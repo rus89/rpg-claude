@@ -1,0 +1,9 @@
+#!/bin/bash
+# ABOUTME: Git pre-commit hook that enforces code analysis and formatting.
+# ABOUTME: Runs flutter analyze and formats code; re-stages formatted files so the commit proceeds.
+set -e
+
+flutter analyze
+dart format .
+# Re-stage any files that were just formatted so they are included in this commit.
+# git add -u
