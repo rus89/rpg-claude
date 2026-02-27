@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:rpg_claude/data/serbian_normalise.dart';
 import 'package:rpg_claude/main.dart' as app;
 import 'package:rpg_claude/providers/data_provider.dart';
 
@@ -36,7 +37,7 @@ void main() {
 
     final normalised = <String, List<String>>{};
     for (final name in allNames) {
-      final key = _normalise(name);
+      final key = normaliseSerbianName(name);
       normalised.putIfAbsent(key, () => []).add(name);
     }
 
@@ -53,16 +54,4 @@ void main() {
           'diacritics/whitespace: $duplicates',
     );
   });
-}
-
-String _normalise(String name) {
-  return name
-      .toLowerCase()
-      .replaceAll('š', 's')
-      .replaceAll('đ', 'dj')
-      .replaceAll('č', 'c')
-      .replaceAll('ć', 'c')
-      .replaceAll('ž', 'z')
-      .replaceAll(RegExp(r'\s+'), '')
-      .trim();
 }

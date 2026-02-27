@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import '../../data/serbian_normalise.dart';
 import '../../providers/data_provider.dart';
 
 class MapaScreen extends ConsumerStatefulWidget {
@@ -73,7 +74,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
         if (snapshots.isNotEmpty) {
           final latest = snapshots.last;
           for (final r in latest.records) {
-            final key = _normalise(r.municipalityName);
+            final key = normaliseSerbianName(r.municipalityName);
             activeByMunicipality[key] =
                 (activeByMunicipality[key] ?? 0) + r.activeHoldings;
           }
@@ -122,7 +123,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            '${activeByMunicipality[_normalise(_tappedMunicipality!)] ?? 0} aktivnih',
+                            '${activeByMunicipality[normaliseSerbianName(_tappedMunicipality!)] ?? 0} aktivnih',
                           ),
                           IconButton(
                             icon: const Icon(Icons.close),
@@ -154,7 +155,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
       final geometry = feature['geometry'] as Map<String, dynamic>;
       final type = geometry['type'] as String;
 
-      final normalised = _normalise(name);
+      final normalised = normaliseSerbianName(name);
       final count = activeByMunicipality[normalised];
       final color = count != null && maxValue > 0
           ? Color.lerp(
@@ -206,15 +207,4 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
         .toList();
   }
 
-  String _normalise(String name) {
-    return name
-        .toLowerCase()
-        .replaceAll('š', 's')
-        .replaceAll('đ', 'dj')
-        .replaceAll('č', 'c')
-        .replaceAll('ć', 'c')
-        .replaceAll('ž', 'z')
-        .replaceAll(RegExp(r'\s+'), '')
-        .trim();
-  }
 }
