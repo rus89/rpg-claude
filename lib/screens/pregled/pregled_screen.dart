@@ -41,13 +41,16 @@ class PregledScreen extends ConsumerWidget {
 
         final barGroups = OrgForm.values.asMap().entries.map((entry) {
           final value = byOrgForm[entry.value] ?? 0;
-          return BarChartGroupData(x: entry.key, barRods: [
-            BarChartRodData(
-              toY: value.toDouble(),
-              width: 16,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ]);
+          return BarChartGroupData(
+            x: entry.key,
+            barRods: [
+              BarChartRodData(
+                toY: value.toDouble(),
+                width: 16,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ],
+          );
         }).toList();
 
         return Scaffold(
@@ -144,9 +147,9 @@ class _SummaryCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),

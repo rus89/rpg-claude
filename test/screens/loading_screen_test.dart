@@ -14,9 +14,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          dataRepositoryProvider.overrideWith(
-            () => _NeverCompleteRepository(),
-          ),
+          dataRepositoryProvider.overrideWith(() => _NeverCompleteRepository()),
         ],
         child: const MaterialApp(home: LoadingScreen()),
       ),
@@ -24,13 +22,13 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('shows error message and retry button on failure', (tester) async {
+  testWidgets('shows error message and retry button on failure', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          dataRepositoryProvider.overrideWith(
-            () => _FailingRepository(),
-          ),
+          dataRepositoryProvider.overrideWith(() => _FailingRepository()),
         ],
         child: const MaterialApp(home: LoadingScreen()),
       ),
