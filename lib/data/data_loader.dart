@@ -9,14 +9,28 @@ import 'models/snapshot.dart';
 
 class DataLoader {
   // Fetches and parses all CSV sources in parallel.
-  // Returns snapshots sorted oldest-first.
-  static Future<List<Snapshot>> loadAll() async {
-    final futures = DataSource.sources.map((source) async {
-      final bytes = await DataSource.fetchBytes(source.url);
-      final records = await compute(_parseInIsolate, bytes);
-      return buildSnapshot(source.date, records);
+  // Returns snapshots sorted oldest-first, skipping any sources that fail.
+  // Throws if all sources fail.
+  static Future<List<Snapshot>> loadAll({
+    List<CsvSource>? sources,
+    Future<List<int>> Function(String url)? fetchBytes,
+  }) async {
+    final effectiveSources = sources ?? DataSource.sources;
+    final effectiveFetch = fetchBytes ?? DataSource.fetchBytes;
+    final futures = effectiveSources.map((source) async {
+      try {
+        final bytes = await effectiveFetch(source.url);
+        final records = await compute(_parseInIsolate, bytes);
+        return buildSnapshot(source.date, records);
+      } on Exception {
+        return null;
+      }
     });
-    final snapshots = await Future.wait(futures);
+    final snapshots =
+        (await Future.wait(futures)).whereType<Snapshot>().toList();
+    if (snapshots.isEmpty) {
+      throw Exception('All CSV sources failed to load');
+    }
     snapshots.sort((a, b) => a.date.compareTo(b.date));
     return snapshots;
   }
