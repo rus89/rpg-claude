@@ -16,6 +16,23 @@ void main() {
     test('fromCode throws for unknown code', () {
       expect(() => OrgForm.fromCode(99), throwsArgumentError);
     });
+
+    test('displayName returns correct Serbian label for each value', () {
+      const expected = {
+        OrgForm.familyFarm: 'Porodično gazdinstvo',
+        OrgForm.company: 'Preduzeće',
+        OrgForm.entrepreneur: 'Preduzetnik',
+        OrgForm.agriculturalCooperative: 'Zemljoradnička zadruga',
+        OrgForm.legalEntityFarm: 'Gazdinstvo - pravno lice',
+        OrgForm.researchOrganization: 'Naučno-istraživačka organizacija',
+        OrgForm.religiousOrganization: 'Verska organizacija',
+      };
+      for (final entry in expected.entries) {
+        expect(entry.key.displayName, entry.value, reason: '${entry.key}');
+      }
+      expect(expected.length, OrgForm.values.length,
+          reason: 'test must cover all OrgForm values');
+    });
   });
 
   group('Record', () {
