@@ -18,6 +18,13 @@ Two issues deferred until implementation is complete (Milan's call — branch is
 
 **Remind Milan to fix both before marking implementation done.**
 
+## 2026-02-27 — Post-implementation decisions
+
+- CORS on web: confirmed working via `flutter run -d chrome`. No action needed.
+- OSM tile usage policy: deferred. Revisit if the app gets traction after release.
+- Map GeoJSON name matching: unverified against real data. Must check Mapa screen manually before release to confirm no grey (unmatched) polygons.
+- pubspec description: updated to "Registrovana poljoprivredna gazdinstva".
+
 ## 2026-02-27 — Task 14 integration test: municipality name sanity check
 
 When implementing Task 14 (`integration_test/app_test.dart`), add an assertion that checks for suspiciously similar-looking municipality names in the loaded data (e.g. duplicates that differ only by diacritics or whitespace variants beyond what `.trim()` catches).
