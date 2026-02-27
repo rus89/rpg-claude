@@ -45,6 +45,8 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
     final result = _hitNotifier.value;
     if (result != null && result.hitValues.isNotEmpty) {
       setState(() => _tappedMunicipality = result.hitValues.first as String);
+    } else {
+      setState(() => _tappedMunicipality = null);
     }
   }
 

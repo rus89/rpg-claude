@@ -93,6 +93,38 @@ void main() {
 
     addTearDown(hitNotifier.dispose);
   });
+
+  testWidgets('tapping empty map space dismisses info card', (tester) async {
+    final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        child: MaterialApp(
+          home: MapaScreen(
+            tileProvider: _NoOpTileProvider(),
+            hitNotifier: hitNotifier,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    hitNotifier.value = const LayerHitResult(
+      hitValues: ['Barajevo'],
+      coordinate: LatLng(44.0, 21.0),
+      point: Point(0, 0),
+    );
+    await tester.pump();
+    expect(find.text('Barajevo'), findsOneWidget);
+
+    // Tap empty space — notifier fires with null
+    hitNotifier.value = null;
+    await tester.pump();
+    expect(find.text('Barajevo'), findsNothing);
+
+    addTearDown(hitNotifier.dispose);
+  });
 }
 
 // Returns a transparent 1x1 PNG without making network requests.
