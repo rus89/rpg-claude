@@ -1,10 +1,11 @@
 // ABOUTME: Parses raw bytes from an RPG CSV snapshot file into a list of Records.
-// ABOUTME: Handles semicolon delimiter and UTF-8/Latin-1 encoding fallback.
+// ABOUTME: Handles semicolon delimiter and UTF-8/Windows-1250 encoding fallback.
 
 import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'models/org_form.dart';
 import 'models/record.dart';
+import 'windows1250.dart';
 
 class CsvParser {
   // Returns an empty list if the bytes are empty or unparseable.
@@ -15,7 +16,7 @@ class CsvParser {
     try {
       content = utf8.decode(bytes);
     } catch (_) {
-      content = latin1.decode(bytes);
+      content = windows1250Decode(bytes);
     }
 
     final rows = const CsvToListConverter(
