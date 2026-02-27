@@ -36,10 +36,7 @@ void main() {
 
   group('Snapshot', () {
     test('constructs with date and records', () {
-      final snapshot = Snapshot(
-        date: DateTime(2025, 12, 31),
-        records: [],
-      );
+      final snapshot = Snapshot(date: DateTime(2025, 12, 31), records: []);
       expect(snapshot.date.year, 2025);
       expect(snapshot.records, isEmpty);
     });

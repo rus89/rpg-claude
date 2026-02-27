@@ -4,10 +4,7 @@
 import 'record.dart';
 
 class Snapshot {
-  const Snapshot({
-    required this.date,
-    required this.records,
-  });
+  const Snapshot({required this.date, required this.records});
 
   final DateTime date;
   final List<Record> records;

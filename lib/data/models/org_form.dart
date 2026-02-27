@@ -24,12 +24,12 @@ enum OrgForm {
   }
 
   String get displayName => switch (this) {
-        OrgForm.familyFarm => 'Porodično gazdinstvo',
-        OrgForm.company => 'Preduzeće',
-        OrgForm.entrepreneur => 'Preduzetnik',
-        OrgForm.agriculturalCooperative => 'Zemljoradnička zadruga',
-        OrgForm.legalEntityFarm => 'Gazdinstvo - pravno lice',
-        OrgForm.researchOrganization => 'Naučno-istraživačka organizacija',
-        OrgForm.religiousOrganization => 'Verska organizacija',
-      };
+    OrgForm.familyFarm => 'Porodično gazdinstvo',
+    OrgForm.company => 'Preduzeće',
+    OrgForm.entrepreneur => 'Preduzetnik',
+    OrgForm.agriculturalCooperative => 'Zemljoradnička zadruga',
+    OrgForm.legalEntityFarm => 'Gazdinstvo - pravno lice',
+    OrgForm.researchOrganization => 'Naučno-istraživačka organizacija',
+    OrgForm.religiousOrganization => 'Verska organizacija',
+  };
 }
