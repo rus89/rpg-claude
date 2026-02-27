@@ -1,10 +1,15 @@
 // ABOUTME: Widget tests for the Mapa (map) screen.
-// ABOUTME: Verifies the FlutterMap widget renders with fixture data.
+// ABOUTME: Verifies rendering, polygon tap info card, and card dismissal.
+
+// ignore_for_file: invalid_use_of_internal_member
+
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:rpg_claude/data/models/org_form.dart';
 import 'package:rpg_claude/data/models/record.dart';
 import 'package:rpg_claude/data/models/snapshot.dart';
@@ -21,6 +26,72 @@ void main() {
     );
     await tester.pump();
     expect(find.byType(FlutterMap), findsOneWidget);
+  });
+
+  testWidgets('shows info card when polygon hit notifier fires', (
+    tester,
+  ) async {
+    final hitNotifier = ValueNotifier<LayerHitResult<String>?>(null);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        child: MaterialApp(
+          home: MapaScreen(
+            tileProvider: _NoOpTileProvider(),
+            hitNotifier: hitNotifier,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Barajevo'), findsNothing);
+
+    hitNotifier.value = const LayerHitResult(
+      hitValues: ['Barajevo'],
+      coordinate: LatLng(44.0, 21.0),
+      point: Point(0, 0),
+    );
+    await tester.pump();
+
+    expect(find.text('Barajevo'), findsOneWidget);
+    expect(find.text('90 aktivnih'), findsOneWidget);
+
+    addTearDown(hitNotifier.dispose);
+  });
+
+  testWidgets('close button dismisses info card', (tester) async {
+    final hitNotifier = ValueNotifier<LayerHitResult<String>?>(null);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        child: MaterialApp(
+          home: MapaScreen(
+            tileProvider: _NoOpTileProvider(),
+            hitNotifier: hitNotifier,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    hitNotifier.value = const LayerHitResult(
+      hitValues: ['Barajevo'],
+      coordinate: LatLng(44.0, 21.0),
+      point: Point(0, 0),
+    );
+    await tester.pump();
+
+    expect(find.text('Barajevo'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pump();
+
+    expect(find.text('Barajevo'), findsNothing);
+
+    addTearDown(hitNotifier.dispose);
   });
 }
 

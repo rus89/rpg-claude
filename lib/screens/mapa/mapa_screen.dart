@@ -10,9 +10,10 @@ import 'package:latlong2/latlong.dart';
 import '../../providers/data_provider.dart';
 
 class MapaScreen extends ConsumerStatefulWidget {
-  const MapaScreen({super.key, this.tileProvider});
+  const MapaScreen({super.key, this.tileProvider, this.hitNotifier});
 
   final TileProvider? tileProvider;
+  final LayerHitNotifier<String>? hitNotifier;
 
   @override
   ConsumerState<MapaScreen> createState() => _MapaScreenState();
@@ -21,11 +22,14 @@ class MapaScreen extends ConsumerStatefulWidget {
 class _MapaScreenState extends ConsumerState<MapaScreen> {
   Map<String, dynamic>? _geoJson;
   String? _tappedMunicipality;
-  final LayerHitNotifier<String> _hitNotifier = ValueNotifier(null);
+  late final LayerHitNotifier<String> _hitNotifier;
+  late final bool _ownsNotifier;
 
   @override
   void initState() {
     super.initState();
+    _ownsNotifier = widget.hitNotifier == null;
+    _hitNotifier = widget.hitNotifier ?? ValueNotifier(null);
     _loadGeoJson();
     _hitNotifier.addListener(_onPolygonHit);
   }
@@ -33,7 +37,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
   @override
   void dispose() {
     _hitNotifier.removeListener(_onPolygonHit);
-    _hitNotifier.dispose();
+    if (_ownsNotifier) _hitNotifier.dispose();
     super.dispose();
   }
 
