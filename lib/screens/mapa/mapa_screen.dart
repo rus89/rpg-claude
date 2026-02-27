@@ -21,11 +21,27 @@ class MapaScreen extends ConsumerStatefulWidget {
 class _MapaScreenState extends ConsumerState<MapaScreen> {
   Map<String, dynamic>? _geoJson;
   String? _tappedMunicipality;
+  final LayerHitNotifier<String> _hitNotifier = ValueNotifier(null);
 
   @override
   void initState() {
     super.initState();
     _loadGeoJson();
+    _hitNotifier.addListener(_onPolygonHit);
+  }
+
+  @override
+  void dispose() {
+    _hitNotifier.removeListener(_onPolygonHit);
+    _hitNotifier.dispose();
+    super.dispose();
+  }
+
+  void _onPolygonHit() {
+    final result = _hitNotifier.value;
+    if (result != null && result.hitValues.isNotEmpty) {
+      setState(() => _tappedMunicipality = result.hitValues.first);
+    }
   }
 
   Future<void> _loadGeoJson() async {
@@ -79,6 +95,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                   ),
                   if (_geoJson != null)
                     PolygonLayer(
+                      hitNotifier: _hitNotifier,
                       polygons: _buildPolygons(activeByMunicipality, maxValue),
                     ),
                 ],
