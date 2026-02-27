@@ -48,7 +48,8 @@ void main() {
     expect(
       duplicates,
       isEmpty,
-      reason: 'Found municipality names that differ only by '
+      reason:
+          'Found municipality names that differ only by '
           'diacritics/whitespace: $duplicates',
     );
   });
