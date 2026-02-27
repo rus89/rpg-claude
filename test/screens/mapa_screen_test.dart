@@ -1,6 +1,7 @@
 // ABOUTME: Widget tests for the Mapa (map) screen.
 // ABOUTME: Verifies rendering, polygon tap info card, and card dismissal.
 
+// LayerHitResult has no public constructor; @internal is the only way to test polygon tap behavior.
 // ignore_for_file: invalid_use_of_internal_member
 
 import 'dart:math';
