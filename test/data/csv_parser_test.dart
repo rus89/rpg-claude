@@ -41,6 +41,18 @@ void main() {
       expect(records.length, 0);
     });
 
+    test('parses CSV with Windows-style \\r\\n line endings', () {
+      const content =
+          'Regija;NazivRegije;SifraOpstine;NazivOpstineL;OrgOblik;NazivOrgOblik;broj gazdinstava;AktivnaGazdinstva\r\n'
+          '1;GRAD BEOGRAD;10;Barajevo;1;Porodicno;1417;1385\r\n'
+          '1;GRAD BEOGRAD;10;Barajevo;2;Preduzeca;8;8\r\n';
+      final bytes = utf8.encode(content);
+      final records = CsvParser.parse(bytes);
+      expect(records.length, 2);
+      expect(records[0].totalRegistered, 1417);
+      expect(records[0].activeHoldings, 1385);
+    });
+
     test('returns empty list for empty file', () {
       final bytes = utf8.encode('');
       final records = CsvParser.parse(bytes);
