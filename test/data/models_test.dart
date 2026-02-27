@@ -30,8 +30,11 @@ void main() {
       for (final entry in expected.entries) {
         expect(entry.key.displayName, entry.value, reason: '${entry.key}');
       }
-      expect(expected.length, OrgForm.values.length,
-          reason: 'test must cover all OrgForm values');
+      expect(
+        expected.length,
+        OrgForm.values.length,
+        reason: 'test must cover all OrgForm values',
+      );
     });
   });
 
