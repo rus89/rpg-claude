@@ -10,8 +10,8 @@ import 'package:rpg_claude/data/models/org_form.dart';
 import 'package:rpg_claude/data/models/record.dart';
 
 const _csvContent =
-    'sifra_regiona;region;sifra_opstine;opstina;organizacioni_oblik;broj_ukupno_registrovanih;broj_aktivnih\n'
-    '1;GRAD BEOGRAD;10;Barajevo;1;100;90\n';
+    'sifra_regiona;region;sifra_opstine;opstina;organizacioni_oblik;naziv_org_oblik;broj_ukupno_registrovanih;broj_aktivnih\n'
+    '1;GRAD BEOGRAD;10;Barajevo;1;Porodicno;100;90\n';
 
 void main() {
   group('DataLoader.buildSnapshot', () {
@@ -54,6 +54,8 @@ void main() {
       expect(snapshots.length, 2);
       expect(snapshots[0].date, DateTime(2020, 1, 1));
       expect(snapshots[1].date, DateTime(2022, 1, 1));
+      expect(snapshots[0].records.length, 1);
+      expect(snapshots[0].records[0].municipalityName, 'Barajevo');
     });
 
     test('throws when all sources fail', () async {
