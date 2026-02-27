@@ -25,10 +25,10 @@ GoRouter router(Ref ref) {
     initialLocation: '/ucitavanje',
     refreshListenable: notifier,
     redirect: (context, state) {
-      final isLoading = ref.read(dataRepositoryProvider).isLoading;
+      final hasData = ref.read(dataRepositoryProvider).hasValue;
       final isOnLoading = state.matchedLocation == '/ucitavanje';
-      if (isLoading && !isOnLoading) return '/ucitavanje';
-      if (!isLoading && isOnLoading) return '/pregled';
+      if (!hasData && !isOnLoading) return '/ucitavanje';
+      if (hasData && isOnLoading) return '/pregled';
       return null;
     },
     routes: [
