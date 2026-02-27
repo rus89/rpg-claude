@@ -27,8 +27,30 @@
 - data.gov.rs URLs can go stale (404). The Aug 2018 CSV was removed at some point. Milan manually fixed the URL.
 - Android internet permission: present in debug manifest but not main. Works for `flutter run` but would fail in release builds.
 
+## 2026-02-27: Fix map diacritics and display names (branch: fix/map-diacritics-and-display-names)
+
+### Root cause discovery
+
+Milan reported grey municipalities with diacritics on the map, and glued compound names in the overlay. Initial hypothesis was Unicode decomposed vs precomposed forms — **wrong**. Actual root cause: **CSV files are Windows-1250 encoded**, and the `latin1.decode` fallback was corrupting Serbian diacritics (bytes 0x80–0x9F map differently in Latin-1 vs W-1250).
+
+Additional data quality issue: the government CSV stores đ (d with stroke) as literal `?` character (byte 0x3F). This is baked into the source data.
+
+### Fixes applied
+
+1. **Windows-1250 codec** (`lib/data/windows1250.dart`): 256-entry byte→Unicode lookup table. No external dependency needed.
+2. **CSV parser**: Changed encoding fallback from `latin1.decode` to `windows1250Decode`.
+3. **Normaliser**: Changed đ handling from đ→dj to stripping both đ and ?, so GeoJSON names (with đ) match CSV names (with ?).
+4. **Map overlay**: Build display name lookup from CSV municipality names (proper spacing). Replace ? with đ for display. Overlay now shows "Nova Varoš" instead of "NovaVaroš".
+
+### Lessons learned
+
+- Government CSV data from data.gov.rs uses Windows-1250, NOT UTF-8 or Latin-1. Always check raw byte values when debugging encoding issues.
+- `latin1.decode` maps bytes 0x80–0x9F to C1 control characters which are invisible in text rendering — makes the corruption hard to spot visually.
+- đ (U+0111) has no canonical Unicode decomposition, unlike č/š/ž/ć. NFD decomposition approach wouldn't have helped for đ anyway.
+- CORS works fine for data.gov.rs from web (tested with `flutter run -d chrome`).
+
 ### Open items
 
 - Internet permission missing from main AndroidManifest.xml — only in debug manifest. Will fail in release builds.
-- GADM GeoJSON compound name matching (e.g. "MaloCrniće" vs "Malo Crniće") may cause some municipalities to render grey on the map. Needs validation against real data.
 - Tile layer `ClientException` logs in tests are noisy but harmless. Could be suppressed if needed.
+- Milan needs to re-test the map on device to verify all municipalities now render with colour.
