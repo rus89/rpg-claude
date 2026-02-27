@@ -13,7 +13,7 @@ class MapaScreen extends ConsumerStatefulWidget {
   const MapaScreen({super.key, this.tileProvider, this.hitNotifier});
 
   final TileProvider? tileProvider;
-  final LayerHitNotifier<String>? hitNotifier;
+  final LayerHitNotifier<Object>? hitNotifier;
 
   @override
   ConsumerState<MapaScreen> createState() => _MapaScreenState();
@@ -22,7 +22,7 @@ class MapaScreen extends ConsumerStatefulWidget {
 class _MapaScreenState extends ConsumerState<MapaScreen> {
   Map<String, dynamic>? _geoJson;
   String? _tappedMunicipality;
-  late final LayerHitNotifier<String> _hitNotifier;
+  late final LayerHitNotifier<Object> _hitNotifier;
   late final bool _ownsNotifier;
 
   @override
@@ -44,7 +44,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
   void _onPolygonHit() {
     final result = _hitNotifier.value;
     if (result != null && result.hitValues.isNotEmpty) {
-      setState(() => _tappedMunicipality = result.hitValues.first);
+      setState(() => _tappedMunicipality = result.hitValues.first as String);
     }
   }
 

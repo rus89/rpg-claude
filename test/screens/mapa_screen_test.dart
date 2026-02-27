@@ -31,7 +31,7 @@ void main() {
   testWidgets('shows info card when polygon hit notifier fires', (
     tester,
   ) async {
-    final hitNotifier = ValueNotifier<LayerHitResult<String>?>(null);
+    final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -62,7 +62,7 @@ void main() {
   });
 
   testWidgets('close button dismisses info card', (tester) async {
-    final hitNotifier = ValueNotifier<LayerHitResult<String>?>(null);
+    final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
 
     await tester.pumpWidget(
       ProviderScope(
