@@ -23,12 +23,12 @@ final municipalityNamesProvider = AutoDisposeProvider<List<String>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef MunicipalityNamesRef = AutoDisposeProviderRef<List<String>>;
-String _$dataRepositoryHash() => r'83244f759f3a6bd38e4cdb9dde61c1ae3718dcbe';
+String _$dataRepositoryHash() => r'329f7879037f8ed7f20c18e4dbe7033012053896';
 
 /// See also [DataRepository].
 @ProviderFor(DataRepository)
 final dataRepositoryProvider =
-    AutoDisposeAsyncNotifierProvider<DataRepository, List<Snapshot>>.internal(
+    AsyncNotifierProvider<DataRepository, List<Snapshot>>.internal(
       DataRepository.new,
       name: r'dataRepositoryProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -38,6 +38,6 @@ final dataRepositoryProvider =
       allTransitiveDependencies: null,
     );
 
-typedef _$DataRepository = AutoDisposeAsyncNotifier<List<Snapshot>>;
+typedef _$DataRepository = AsyncNotifier<List<Snapshot>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

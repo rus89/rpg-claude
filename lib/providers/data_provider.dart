@@ -8,7 +8,8 @@ import '../data/models/snapshot.dart';
 
 part 'data_provider.g.dart';
 
-@riverpod
+// keepAlive: true — data is fetched once on cold start and held for the app lifetime.
+@Riverpod(keepAlive: true)
 class DataRepository extends _$DataRepository {
   @override
   Future<List<Snapshot>> build() => DataLoader.loadAll();
@@ -18,11 +19,12 @@ class DataRepository extends _$DataRepository {
 @riverpod
 List<String> municipalityNames(Ref ref) {
   final snapshots = ref.watch(dataRepositoryProvider).valueOrNull ?? [];
-  final names = snapshots
-      .expand((s) => s.records)
-      .map((r) => r.municipalityName)
-      .toSet()
-      .toList()
-    ..sort();
+  final names =
+      snapshots
+          .expand((s) => s.records)
+          .map((r) => r.municipalityName)
+          .toSet()
+          .toList()
+        ..sort();
   return names;
 }
