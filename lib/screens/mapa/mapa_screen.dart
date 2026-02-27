@@ -27,8 +27,9 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
   }
 
   Future<void> _loadGeoJson() async {
-    final raw = await rootBundle
-        .loadString('assets/geojson/serbia_municipalities.geojson');
+    final raw = await rootBundle.loadString(
+      'assets/geojson/serbia_municipalities.geojson',
+    );
     if (mounted) {
       setState(() => _geoJson = jsonDecode(raw) as Map<String, dynamic>);
     }
@@ -52,8 +53,10 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
             activeByMunicipality[key] =
                 (activeByMunicipality[key] ?? 0) + r.activeHoldings;
           }
-          maxValue =
-              activeByMunicipality.values.fold(0, (a, b) => a > b ? a : b);
+          maxValue = activeByMunicipality.values.fold(
+            0,
+            (a, b) => a > b ? a : b,
+          );
         }
 
         return Scaffold(
@@ -73,8 +76,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                   ),
                   if (_geoJson != null)
                     PolygonLayer(
-                      polygons:
-                          _buildPolygons(activeByMunicipality, maxValue),
+                      polygons: _buildPolygons(activeByMunicipality, maxValue),
                     ),
                 ],
               ),
@@ -91,9 +93,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                         children: [
                           Text(
                             _tappedMunicipality!,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Text(
                             '${activeByMunicipality[_normalise(_tappedMunicipality!)] ?? 0} aktivnih',
@@ -140,23 +140,22 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
 
       final rings = _extractRings(geometry, type);
       for (final ring in rings) {
-        polygons.add(Polygon(
-          points: ring,
-          color: color.withValues(alpha: 0.6),
-          borderColor: Colors.black45,
-          borderStrokeWidth: 1,
-          hitValue: name,
-        ));
+        polygons.add(
+          Polygon(
+            points: ring,
+            color: color.withValues(alpha: 0.6),
+            borderColor: Colors.black45,
+            borderStrokeWidth: 1,
+            hitValue: name,
+          ),
+        );
       }
     }
 
     return polygons;
   }
 
-  List<List<LatLng>> _extractRings(
-    Map<String, dynamic> geometry,
-    String type,
-  ) {
+  List<List<LatLng>> _extractRings(Map<String, dynamic> geometry, String type) {
     final coordinates = geometry['coordinates'];
     final rings = <List<LatLng>>[];
 

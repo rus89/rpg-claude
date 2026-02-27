@@ -31,7 +31,8 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
       data: (snapshots) {
         final spots = snapshots.asMap().entries.map((entry) {
           final records = entry.value.records.where((r) {
-            final matchesMunicipality = _selectedMunicipality == null ||
+            final matchesMunicipality =
+                _selectedMunicipality == null ||
                 r.municipalityName == _selectedMunicipality;
             final matchesForm = _selectedForms.contains(r.orgForm);
             return matchesMunicipality && matchesForm;

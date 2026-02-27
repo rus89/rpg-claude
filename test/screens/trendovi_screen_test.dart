@@ -12,28 +12,34 @@ import 'package:rpg_claude/providers/data_provider.dart';
 import 'package:rpg_claude/screens/trendovi/trendovi_screen.dart';
 
 final _fixtures = [
-  Snapshot(date: DateTime(2024, 1, 1), records: const [
-    Record(
-      regionCode: '1',
-      regionName: 'R',
-      municipalityCode: '10',
-      municipalityName: 'Barajevo',
-      orgForm: OrgForm.familyFarm,
-      totalRegistered: 100,
-      activeHoldings: 90,
-    ),
-  ]),
-  Snapshot(date: DateTime(2025, 1, 1), records: const [
-    Record(
-      regionCode: '1',
-      regionName: 'R',
-      municipalityCode: '10',
-      municipalityName: 'Barajevo',
-      orgForm: OrgForm.familyFarm,
-      totalRegistered: 110,
-      activeHoldings: 100,
-    ),
-  ]),
+  Snapshot(
+    date: DateTime(2024, 1, 1),
+    records: const [
+      Record(
+        regionCode: '1',
+        regionName: 'R',
+        municipalityCode: '10',
+        municipalityName: 'Barajevo',
+        orgForm: OrgForm.familyFarm,
+        totalRegistered: 100,
+        activeHoldings: 90,
+      ),
+    ],
+  ),
+  Snapshot(
+    date: DateTime(2025, 1, 1),
+    records: const [
+      Record(
+        regionCode: '1',
+        regionName: 'R',
+        municipalityCode: '10',
+        municipalityName: 'Barajevo',
+        orgForm: OrgForm.familyFarm,
+        totalRegistered: 110,
+        activeHoldings: 100,
+      ),
+    ],
+  ),
 ];
 
 void main() {

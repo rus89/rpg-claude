@@ -27,19 +27,19 @@ void main() {
 class _Fixture extends DataRepository {
   @override
   Future<List<Snapshot>> build() async => [
-        Snapshot(
-          date: DateTime(2025, 12, 31),
-          records: const [
-            Record(
-              regionCode: '1',
-              regionName: 'R',
-              municipalityCode: '10',
-              municipalityName: 'Barajevo',
-              orgForm: OrgForm.familyFarm,
-              totalRegistered: 100,
-              activeHoldings: 90,
-            ),
-          ],
+    Snapshot(
+      date: DateTime(2025, 12, 31),
+      records: const [
+        Record(
+          regionCode: '1',
+          regionName: 'R',
+          municipalityCode: '10',
+          municipalityName: 'Barajevo',
+          orgForm: OrgForm.familyFarm,
+          totalRegistered: 100,
+          activeHoldings: 90,
         ),
-      ];
+      ],
+    ),
+  ];
 }

@@ -8,8 +8,9 @@ import 'package:rpg_claude/main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('app loads data and shows non-zero totals on Pregled',
-      (tester) async {
+  testWidgets('app loads data and shows non-zero totals on Pregled', (
+    tester,
+  ) async {
     app.main();
     await tester.pumpAndSettle(const Duration(seconds: 30));
 

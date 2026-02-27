@@ -17,7 +17,8 @@ class OAplikacijiScreen extends StatelessWidget {
           children: [
             _Section(
               title: 'O aplikaciji',
-              body: 'Ova aplikacija prikazuje otvorene podatke o registrovanim '
+              body:
+                  'Ova aplikacija prikazuje otvorene podatke o registrovanim '
                   'poljoprivrednim gazdinstvima u Srbiji (RPG), preuzete sa portala '
                   'data.gov.rs. Cilj aplikacije je obrazovni — da omogući svim '
                   'zainteresovanim građanima lak pristup ovim podacima.',
@@ -25,7 +26,8 @@ class OAplikacijiScreen extends StatelessWidget {
             Divider(height: 32),
             _Section(
               title: 'Napomena o nezavisnosti',
-              body: 'Ova aplikacija je razvio nezavisan developer i nije '
+              body:
+                  'Ova aplikacija je razvio nezavisan developer i nije '
                   'povezana ni sa jednim državnim organom, institucijom ili '
                   'organizacijom. Podaci se preuzimaju direktno sa portala '
                   'data.gov.rs i koriste se isključivo u informativne i '
@@ -34,7 +36,8 @@ class OAplikacijiScreen extends StatelessWidget {
             Divider(height: 32),
             _Section(
               title: 'Izvor podataka',
-              body: 'Podaci potiču od Uprave za agrarna plaćanja i dostupni '
+              body:
+                  'Podaci potiču od Uprave za agrarna plaćanja i dostupni '
                   'su na: data.gov.rs',
             ),
             Divider(height: 32),

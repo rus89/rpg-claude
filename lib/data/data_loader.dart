@@ -26,8 +26,9 @@ class DataLoader {
         return null;
       }
     });
-    final snapshots =
-        (await Future.wait(futures)).whereType<Snapshot>().toList();
+    final snapshots = (await Future.wait(
+      futures,
+    )).whereType<Snapshot>().toList();
     if (snapshots.isEmpty) {
       throw Exception('All CSV sources failed to load');
     }
