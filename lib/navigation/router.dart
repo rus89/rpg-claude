@@ -9,6 +9,7 @@ import '../providers/data_provider.dart';
 import '../screens/loading/loading_screen.dart';
 import '../screens/mapa/mapa_screen.dart';
 import '../screens/o_aplikaciji/o_aplikaciji_screen.dart';
+import '../screens/opstine/opstina_detail_screen.dart';
 import '../screens/opstine/opstine_screen.dart';
 import '../screens/pregled/pregled_screen.dart';
 import '../screens/trendovi/trendovi_screen.dart';
@@ -46,6 +47,12 @@ GoRouter router(Ref ref) {
           GoRoute(
             path: '/opstine',
             builder: (context, state) => const OpstineScreen(),
+          ),
+          GoRoute(
+            path: '/opstine/:name',
+            builder: (context, state) => OpstinaDetailScreen(
+              municipalityName: state.pathParameters['name']!,
+            ),
           ),
           GoRoute(
             path: '/trendovi',

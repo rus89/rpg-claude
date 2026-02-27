@@ -1,13 +1,58 @@
 // ABOUTME: Opštine screen — searchable list of all municipalities in the dataset.
-// ABOUTME: Placeholder until Task 10 is implemented.
+// ABOUTME: Tapping a municipality navigates to its detail screen.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../providers/data_provider.dart';
 
-class OpstineScreen extends StatelessWidget {
+class OpstineScreen extends ConsumerStatefulWidget {
   const OpstineScreen({super.key});
 
   @override
+  ConsumerState<OpstineScreen> createState() => _OpstineScreenState();
+}
+
+class _OpstineScreenState extends ConsumerState<OpstineScreen> {
+  String _query = '';
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Opštine')));
+    final allNames = ref.watch(municipalityNamesProvider);
+    final filtered = allNames
+        .where((n) => n.toLowerCase().contains(_query.toLowerCase()))
+        .toList();
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Opštine')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: 'Pretraži opštine...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (v) => setState(() => _query = v),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: filtered.length,
+              itemBuilder: (context, index) {
+                final name = filtered[index];
+                return ListTile(
+                  title: Text(name),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/opstine/$name'),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
