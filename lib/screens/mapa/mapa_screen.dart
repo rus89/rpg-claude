@@ -10,7 +10,9 @@ import 'package:latlong2/latlong.dart';
 import '../../providers/data_provider.dart';
 
 class MapaScreen extends ConsumerStatefulWidget {
-  const MapaScreen({super.key});
+  const MapaScreen({super.key, this.tileProvider});
+
+  final TileProvider? tileProvider;
 
   @override
   ConsumerState<MapaScreen> createState() => _MapaScreenState();
@@ -73,6 +75,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.serbiaOpenData.rpg',
+                    tileProvider: widget.tileProvider,
                   ),
                   if (_geoJson != null)
                     PolygonLayer(

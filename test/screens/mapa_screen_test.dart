@@ -16,12 +16,20 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
-        child: const MaterialApp(home: MapaScreen()),
+        child: MaterialApp(home: MapaScreen(tileProvider: _NoOpTileProvider())),
       ),
     );
     await tester.pump();
     expect(find.byType(FlutterMap), findsOneWidget);
   });
+}
+
+// Returns a transparent 1x1 PNG without making network requests.
+class _NoOpTileProvider extends TileProvider {
+  @override
+  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) {
+    return MemoryImage(TileProvider.transparentImage);
+  }
 }
 
 class _Fixture extends DataRepository {
