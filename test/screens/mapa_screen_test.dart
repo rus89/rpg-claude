@@ -125,6 +125,40 @@ void main() {
 
     addTearDown(hitNotifier.dispose);
   });
+
+  testWidgets('matches GeoJSON name without spaces to CSV name with spaces', (
+    tester,
+  ) async {
+    final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          dataRepositoryProvider.overrideWith(() => _SpacedNameFixture()),
+        ],
+        child: MaterialApp(
+          home: MapaScreen(
+            tileProvider: _NoOpTileProvider(),
+            hitNotifier: hitNotifier,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // GeoJSON fires 'NoviBeograd' (no space), CSV has 'Novi Beograd' (space)
+    hitNotifier.value = const LayerHitResult(
+      hitValues: ['NoviBeograd'],
+      coordinate: LatLng(44.0, 21.0),
+      point: Point(0, 0),
+    );
+    await tester.pump();
+
+    expect(find.text('NoviBeograd'), findsOneWidget);
+    expect(find.text('50 aktivnih'), findsOneWidget);
+
+    addTearDown(hitNotifier.dispose);
+  });
 }
 
 // Returns a transparent 1x1 PNG without making network requests.
@@ -149,6 +183,26 @@ class _Fixture extends DataRepository {
           orgForm: OrgForm.familyFarm,
           totalRegistered: 100,
           activeHoldings: 90,
+        ),
+      ],
+    ),
+  ];
+}
+
+class _SpacedNameFixture extends DataRepository {
+  @override
+  Future<List<Snapshot>> build() async => [
+    Snapshot(
+      date: DateTime(2025, 12, 31),
+      records: const [
+        Record(
+          regionCode: '1',
+          regionName: 'R',
+          municipalityCode: '13',
+          municipalityName: 'Novi Beograd',
+          orgForm: OrgForm.familyFarm,
+          totalRegistered: 60,
+          activeHoldings: 50,
         ),
       ],
     ),

@@ -214,6 +214,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
         .replaceAll('č', 'c')
         .replaceAll('ć', 'c')
         .replaceAll('ž', 'z')
+        .replaceAll(RegExp(r'\s+'), '')
         .trim();
   }
 }
