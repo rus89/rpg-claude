@@ -17,3 +17,11 @@ Two issues deferred until implementation is complete (Milan's call — branch is
 2. `test/widget_test.dart` — tests the counter demo, not the RPG app. Will break once `main.dart` is replaced. Needs updating alongside `main.dart`.
 
 **Remind Milan to fix both before marking implementation done.**
+
+## 2026-02-27 — Task 14 integration test: municipality name sanity check
+
+When implementing Task 14 (`integration_test/app_test.dart`), add an assertion that checks for suspiciously similar-looking municipality names in the loaded data (e.g. duplicates that differ only by diacritics or whitespace variants beyond what `.trim()` catches).
+
+`.trim()` in CsvParser already handles trailing/leading spaces, so that specific case is covered. The risk is diacritic inconsistencies or typos across the 12 CSV snapshots (published 2018–2025). We can't normalise proactively without seeing the data.
+
+The assertion should fail loudly if duplicates are found, so we can investigate and normalise if needed.
