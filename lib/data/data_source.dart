@@ -24,7 +24,7 @@ class DataSource {
     ),
     CsvSource(
       url:
-          'https://data.gov.rs/s/resources/rpg-broj-svikh-registrovanikh-poljoprivrednikh-gazdinstava-aktivna-gazdinstva/20180815-081910/Srbija_broj-gazinstava_po_opstinama_organizacionom_obliku_08_15.csv',
+          'https://data.gov.rs/s/resources/rpg-broj-svikh-registrovanikh-poljoprivrednikh-gazdinstava-aktivna-gazdinstva/20180815-081910/Srbija_broj_gazinstava_po_opstinama_organizacionom_obliku_08_15.csv',
       date: DateTime(2018, 8, 15),
     ),
     CsvSource(
