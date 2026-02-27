@@ -147,7 +147,8 @@ void main() {
     );
     await tester.pump();
 
-    // GeoJSON fires 'NoviBeograd' (no space), CSV has 'Novi Beograd' (space)
+    // GeoJSON fires 'NoviBeograd' (no space), CSV has 'Novi Beograd' (space).
+    // The overlay should show the CSV display name with proper spacing.
     hitNotifier.value = const LayerHitResult(
       hitValues: ['NoviBeograd'],
       coordinate: LatLng(44.0, 21.0),
@@ -155,8 +156,40 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('NoviBeograd'), findsOneWidget);
+    expect(find.text('Novi Beograd'), findsOneWidget);
     expect(find.text('50 aktivnih'), findsOneWidget);
+
+    addTearDown(hitNotifier.dispose);
+  });
+  testWidgets('shows CSV display name with ? replaced by đ', (tester) async {
+    final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          dataRepositoryProvider.overrideWith(() => _DjFixture()),
+        ],
+        child: MaterialApp(
+          home: MapaScreen(
+            tileProvider: _NoOpTileProvider(),
+            hitNotifier: hitNotifier,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // GeoJSON fires 'Inđija', CSV has 'In?ija' (corrupted đ).
+    // Overlay should show 'Inđija' (with ? replaced by đ for display).
+    hitNotifier.value = const LayerHitResult(
+      hitValues: ['Inđija'],
+      coordinate: LatLng(44.0, 21.0),
+      point: Point(0, 0),
+    );
+    await tester.pump();
+
+    expect(find.text('Inđija'), findsOneWidget);
+    expect(find.text('70 aktivnih'), findsOneWidget);
 
     addTearDown(hitNotifier.dispose);
   });
@@ -204,6 +237,27 @@ class _SpacedNameFixture extends DataRepository {
           orgForm: OrgForm.familyFarm,
           totalRegistered: 60,
           activeHoldings: 50,
+        ),
+      ],
+    ),
+  ];
+}
+
+class _DjFixture extends DataRepository {
+  @override
+  Future<List<Snapshot>> build() async => [
+    Snapshot(
+      date: DateTime(2025, 12, 31),
+      records: const [
+        Record(
+          regionCode: '2',
+          regionName: 'R',
+          municipalityCode: '22',
+          // CSV has '?' where đ should be (data quality issue from source)
+          municipalityName: 'In?ija',
+          orgForm: OrgForm.familyFarm,
+          totalRegistered: 80,
+          activeHoldings: 70,
         ),
       ],
     ),
