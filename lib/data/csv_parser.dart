@@ -34,17 +34,20 @@ class CsvParser {
         final orgFormCode = int.parse(row[4].toString().trim());
         final totalRegistered = int.parse(row[6].toString().trim());
         final activeHoldings = int.parse(row[7].toString().trim());
-        records.add(Record(
-          regionCode: row[0].toString().trim(),
-          regionName: row[1].toString().trim(),
-          municipalityCode: row[2].toString().trim(),
-          municipalityName: row[3].toString().trim(),
-          orgForm: OrgForm.fromCode(orgFormCode),
-          totalRegistered: totalRegistered,
-          activeHoldings: activeHoldings,
-        ));
-      } catch (_) {
-        // Skip malformed rows silently
+        records.add(
+          Record(
+            regionCode: row[0].toString().trim(),
+            regionName: row[1].toString().trim(),
+            municipalityCode: row[2].toString().trim(),
+            municipalityName: row[3].toString().trim(),
+            orgForm: OrgForm.fromCode(orgFormCode),
+            totalRegistered: totalRegistered,
+            activeHoldings: activeHoldings,
+          ),
+        );
+      } on FormatException catch (_) {
+        continue;
+      } on ArgumentError catch (_) {
         continue;
       }
     }
