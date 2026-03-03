@@ -45,8 +45,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
   void _onPolygonHit() {
     final result = _hitNotifier.value;
     if (result != null && result.hitValues.isNotEmpty) {
-      final name = result.hitValues.first as String;
-      setState(() => _tappedMunicipality = normaliseSerbianName(name));
+      setState(() => _tappedMunicipality = result.hitValues.first as String);
     } else {
       setState(() => _tappedMunicipality = null);
     }
@@ -71,7 +70,6 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
       error: (e, _) => Scaffold(body: Center(child: Text('Greška: $e'))),
       data: (snapshots) {
         final activeByMunicipality = <String, int>{};
-        final displayNameByNormalised = <String, String>{};
         int maxValue = 0;
         if (snapshots.isNotEmpty) {
           final latest = snapshots.last;
@@ -79,11 +77,6 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
             final key = normaliseSerbianName(r.municipalityName);
             activeByMunicipality[key] =
                 (activeByMunicipality[key] ?? 0) + r.activeHoldings;
-            // CSV stores đ as '?' — fix for display purposes
-            displayNameByNormalised.putIfAbsent(
-              key,
-              () => r.municipalityName.replaceAll('?', 'đ'),
-            );
           }
           maxValue = activeByMunicipality.values.fold(
             0,
@@ -126,12 +119,11 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            displayNameByNormalised[_tappedMunicipality!] ??
-                                _tappedMunicipality!,
+                            displayName(_tappedMunicipality!),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            '${activeByMunicipality[_tappedMunicipality!] ?? 0} aktivnih',
+                            '${activeByMunicipality[normaliseSerbianName(_tappedMunicipality!)] ?? 0} aktivnih',
                           ),
                           IconButton(
                             icon: const Icon(Icons.close),

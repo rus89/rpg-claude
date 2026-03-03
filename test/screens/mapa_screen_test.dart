@@ -148,7 +148,7 @@ void main() {
     await tester.pump();
 
     // GeoJSON fires 'NoviBeograd' (no space), CSV has 'Novi Beograd' (space).
-    // The overlay should show the CSV display name with proper spacing.
+    // The overlay should split CamelCase and show "Novi Beograd".
     hitNotifier.value = const LayerHitResult(
       hitValues: ['NoviBeograd'],
       coordinate: LatLng(44.0, 21.0),
@@ -161,14 +161,12 @@ void main() {
 
     addTearDown(hitNotifier.dispose);
   });
-  testWidgets('shows CSV display name with ? replaced by đ', (tester) async {
+  testWidgets('matches GeoJSON đ to CSV ? for count lookup', (tester) async {
     final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          dataRepositoryProvider.overrideWith(() => _DjFixture()),
-        ],
+        overrides: [dataRepositoryProvider.overrideWith(() => _DjFixture())],
         child: MaterialApp(
           home: MapaScreen(
             tileProvider: _NoOpTileProvider(),
@@ -180,7 +178,7 @@ void main() {
     await tester.pump();
 
     // GeoJSON fires 'Inđija', CSV has 'In?ija' (corrupted đ).
-    // Overlay should show 'Inđija' (with ? replaced by đ for display).
+    // Overlay shows GeoJSON name; count matches via normalisation.
     hitNotifier.value = const LayerHitResult(
       hitValues: ['Inđija'],
       coordinate: LatLng(44.0, 21.0),

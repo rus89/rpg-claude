@@ -7,7 +7,10 @@ import 'package:rpg_claude/data/serbian_normalise.dart';
 void main() {
   group('normaliseSerbianName', () {
     test('lowercases and strips whitespace', () {
-      expect(normaliseSerbianName('Nova Varoš'), normaliseSerbianName('NovaVaroš'));
+      expect(
+        normaliseSerbianName('Nova Varoš'),
+        normaliseSerbianName('NovaVaroš'),
+      );
     });
 
     test('replaces š with s', () {
@@ -32,15 +35,24 @@ void main() {
 
     test('strips ? so corrupted đ matches', () {
       // CSV has literal '?' where đ should be
-      expect(normaliseSerbianName('Žitora?a'), normaliseSerbianName('Žitorađa'));
+      expect(
+        normaliseSerbianName('Žitora?a'),
+        normaliseSerbianName('Žitorađa'),
+      );
     });
 
     test('matches GeoJSON "MaliIđoš" to CSV "Mali I?oš"', () {
-      expect(normaliseSerbianName('MaliIđoš'), normaliseSerbianName('Mali I?oš'));
+      expect(
+        normaliseSerbianName('MaliIđoš'),
+        normaliseSerbianName('Mali I?oš'),
+      );
     });
 
     test('matches GeoJSON "Aranđelovac" to CSV "Aran?elovac"', () {
-      expect(normaliseSerbianName('Aranđelovac'), normaliseSerbianName('Aran?elovac'));
+      expect(
+        normaliseSerbianName('Aranđelovac'),
+        normaliseSerbianName('Aran?elovac'),
+      );
     });
 
     test('matches GeoJSON "Inđija" to CSV "In?ija"', () {
@@ -49,6 +61,23 @@ void main() {
 
     test('handles name with no diacritics unchanged', () {
       expect(normaliseSerbianName('Beograd'), 'beograd');
+    });
+  });
+
+  group('displayName', () {
+    test('inserts spaces into CamelCase GeoJSON names', () {
+      expect(displayName('NovaVaroš'), 'Nova Varoš');
+      expect(displayName('BajinaBašta'), 'Bajina Bašta');
+      expect(displayName('NoviBeograd'), 'Novi Beograd');
+      expect(displayName('GadžinHan'), 'Gadžin Han');
+      expect(displayName('MaloCrniće'), 'Malo Crniće');
+      expect(displayName('MaliIđoš'), 'Mali Iđoš');
+    });
+
+    test('leaves single-word names unchanged', () {
+      expect(displayName('Niš'), 'Niš');
+      expect(displayName('Barajevo'), 'Barajevo');
+      expect(displayName('Čačak'), 'Čačak');
     });
   });
 }
