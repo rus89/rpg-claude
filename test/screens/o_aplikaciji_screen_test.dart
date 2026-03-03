@@ -16,6 +16,13 @@ void main() {
     expect(find.textContaining('data.gov.rs'), findsWidgets);
   });
 
+  testWidgets('info sections show leading icons', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: OAplikacijiScreen()));
+    expect(find.byIcon(Icons.info_outline), findsOneWidget);
+    expect(find.byIcon(Icons.gavel), findsOneWidget);
+    expect(find.byIcon(Icons.open_in_new), findsOneWidget);
+  });
+
   testWidgets('shows guide for all 4 main tabs', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: OAplikacijiScreen()));
     await tester.scrollUntilVisible(find.text('Pregled'), 100);

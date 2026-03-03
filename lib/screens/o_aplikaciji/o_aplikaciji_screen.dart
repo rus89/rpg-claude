@@ -2,6 +2,7 @@
 // ABOUTME: Explains data source and independence from government bodies.
 
 import 'package:flutter/material.dart';
+import '../../theme.dart';
 
 class OAplikacijiScreen extends StatelessWidget {
   const OAplikacijiScreen({super.key});
@@ -10,12 +11,13 @@ class OAplikacijiScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('O aplikaciji')),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _Section(
+            const _InfoCard(
+              icon: Icons.info_outline,
               title: 'O aplikaciji',
               body:
                   'Ova aplikacija prikazuje otvorene podatke o registrovanim '
@@ -23,8 +25,9 @@ class OAplikacijiScreen extends StatelessWidget {
                   'data.gov.rs. Cilj aplikacije je obrazovni — da omogući svim '
                   'zainteresovanim građanima lak pristup ovim podacima.',
             ),
-            Divider(height: 32),
-            _Section(
+            const SizedBox(height: 12),
+            const _InfoCard(
+              icon: Icons.gavel,
               title: 'Napomena o nezavisnosti',
               body:
                   'Ova aplikacija je razvio nezavisan developer i nije '
@@ -33,40 +36,41 @@ class OAplikacijiScreen extends StatelessWidget {
                   'data.gov.rs i koriste se isključivo u informativne i '
                   'obrazovne svrhe.',
             ),
-            Divider(height: 32),
-            _Section(
+            const SizedBox(height: 12),
+            const _InfoCard(
+              icon: Icons.open_in_new,
               title: 'Izvor podataka',
               body:
                   'Podaci potiču od Uprave za agrarna plaćanja i dostupni '
                   'su na: data.gov.rs',
             ),
-            Divider(height: 32),
+            const SizedBox(height: 24),
             Text(
               'Vodič kroz aplikaciju',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 18),
             ),
-            SizedBox(height: 16),
-            _TabGuide(
+            const SizedBox(height: 16),
+            const _TabGuide(
               tabName: 'Pregled',
               description:
                   'Prikazuje ukupan broj registrovanih i aktivnih gazdinstava '
                   'na nivou Srbije za najnoviji dostupni snimak podataka, kao i '
                   'raspodelu po obliku organizacije.',
             ),
-            _TabGuide(
+            const _TabGuide(
               tabName: 'Opštine',
               description:
                   'Pretraži sve opštine i pogledaj detalje za svaku — '
                   'aktivan broj gazdinstava po obliku organizacije i trend kroz vreme.',
             ),
-            _TabGuide(
+            const _TabGuide(
               tabName: 'Trendovi',
               description:
                   'Prati kako se broj aktivnih gazdinstava menjao od 2018. '
                   'do danas. Filtriraj po opštini i obliku organizacije, ili '
                   'poređaj više opština na istom grafikonu.',
             ),
-            _TabGuide(
+            const _TabGuide(
               tabName: 'Mapa',
               description:
                   'Geografski prikaz Srbije — opštine su obojene prema broju '
@@ -79,23 +83,40 @@ class OAplikacijiScreen extends StatelessWidget {
   }
 }
 
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.body});
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+  final IconData icon;
   final String title;
   final String body;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return DecoratedBox(
+      decoration: cardDecoration,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: Theme.of(context).colorScheme.primary, size: 28),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 4),
+                  Text(body),
+                ],
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Text(body),
-      ],
+      ),
     );
   }
 }
