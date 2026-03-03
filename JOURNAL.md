@@ -40,7 +40,11 @@ Additional data quality issue: the government CSV stores đ (d with stroke) as l
 1. **Windows-1250 codec** (`lib/data/windows1250.dart`): 256-entry byte→Unicode lookup table. No external dependency needed.
 2. **CSV parser**: Changed encoding fallback from `latin1.decode` to `windows1250Decode`.
 3. **Normaliser**: Changed đ handling from đ→dj to stripping both đ and ?, so GeoJSON names (with đ) match CSV names (with ?).
-4. **Map overlay**: Build display name lookup from CSV municipality names (proper spacing). Replace ? with đ for display. Overlay now shows "Nova Varoš" instead of "NovaVaroš".
+4. **Map overlay**: Use `displayName()` to split CamelCase GeoJSON names (e.g. "NovaVaroš" → "Nova Varoš") for display. Keep raw GeoJSON name for normalised count lookup.
+
+### Regression and fix
+
+First overlay approach built a `displayNameByNormalised` map from CSV names and stored the normalised key in `_tappedMunicipality`. This broke badly — GeoJSON and CSV use different naming conventions for many municipalities (e.g. GeoJSON "Niš" vs CSV "Niš -grad"), so the lookup failed and the overlay showed raw normalised keys like "nis" with count 0. Reverted to storing the raw GeoJSON name and using a simple CamelCase splitter for display instead.
 
 ### Lessons learned
 
@@ -48,6 +52,8 @@ Additional data quality issue: the government CSV stores đ (d with stroke) as l
 - `latin1.decode` maps bytes 0x80–0x9F to C1 control characters which are invisible in text rendering — makes the corruption hard to spot visually.
 - đ (U+0111) has no canonical Unicode decomposition, unlike č/š/ž/ć. NFD decomposition approach wouldn't have helped for đ anyway.
 - CORS works fine for data.gov.rs from web (tested with `flutter run -d chrome`).
+- Don't build cross-source lookup maps unless the sources use consistent naming. GeoJSON and CSV municipality names differ in ways beyond encoding (suffixes like "-grad", different granularity). Use the source that already has what you need for display.
+- Test with real data, not just unit test fixtures. The "Niš" regression wasn't caught by tests because the fixtures used matching names.
 
 ### Open items
 
