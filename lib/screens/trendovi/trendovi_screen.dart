@@ -74,8 +74,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
                         (form) => FilterChip(
                           label: Text(form.displayName),
                           selected: _selectedForms.contains(form),
-                          selectedColor:
-                              Theme.of(context).colorScheme.primary,
+                          selectedColor: Theme.of(context).colorScheme.primary,
                           labelStyle: TextStyle(
                             color: _selectedForms.contains(form)
                                 ? Colors.white

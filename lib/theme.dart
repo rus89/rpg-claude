@@ -76,10 +76,6 @@ final cardDecoration = BoxDecoration(
   color: _surface,
   borderRadius: BorderRadius.circular(12),
   boxShadow: const [
-    BoxShadow(
-      color: Color(0x0F000000),
-      blurRadius: 8,
-      offset: Offset(0, 2),
-    ),
+    BoxShadow(color: Color(0x0F000000), blurRadius: 8, offset: Offset(0, 2)),
   ],
 );

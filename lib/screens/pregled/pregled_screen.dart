@@ -147,10 +147,7 @@ class _SummaryCard extends StatelessWidget {
           children: [
             Text(label, style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 4),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text(value, style: Theme.of(context).textTheme.headlineSmall),
           ],
         ),
       ),

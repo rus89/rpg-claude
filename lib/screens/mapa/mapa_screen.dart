@@ -117,8 +117,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                     name: _tappedMunicipality!,
                     records: snapshots.last.records,
                     activeByMunicipality: activeByMunicipality,
-                    onClose: () =>
-                        setState(() => _tappedMunicipality = null),
+                    onClose: () => setState(() => _tappedMunicipality = null),
                   ),
                 ),
             ],
@@ -252,10 +251,7 @@ class _MunicipalityOverlay extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: onClose,
-                ),
+                IconButton(icon: const Icon(Icons.close), onPressed: onClose),
               ],
             ),
           ),
