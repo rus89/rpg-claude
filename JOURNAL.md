@@ -1,5 +1,28 @@
 # Project Journal
 
+## 2026-03-03: Visual redesign (branch: feature/visual-redesign)
+
+Implemented full visual redesign across all screens. 11 tasks from `docs/plans/2026-03-03-visual-redesign.md`, executed via executing-plans skill in 4 batches.
+
+### What was done
+
+- **Centralised theme** (`lib/theme.dart`): All design tokens in one file — olive green primary (`#5C7A45`), warm cream background (`#F5F2EC`), app bar, card, nav bar, chip, input, and text themes.
+- **`cardDecoration`** helper: `BoxDecoration` with 12px radius and custom shadow (black @ 6%, blur 8, offset 0,2) since `CardTheme` doesn't support custom box shadows.
+- **Screen updates**: Pregled (DecoratedBox cards, theme typography), Opštine (theme search field, ListView.separated), Opština detail (theme headings), Trendovi (theme dropdown, styled chips), O aplikaciji (icon cards replacing plain sections), Mapa (bottom sheet overlay with org form breakdown), Loading (theme error color).
+
+### Code review fixes
+
+Three items caught in review that the plan missed:
+1. Shell test ABOUTME overpromised — said "verifies active/inactive icon appearance" but only checked `isNotNull`. Fixed to match actual coverage.
+2. `cardDecoration` test didn't pin shadow values — only checked existence, not the specific color/blur/offset. Pinned all three.
+3. `_TabGuide` still had hardcoded `TextStyle(fontWeight: FontWeight.bold)` — inconsistent with the redesign goal. Fixed to use `titleMedium`.
+
+### Lessons learned
+
+- Pre-commit formatter hook updates staged files but not the working tree. Run `git checkout -- <files>` after commits to stay in sync, or the drift accumulates.
+- When overlay shows a count that also appears in a breakdown table (same number twice), tests need `findsNWidgets(2)` not `findsOneWidget`. Single-record fixtures make total and per-row values identical.
+- ABOUTME comments should describe what code *actually does*, not what was *intended*. Easy to copy aspirational descriptions from plans.
+
 ## 2026-02-27: Completed Tasks 10-14 + bug fixes
 
 ### Bug fixes
