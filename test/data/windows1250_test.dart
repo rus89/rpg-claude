@@ -20,7 +20,6 @@ void main() {
     });
 
     test('decodes Serbian diacritics in 0xA0-0xFF range', () {
-      // Đ=0xD0, đ=0xF0, Č=0xC8, č=0xE8... wait, need to check
       // In Windows-1250: Ć=0xC6, ć=0xE6, Č=0xC8, č=0xE8, Đ=0xD0, đ=0xF0
       expect(windows1250Decode([0xC6]), 'Ć');
       expect(windows1250Decode([0xE6]), 'ć');

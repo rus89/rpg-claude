@@ -1,8 +1,8 @@
 // ABOUTME: Serbian name utilities for fuzzy matching and display formatting.
 // ABOUTME: Used to match municipality names across GeoJSON and CSV data sources.
 
-/// Normalises a Serbian name by lowercasing, replacing diacritics with ASCII
-/// equivalents, and stripping all whitespace.
+/// Normalises a Serbian name by lowercasing, stripping or replacing diacritics,
+/// and removing all whitespace.
 ///
 /// đ and ? are both stripped rather than replaced, because the government CSV
 /// data stores đ as a literal '?' character (data quality issue). Stripping
