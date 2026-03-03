@@ -54,10 +54,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
               children: [
                 DropdownButtonFormField<String?>(
                   initialValue: _selectedMunicipality,
-                  decoration: const InputDecoration(
-                    labelText: 'Opština',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: const InputDecoration(labelText: 'Opština'),
                   items: [
                     const DropdownMenuItem(
                       value: null,
@@ -77,6 +74,14 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
                         (form) => FilterChip(
                           label: Text(form.displayName),
                           selected: _selectedForms.contains(form),
+                          selectedColor:
+                              Theme.of(context).colorScheme.primary,
+                          labelStyle: TextStyle(
+                            color: _selectedForms.contains(form)
+                                ? Colors.white
+                                : null,
+                          ),
+                          checkmarkColor: Colors.white,
                           onSelected: (selected) => setState(() {
                             selected
                                 ? _selectedForms.add(form)
