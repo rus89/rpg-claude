@@ -47,7 +47,9 @@ class OAplikacijiScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'Vodič kroz aplikaciju',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 18),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 16),
             const _TabGuide(
@@ -133,7 +135,7 @@ class _TabGuide extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(tabName, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(tabName, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 4),
           Text(description),
         ],
