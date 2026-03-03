@@ -39,8 +39,11 @@ void main() {
 
   test('cardDecoration has 12px radius and subtle shadow', () {
     expect(cardDecoration.borderRadius, equals(BorderRadius.circular(12)));
-    expect(cardDecoration.boxShadow, isNotNull);
-    expect(cardDecoration.boxShadow!.length, equals(1));
     expect(cardDecoration.color, equals(const Color(0xFFFFFFFF)));
+    expect(cardDecoration.boxShadow, hasLength(1));
+    final shadow = cardDecoration.boxShadow!.single;
+    expect(shadow.color, equals(const Color(0x0F000000)));
+    expect(shadow.blurRadius, equals(8));
+    expect(shadow.offset, equals(const Offset(0, 2)));
   });
 }
