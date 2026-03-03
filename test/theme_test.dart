@@ -7,21 +7,40 @@ import 'package:rpg_claude/theme.dart';
 
 void main() {
   test('primary color is olive green', () {
-    expect(appTheme.colorScheme.primary.toARGB32(), equals(const Color(0xFF5C7A45).toARGB32()));
+    expect(
+      appTheme.colorScheme.primary.toARGB32(),
+      equals(const Color(0xFF5C7A45).toARGB32()),
+    );
   });
 
   test('scaffold background is warm cream', () {
-    expect(appTheme.scaffoldBackgroundColor.toARGB32(), equals(const Color(0xFFF5F2EC).toARGB32()));
+    expect(
+      appTheme.scaffoldBackgroundColor.toARGB32(),
+      equals(const Color(0xFFF5F2EC).toARGB32()),
+    );
   });
 
   test('app bar uses primary color background with white foreground', () {
-    expect(appTheme.appBarTheme.backgroundColor!.toARGB32(), equals(const Color(0xFF5C7A45).toARGB32()));
-    expect(appTheme.appBarTheme.foregroundColor!.toARGB32(), equals(const Color(0xFFFFFFFF).toARGB32()));
+    expect(
+      appTheme.appBarTheme.backgroundColor!.toARGB32(),
+      equals(const Color(0xFF5C7A45).toARGB32()),
+    );
+    expect(
+      appTheme.appBarTheme.foregroundColor!.toARGB32(),
+      equals(const Color(0xFFFFFFFF).toARGB32()),
+    );
   });
 
   test('card theme has 12px border radius', () {
     final shape = appTheme.cardTheme.shape as RoundedRectangleBorder;
     final radius = (shape.borderRadius as BorderRadius).topLeft;
     expect(radius.x, equals(12));
+  });
+
+  test('cardDecoration has 12px radius and subtle shadow', () {
+    expect(cardDecoration.borderRadius, equals(BorderRadius.circular(12)));
+    expect(cardDecoration.boxShadow, isNotNull);
+    expect(cardDecoration.boxShadow!.length, equals(1));
+    expect(cardDecoration.color, equals(const Color(0xFFFFFFFF)));
   });
 }

@@ -61,24 +61,25 @@ final appTheme = ThemeData(
     ),
   ),
   textTheme: const TextTheme(
-    headlineSmall: TextStyle(
-      fontWeight: FontWeight.w800,
-      color: _textPrimary,
-    ),
-    titleMedium: TextStyle(
-      fontWeight: FontWeight.w700,
-      color: _textPrimary,
-    ),
-    bodyMedium: TextStyle(
-      fontWeight: FontWeight.w400,
-      color: _textPrimary,
-    ),
-    bodySmall: TextStyle(
-      fontWeight: FontWeight.w500,
-      color: _textSecondary,
-    ),
+    headlineSmall: TextStyle(fontWeight: FontWeight.w800, color: _textPrimary),
+    titleMedium: TextStyle(fontWeight: FontWeight.w700, color: _textPrimary),
+    bodyMedium: TextStyle(fontWeight: FontWeight.w400, color: _textPrimary),
+    bodySmall: TextStyle(fontWeight: FontWeight.w500, color: _textSecondary),
   ),
 );
 
 /// Amber accent for secondary highlights (chart accents, badges).
 const accentColor = Color(0xFFC47B2B);
+
+/// Card-like container decoration with custom shadow.
+final cardDecoration = BoxDecoration(
+  color: _surface,
+  borderRadius: BorderRadius.circular(12),
+  boxShadow: const [
+    BoxShadow(
+      color: Color(0x0F000000),
+      blurRadius: 8,
+      offset: Offset(0, 2),
+    ),
+  ],
+);
