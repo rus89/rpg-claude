@@ -33,14 +33,14 @@ class _OpstineScreenState extends ConsumerState<OpstineScreen> {
               decoration: const InputDecoration(
                 hintText: 'Pretraži opštine...',
                 prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
               ),
               onChanged: (v) => setState(() => _query = v),
             ),
           ),
           Expanded(
-            child: ListView.builder(
+            child: ListView.separated(
               itemCount: filtered.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final name = filtered[index];
                 return ListTile(
