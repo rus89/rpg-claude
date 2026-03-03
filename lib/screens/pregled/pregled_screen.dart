@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/org_form.dart';
 import '../../providers/data_provider.dart';
+import '../../theme.dart';
 
 class PregledScreen extends ConsumerWidget {
   const PregledScreen({super.key});
@@ -82,9 +83,9 @@ class PregledScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'Aktivna gazdinstva po obliku organizacije',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
                 SizedBox(
@@ -137,7 +138,8 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return DecoratedBox(
+      decoration: cardDecoration,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -147,9 +149,7 @@ class _SummaryCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               value,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
           ],
         ),
