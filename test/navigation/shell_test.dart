@@ -1,5 +1,5 @@
-// ABOUTME: Widget tests for AppShell bottom navigation styling.
-// ABOUTME: Verifies active/inactive icon appearance and indicator.
+// ABOUTME: Smoke test for AppShell bottom navigation.
+// ABOUTME: Verifies the NavigationBar renders with the app theme applied.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,10 +17,7 @@ void main() {
           routes: [
             GoRoute(path: '/pregled', builder: (_, __) => const Placeholder()),
             GoRoute(path: '/opstine', builder: (_, __) => const Placeholder()),
-            GoRoute(
-              path: '/trendovi',
-              builder: (_, __) => const Placeholder(),
-            ),
+            GoRoute(path: '/trendovi', builder: (_, __) => const Placeholder()),
             GoRoute(path: '/mapa', builder: (_, __) => const Placeholder()),
             GoRoute(
               path: '/o-aplikaciji',
