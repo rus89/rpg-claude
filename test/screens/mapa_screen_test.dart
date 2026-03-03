@@ -16,6 +16,7 @@ import 'package:rpg_claude/data/models/record.dart';
 import 'package:rpg_claude/data/models/snapshot.dart';
 import 'package:rpg_claude/providers/data_provider.dart';
 import 'package:rpg_claude/screens/mapa/mapa_screen.dart';
+import 'package:rpg_claude/theme.dart';
 
 void main() {
   testWidgets('renders FlutterMap widget', (tester) async {
@@ -57,7 +58,8 @@ void main() {
     await tester.pump();
 
     expect(find.text('Barajevo'), findsOneWidget);
-    expect(find.text('90 aktivnih'), findsOneWidget);
+    expect(find.text('90'), findsNWidgets(2)); // total + breakdown row
+    expect(find.text('Aktivnih gazdinstava'), findsOneWidget);
 
     addTearDown(hitNotifier.dispose);
   });
@@ -127,6 +129,37 @@ void main() {
     addTearDown(hitNotifier.dispose);
   });
 
+  testWidgets('overlay shows org form breakdown', (tester) async {
+    final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        child: MaterialApp(
+          theme: appTheme,
+          home: MapaScreen(
+            tileProvider: _NoOpTileProvider(),
+            hitNotifier: hitNotifier,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    hitNotifier.value = const LayerHitResult(
+      hitValues: ['Barajevo'],
+      coordinate: LatLng(44.0, 21.0),
+      point: Point(0, 0),
+    );
+    await tester.pump();
+
+    // Should show org form name and count
+    expect(find.text('Porodično gazdinstvo'), findsOneWidget);
+    expect(find.text('90'), findsNWidgets(2)); // total + breakdown row
+
+    addTearDown(hitNotifier.dispose);
+  });
+
   testWidgets('matches GeoJSON name without spaces to CSV name with spaces', (
     tester,
   ) async {
@@ -157,7 +190,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Novi Beograd'), findsOneWidget);
-    expect(find.text('50 aktivnih'), findsOneWidget);
+    expect(find.text('50'), findsNWidgets(2)); // total + breakdown row
 
     addTearDown(hitNotifier.dispose);
   });
@@ -188,7 +221,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Inđija'), findsOneWidget);
-    expect(find.text('70 aktivnih'), findsOneWidget);
+    expect(find.text('70'), findsNWidgets(2)); // total + breakdown row
 
     addTearDown(hitNotifier.dispose);
   });

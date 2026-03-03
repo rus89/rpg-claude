@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import '../../data/models/record.dart';
 import '../../data/serbian_normalise.dart';
 import '../../providers/data_provider.dart';
 
@@ -109,30 +110,15 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
               ),
               if (_tappedMunicipality != null)
                 Positioned(
-                  bottom: 16,
-                  left: 16,
-                  right: 16,
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            displayName(_tappedMunicipality!),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            '${activeByMunicipality[normaliseSerbianName(_tappedMunicipality!)] ?? 0} aktivnih',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () =>
-                                setState(() => _tappedMunicipality = null),
-                          ),
-                        ],
-                      ),
-                    ),
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: _MunicipalityOverlay(
+                    name: _tappedMunicipality!,
+                    records: snapshots.last.records,
+                    activeByMunicipality: activeByMunicipality,
+                    onClose: () =>
+                        setState(() => _tappedMunicipality = null),
                   ),
                 ),
             ],
@@ -205,5 +191,126 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
     return coords
         .map((c) => LatLng((c[1] as num).toDouble(), (c[0] as num).toDouble()))
         .toList();
+  }
+}
+
+class _MunicipalityOverlay extends StatelessWidget {
+  const _MunicipalityOverlay({
+    required this.name,
+    required this.records,
+    required this.activeByMunicipality,
+    required this.onClose,
+  });
+
+  final String name;
+  final List<Record> records;
+  final Map<String, int> activeByMunicipality;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final normalised = normaliseSerbianName(name);
+    final totalActive = activeByMunicipality[normalised] ?? 0;
+
+    final municipalityRecords = records.where((r) {
+      return normaliseSerbianName(r.municipalityName) == normalised;
+    }).toList();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x29000000),
+            blurRadius: 12,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Container(
+              width: 32,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    displayName(name),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: onClose,
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  '$totalActive',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Aktivnih gazdinstava',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          if (municipalityRecords.isNotEmpty) ...[
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                children: municipalityRecords
+                    .where((r) => r.activeHoldings > 0)
+                    .map(
+                      (r) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                r.orgForm.displayName,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                            Text(
+                              '${r.activeHoldings}',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ] else
+            const SizedBox(height: 16),
+        ],
+      ),
+    );
   }
 }
