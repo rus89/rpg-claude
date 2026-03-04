@@ -51,8 +51,7 @@ GoRouter router(Ref ref) {
           GoRoute(
             path: '/opstine/:name',
             builder: (context, state) => OpstinaDetailScreen(
-              municipalityName:
-                  Uri.decodeComponent(state.pathParameters['name']!),
+              municipalityName: state.pathParameters['name']!,
             ),
           ),
           GoRoute(
