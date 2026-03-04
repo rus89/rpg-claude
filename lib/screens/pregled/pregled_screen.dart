@@ -322,7 +322,8 @@ class _MunicipalityRankings extends StatelessWidget {
   Map<String, _MunicipalityCount> _aggregateActive(Snapshot snapshot) {
     final map = <String, _MunicipalityCount>{};
     for (final r in snapshot.records) {
-      final key = normaliseSerbianName(r.municipalityName);
+      final key = resolver?.canonicalKey(r.municipalityName) ??
+          normaliseSerbianName(r.municipalityName);
       final existing = map[key];
       final display =
           resolver?.displayName(r.municipalityName) ?? r.municipalityName;

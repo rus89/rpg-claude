@@ -77,7 +77,8 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
         if (snapshots.isNotEmpty) {
           final latest = snapshots.last;
           for (final r in latest.records) {
-            final key = resolver?.canonicalKey(r.municipalityName) ??
+            final key =
+                resolver?.canonicalKey(r.municipalityName) ??
                 normaliseSerbianName(r.municipalityName);
             activeByMunicipality[key] =
                 (activeByMunicipality[key] ?? 0) + r.activeHoldings;
@@ -218,7 +219,8 @@ class _MunicipalityOverlay extends StatelessWidget {
     final totalActive = activeByMunicipality[normalised] ?? 0;
 
     final municipalityRecords = records.where((r) {
-      final key = resolver?.canonicalKey(r.municipalityName) ??
+      final key =
+          resolver?.canonicalKey(r.municipalityName) ??
           normaliseSerbianName(r.municipalityName);
       return key == normalised;
     }).toList();

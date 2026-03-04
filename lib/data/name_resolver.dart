@@ -60,8 +60,8 @@ class NameResolver {
 
   /// All GeoJSON municipality names as display-ready strings, sorted.
   List<String> get allDisplayNames {
-    final names =
-        _normalToGeoJson.values.map(_splitCamelCase).toSet().toList()..sort();
+    final names = _normalToGeoJson.values.map(_splitCamelCase).toSet().toList()
+      ..sort();
     return names;
   }
 

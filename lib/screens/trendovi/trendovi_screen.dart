@@ -42,7 +42,9 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
           final records = snapshot.records.where((r) {
             final matchesMunicipality =
                 selectedNorm == null ||
-                normaliseSerbianName(r.municipalityName) == selectedNorm;
+                (resolver?.canonicalKey(r.municipalityName) ??
+                        normaliseSerbianName(r.municipalityName)) ==
+                    selectedNorm;
             final matchesForm = _selectedForms.contains(r.orgForm);
             return matchesMunicipality && matchesForm;
           });

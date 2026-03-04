@@ -125,22 +125,19 @@ void main() {
       expect(resolver.displayName('Barajevo'), 'Barajevo');
     });
 
-    test(
-      'allDisplayNames returns sorted deduplicated list',
-      () {
-        final names = resolver.allDisplayNames;
-        // 13 GeoJSON names + 3 aliases, but aliases point to existing
-        // GeoJSON entries, so .toSet() deduplicates them → 13
-        expect(names.length, 13);
-        expect(names.first, 'Barajevo');
-        expect(names.contains('Nova Varoš'), isTrue);
-        expect(names.contains('Malo Crniće'), isTrue);
-        expect(names.contains('Medveđa'), isTrue);
-        expect(names.contains('Novi Sad'), isTrue);
-        expect(names.contains('Rača'), isTrue);
-        // No duplicates from aliases
-        expect(names.where((n) => n == 'Rača').length, 1);
-      },
-    );
+    test('allDisplayNames returns sorted deduplicated list', () {
+      final names = resolver.allDisplayNames;
+      // 13 GeoJSON names + 3 aliases, but aliases point to existing
+      // GeoJSON entries, so .toSet() deduplicates them → 13
+      expect(names.length, 13);
+      expect(names.first, 'Barajevo');
+      expect(names.contains('Nova Varoš'), isTrue);
+      expect(names.contains('Malo Crniće'), isTrue);
+      expect(names.contains('Medveđa'), isTrue);
+      expect(names.contains('Novi Sad'), isTrue);
+      expect(names.contains('Rača'), isTrue);
+      // No duplicates from aliases
+      expect(names.where((n) => n == 'Rača').length, 1);
+    });
   });
 }

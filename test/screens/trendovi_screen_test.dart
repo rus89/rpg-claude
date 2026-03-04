@@ -8,8 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rpg_claude/data/models/org_form.dart';
 import 'package:rpg_claude/data/models/record.dart';
 import 'package:rpg_claude/data/models/snapshot.dart';
+import 'package:rpg_claude/data/name_resolver.dart';
 import 'package:rpg_claude/providers/data_provider.dart';
 import 'package:rpg_claude/screens/trendovi/trendovi_screen.dart';
+
+final _resolver = NameResolver(['Barajevo']);
 
 final _fixtures = [
   Snapshot(
@@ -46,7 +49,10 @@ void main() {
   testWidgets('renders a line chart', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        overrides: [
+          dataRepositoryProvider.overrideWith(() => _Fixture()),
+          nameResolverProvider.overrideWith((ref) async => _resolver),
+        ],
         child: const MaterialApp(home: TrendoviScreen()),
       ),
     );

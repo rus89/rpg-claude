@@ -16,6 +16,7 @@ class OpstinaDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dataAsync = ref.watch(dataRepositoryProvider);
+    final resolver = ref.watch(nameResolverProvider).valueOrNull;
 
     return dataAsync.when(
       loading: () =>
@@ -27,7 +28,10 @@ class OpstinaDetailScreen extends ConsumerWidget {
         final latest = snapshots.last;
         final latestRecords = latest.records
             .where(
-              (r) => normaliseSerbianName(r.municipalityName) == normalised,
+              (r) =>
+                  (resolver?.canonicalKey(r.municipalityName) ??
+                      normaliseSerbianName(r.municipalityName)) ==
+                  normalised,
             )
             .toList();
 
@@ -35,7 +39,10 @@ class OpstinaDetailScreen extends ConsumerWidget {
         final trendSpots = snapshots.map((snapshot) {
           final total = snapshot.records
               .where(
-                (r) => normaliseSerbianName(r.municipalityName) == normalised,
+                (r) =>
+                    (resolver?.canonicalKey(r.municipalityName) ??
+                        normaliseSerbianName(r.municipalityName)) ==
+                    normalised,
               )
               .fold(0, (sum, r) => sum + r.activeHoldings);
           return FlSpot(dateToX(snapshot.date), total.toDouble());

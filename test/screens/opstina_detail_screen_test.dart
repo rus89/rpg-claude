@@ -8,8 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rpg_claude/data/models/org_form.dart';
 import 'package:rpg_claude/data/models/record.dart';
 import 'package:rpg_claude/data/models/snapshot.dart';
+import 'package:rpg_claude/data/name_resolver.dart';
 import 'package:rpg_claude/providers/data_provider.dart';
 import 'package:rpg_claude/screens/opstine/opstina_detail_screen.dart';
+
+final _resolver = NameResolver(['Barajevo']);
 
 final _fixtures = [
   Snapshot(
@@ -61,7 +64,10 @@ final _fixtures = [
 ];
 
 Widget _buildApp({String name = 'Barajevo'}) => ProviderScope(
-  overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+  overrides: [
+    dataRepositoryProvider.overrideWith(() => _Fixture()),
+    nameResolverProvider.overrideWith((ref) async => _resolver),
+  ],
   child: MaterialApp(home: OpstinaDetailScreen(municipalityName: name)),
 );
 
