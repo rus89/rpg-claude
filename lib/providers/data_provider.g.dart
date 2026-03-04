@@ -6,6 +6,23 @@ part of 'data_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$nameResolverHash() => r'6d4af064b931037eb6fd963d061c12efaa18df7a';
+
+/// See also [nameResolver].
+@ProviderFor(nameResolver)
+final nameResolverProvider = FutureProvider<NameResolver>.internal(
+  nameResolver,
+  name: r'nameResolverProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$nameResolverHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef NameResolverRef = FutureProviderRef<NameResolver>;
 String _$municipalityNamesHash() => r'2c4b1b37e864b7bd410ad4f71fdbdc9fb23b6d59';
 
 /// See also [municipalityNames].

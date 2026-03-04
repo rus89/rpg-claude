@@ -46,7 +46,9 @@ class _OpstineScreenState extends ConsumerState<OpstineScreen> {
                 return ListTile(
                   title: Text(name),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/opstine/$name'),
+                  onTap: () => context.push(
+                    '/opstine/${Uri.encodeComponent(name)}',
+                  ),
                 );
               },
             ),
