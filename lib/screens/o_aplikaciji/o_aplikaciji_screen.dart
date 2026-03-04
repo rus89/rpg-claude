@@ -2,6 +2,7 @@
 // ABOUTME: Explains data source and independence from government bodies.
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../theme.dart';
 
 class OAplikacijiScreen extends StatelessWidget {
@@ -42,7 +43,8 @@ class OAplikacijiScreen extends StatelessWidget {
               title: 'Izvor podataka',
               body:
                   'Podaci potiču od Uprave za agrarna plaćanja i dostupni '
-                  'su na: data.gov.rs',
+                  'su na:',
+              link: _DataSourceLink(),
             ),
             const SizedBox(height: 24),
             Text(
@@ -90,10 +92,12 @@ class _InfoCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.body,
+    this.link,
   });
   final IconData icon;
   final String title;
   final String body;
+  final Widget? link;
 
   @override
   Widget build(BuildContext context) {
@@ -113,10 +117,35 @@ class _InfoCard extends StatelessWidget {
                   Text(title, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
                   Text(body),
+                  if (link != null) ...[
+                    const SizedBox(height: 4),
+                    link!,
+                  ],
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+const _dataSourceUrl =
+    'https://data.gov.rs/s/resources/rpg-broj-svikh-registrovanikh-poljoprivrednikh-gazdinstava-aktivna-gazdinstva/';
+
+class _DataSourceLink extends StatelessWidget {
+  const _DataSourceLink();
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => launchUrl(Uri.parse(_dataSourceUrl)),
+      child: Text(
+        'data.gov.rs',
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          decoration: TextDecoration.underline,
         ),
       ),
     );

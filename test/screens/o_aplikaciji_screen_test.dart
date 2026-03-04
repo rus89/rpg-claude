@@ -23,6 +23,13 @@ void main() {
     expect(find.byIcon(Icons.open_in_new), findsOneWidget);
   });
 
+  testWidgets('shows tappable data source link', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: OAplikacijiScreen()));
+    // The link text should be present and tappable
+    expect(find.textContaining('data.gov.rs'), findsWidgets);
+    expect(find.byType(InkWell), findsWidgets);
+  });
+
   testWidgets('shows guide for all 4 main tabs', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: OAplikacijiScreen()));
     await tester.scrollUntilVisible(find.text('Pregled'), 100);

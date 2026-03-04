@@ -195,6 +195,41 @@ void main() {
     addTearDown(hitNotifier.dispose);
   });
 
+  testWidgets('shows explanatory note when tapped municipality has 0 active',
+      (tester) async {
+    final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          dataRepositoryProvider.overrideWith(() => _Fixture()),
+        ],
+        child: MaterialApp(
+          home: MapaScreen(
+            tileProvider: _NoOpTileProvider(),
+            hitNotifier: hitNotifier,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Tap a municipality that doesn't exist in data → totalActive = 0
+    hitNotifier.value = const LayerHitResult(
+      hitValues: ['UnknownMunicipality'],
+      coordinate: LatLng(44.0, 21.0),
+      point: Point(0, 0),
+    );
+    await tester.pump();
+
+    expect(
+      find.textContaining('objedinjeni'),
+      findsOneWidget,
+    );
+
+    addTearDown(hitNotifier.dispose);
+  });
+
   testWidgets('matches GeoJSON đ to CSV ? for count lookup', (tester) async {
     final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
 

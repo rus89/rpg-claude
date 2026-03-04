@@ -273,7 +273,15 @@ class _MunicipalityOverlay extends StatelessWidget {
               ],
             ),
           ),
-          if (municipalityRecords.isNotEmpty) ...[
+          if (totalActive == 0)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: Text(
+                'Podaci za ovu opštinu mogu biti objedinjeni sa drugom opštinom',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            )
+          else if (municipalityRecords.isNotEmpty) ...[
             const Divider(),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
