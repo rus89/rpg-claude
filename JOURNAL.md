@@ -1,5 +1,21 @@
 # Project Journal
 
+## 2026-03-04: Fix CSV municipality name edge cases (branch: feature/data-foundation-and-improvements)
+
+### What was done
+
+Fixed 8 CSV municipality names that didn't match GeoJSON equivalents:
+- **cleanCsvMunicipality**: Strips " - grad" suffix, splits on "/" takes first part. Handles "Novi Sad - grad", "Niš -grad", "Kragujevac - grad", "Majdanpek/D.Milan44290", "Lu?ani /Gu?a 41302".
+- **CSV aliases**: 3 explicit mappings for fundamentally different names: "Ra?a Kragujeva?ka"→Rača, "Surcin"→Surčin, "Petrovac na Mlavi"→Petrovac.
+- **canonicalKey()**: Stable normalised grouping key — resolves through GeoJSON when possible, falls back to normalised cleaned name.
+- **All 4 screens updated**: mapa, pregled, opstina detail, trendovi now use `resolver?.canonicalKey()` instead of raw `normaliseSerbianName()` for CSV record matching.
+- **allDisplayNames**: Added `.toSet()` to deduplicate alias entries.
+- 111 tests pass, analyzer clean.
+
+### Lesson learned
+
+- Alias keys must use the actual CSV form with `?` corruption, not Anglicised versions. `normaliseSerbianName('Raca Kragujevacka')` ≠ `normaliseSerbianName('Ra?a Kragujeva?ka')` because `?` and `c` are different characters.
+
 ## 2026-03-04: Data foundation and improvements (branch: feature/data-foundation-and-improvements)
 
 Implementing plan from `tender-sauteeing-shannon.md` — 6 tasks addressing CSV parser, name resolution, screen enhancements, chart fixes, and minor UI fixes. Tasks 1-5 complete, Task 6 (final verification) pending.
