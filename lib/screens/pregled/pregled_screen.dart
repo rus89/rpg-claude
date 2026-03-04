@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+
 import '../../data/models/org_form.dart';
 import '../../data/models/snapshot.dart';
 import '../../data/name_resolver.dart';
@@ -54,15 +55,23 @@ class _PregledBody extends StatelessWidget {
     final hasPrevious = snapshots.length > 1;
     final previous = hasPrevious ? snapshots[snapshots.length - 2] : null;
 
-    final totalRegistered =
-        latest.records.fold(0, (sum, r) => sum + r.totalRegistered);
-    final totalActive =
-        latest.records.fold(0, (sum, r) => sum + r.activeHoldings);
+    final totalRegistered = latest.records.fold(
+      0,
+      (sum, r) => sum + r.totalRegistered,
+    );
+    final totalActive = latest.records.fold(
+      0,
+      (sum, r) => sum + r.activeHoldings,
+    );
 
-    final prevRegistered = previous?.records
-        .fold(0, (sum, r) => sum + r.totalRegistered);
-    final prevActive = previous?.records
-        .fold(0, (sum, r) => sum + r.activeHoldings);
+    final prevRegistered = previous?.records.fold(
+      0,
+      (sum, r) => sum + r.totalRegistered,
+    );
+    final prevActive = previous?.records.fold(
+      0,
+      (sum, r) => sum + r.activeHoldings,
+    );
 
     final activityRate = totalRegistered > 0
         ? totalActive / totalRegistered * 100
@@ -71,43 +80,42 @@ class _PregledBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Podaci na dan: ${DateFormat('dd.MM.yyyy').format(latest.date)}',
-        ),
+        Text('Podaci na dan: ${DateFormat('dd.MM.yyyy').format(latest.date)}'),
         const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _SummaryCard(
-                label: 'Ukupno registrovanih',
-                value: fmt.format(totalRegistered),
-                delta: _delta(totalRegistered, prevRegistered),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _SummaryCard(
+                  label: 'Ukupno registrovanih',
+                  value: fmt.format(totalRegistered),
+                  delta: _delta(totalRegistered, prevRegistered),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _SummaryCard(
-                label: 'Aktivnih gazdinstava',
-                value: fmt.format(totalActive),
-                delta: _delta(totalActive, prevActive),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _SummaryCard(
+                  label: 'Aktivnih gazdinstava',
+                  value: fmt.format(totalActive),
+                  delta: _delta(totalActive, prevActive),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _SummaryCard(
-                label: 'Stopa aktivnosti',
-                value: '${activityRate.toStringAsFixed(1).replaceAll('.', ',')}%',
+              const SizedBox(width: 12),
+              Expanded(
+                child: _SummaryCard(
+                  label: 'Stopa aktivnosti',
+                  value:
+                      '${activityRate.toStringAsFixed(1).replaceAll('.', ',')}%',
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 24),
         _BarChartSection(latest: latest, context: context),
         const SizedBox(height: 24),
-        _MunicipalityRankings(
-          snapshots: snapshots,
-          resolver: resolver,
-        ),
+        _MunicipalityRankings(snapshots: snapshots, resolver: resolver),
       ],
     );
   }
@@ -148,6 +156,8 @@ class _BarChartSection extends StatelessWidget {
       );
     }).toList();
 
+    final maxValue = byOrgForm.values.fold(0, (a, b) => a > b ? a : b);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -160,10 +170,14 @@ class _BarChartSection extends StatelessWidget {
           height: 240,
           child: BarChart(
             BarChartData(
+              maxY: maxValue * 1.15,
               barGroups: barGroups,
               barTouchData: BarTouchData(
                 enabled: false,
                 touchTooltipData: BarTouchTooltipData(
+                  getTooltipColor: (_) =>
+                      const Color.fromARGB(255, 237, 191, 136),
+                  fitInsideVertically: true,
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     final fmt = NumberFormat('#,###', 'sr');
                     return BarTooltipItem(
@@ -212,10 +226,7 @@ class _BarChartSection extends StatelessWidget {
 }
 
 class _MunicipalityRankings extends StatelessWidget {
-  const _MunicipalityRankings({
-    required this.snapshots,
-    this.resolver,
-  });
+  const _MunicipalityRankings({required this.snapshots, this.resolver});
 
   final List<Snapshot> snapshots;
   final NameResolver? resolver;
@@ -242,17 +253,22 @@ class _MunicipalityRankings extends StatelessWidget {
       if (firstEntry == null || firstEntry.count == 0) continue;
       final growth =
           (entry.value.count - firstEntry.count) / firstEntry.count * 100;
-      growthRates.add(_MunicipalityGrowth(
-        displayName: entry.value.displayName,
-        growth: growth,
-      ));
+      growthRates.add(
+        _MunicipalityGrowth(
+          displayName: entry.value.displayName,
+          growth: growth,
+        ),
+      );
     }
 
     growthRates.sort((a, b) => b.growth.compareTo(a.growth));
-    final top5Growth =
-        growthRates.where((g) => g.growth > 0).take(5).toList();
-    final bottom5Decline =
-        growthRates.where((g) => g.growth < 0).toList().reversed.take(5).toList();
+    final top5Growth = growthRates.where((g) => g.growth > 0).take(5).toList();
+    final bottom5Decline = growthRates
+        .where((g) => g.growth < 0)
+        .toList()
+        .reversed
+        .take(5)
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,13 +276,13 @@ class _MunicipalityRankings extends StatelessWidget {
         _RankingSection(
           title: 'Top 5 opština po broju aktivnih',
           items: top5Active
-              .map((e) => _RankingItem(
-                    name: e.value.displayName,
-                    trailing: fmt.format(e.value.count),
-                    onTap: () => context.push(
-                      '/opstine/${e.value.displayName}',
-                    ),
-                  ))
+              .map(
+                (e) => _RankingItem(
+                  name: e.value.displayName,
+                  trailing: fmt.format(e.value.count),
+                  onTap: () => context.push('/opstine/${e.value.displayName}'),
+                ),
+              )
               .toList(),
         ),
         const SizedBox(height: 24),
@@ -274,22 +290,28 @@ class _MunicipalityRankings extends StatelessWidget {
           _RankingSection(
             title: 'Top 5 opština po rastu',
             items: top5Growth
-                .map((g) => _RankingItem(
-                      name: g.displayName,
-                      trailing: '+${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
-                      trailingColor: Colors.green.shade700,
-                    ))
+                .map(
+                  (g) => _RankingItem(
+                    name: g.displayName,
+                    trailing:
+                        '+${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
+                    trailingColor: Colors.green.shade700,
+                  ),
+                )
                 .toList(),
           ),
           const SizedBox(height: 24),
           _RankingSection(
             title: 'Opštine u opadanju',
             items: bottom5Decline
-                .map((g) => _RankingItem(
-                      name: g.displayName,
-                      trailing: '${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
-                      trailingColor: Colors.red.shade700,
-                    ))
+                .map(
+                  (g) => _RankingItem(
+                    name: g.displayName,
+                    trailing:
+                        '${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
+                    trailingColor: Colors.red.shade700,
+                  ),
+                )
                 .toList(),
           ),
         ],
@@ -302,8 +324,8 @@ class _MunicipalityRankings extends StatelessWidget {
     for (final r in snapshot.records) {
       final key = normaliseSerbianName(r.municipalityName);
       final existing = map[key];
-      final display = resolver?.displayName(r.municipalityName) ??
-          r.municipalityName;
+      final display =
+          resolver?.displayName(r.municipalityName) ?? r.municipalityName;
       map[key] = _MunicipalityCount(
         displayName: existing?.displayName ?? display,
         count: (existing?.count ?? 0) + r.activeHoldings,
@@ -320,10 +342,7 @@ class _MunicipalityCount {
 }
 
 class _MunicipalityGrowth {
-  const _MunicipalityGrowth({
-    required this.displayName,
-    required this.growth,
-  });
+  const _MunicipalityGrowth({required this.displayName, required this.growth});
   final String displayName;
   final double growth;
 }
@@ -367,10 +386,7 @@ class _RankingItem extends StatelessWidget {
       title: Text(name),
       trailing: Text(
         trailing,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: trailingColor,
-        ),
+        style: TextStyle(fontWeight: FontWeight.w600, color: trailingColor),
       ),
       onTap: onTap,
     );
@@ -378,11 +394,7 @@ class _RankingItem extends StatelessWidget {
 }
 
 class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({
-    required this.label,
-    required this.value,
-    this.delta,
-  });
+  const _SummaryCard({required this.label, required this.value, this.delta});
   final String label;
   final String value;
   final String? delta;
@@ -406,9 +418,7 @@ class _SummaryCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    isPositive
-                        ? Icons.arrow_upward
-                        : Icons.arrow_downward,
+                    isPositive ? Icons.arrow_upward : Icons.arrow_downward,
                     size: 14,
                     color: isPositive
                         ? Colors.green.shade700
