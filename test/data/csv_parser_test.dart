@@ -1,5 +1,5 @@
 // ABOUTME: Tests for CSV parsing logic.
-// ABOUTME: Covers delimiter handling, encoding fallback, and malformed row skipping.
+// ABOUTME: Covers header-based column mapping, encoding fallback, and malformed row skipping.
 
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
@@ -81,6 +81,66 @@ void main() {
       final bytes = utf8.encode('');
       final records = CsvParser.parse(bytes);
       expect(records, isEmpty);
+    });
+
+    test('parses CSV with alternative header names', () {
+      const content =
+          'SifRegije;NazivRegije;SifraOpstine;NazivOpstineL;OrgOblik;NazivOrgOblik;BrojGazdinstavaSva;BrojGazdinstavaAktivna\n'
+          '1;GRAD BEOGRAD;10;Barajevo;1;Porodicno;1417;1385\n';
+      final bytes = utf8.encode(content);
+      final records = CsvParser.parse(bytes);
+      expect(records.length, 1);
+      expect(records[0].regionCode, '1');
+      expect(records[0].municipalityName, 'Barajevo');
+      expect(records[0].totalRegistered, 1417);
+      expect(records[0].activeHoldings, 1385);
+    });
+
+    test('defaults activeHoldings to 0 when column missing', () {
+      const content =
+          'Regija;NazivRegije;SifraOpstine;NazivOpstineL;OrgOblik;NazivOrgOblik;broj gazdinstava\n'
+          '1;GRAD BEOGRAD;10;Barajevo;1;Porodicno;1417\n';
+      final bytes = utf8.encode(content);
+      final records = CsvParser.parse(bytes);
+      expect(records.length, 1);
+      expect(records[0].totalRegistered, 1417);
+      expect(records[0].activeHoldings, 0);
+    });
+
+    test('returns empty list when required column missing', () {
+      // Missing municipalityName column
+      const content =
+          'Regija;NazivRegije;SifraOpstine;OrgOblik;NazivOrgOblik;broj gazdinstava;AktivnaGazdinstva\n'
+          '1;GRAD BEOGRAD;10;1;Porodicno;1417;1385\n';
+      final bytes = utf8.encode(content);
+      final records = CsvParser.parse(bytes);
+      expect(records, isEmpty);
+    });
+
+    test('header matching is case-insensitive', () {
+      const content =
+          'regija;nazivregije;sifraopstine;nazivopstinel;orgoblik;nazivorgoblik;BROJ GAZDINSTAVA;aktivnagazdinstva\n'
+          '1;GRAD BEOGRAD;10;Barajevo;1;Porodicno;1417;1385\n';
+      final bytes = utf8.encode(content);
+      final records = CsvParser.parse(bytes);
+      expect(records.length, 1);
+      expect(records[0].totalRegistered, 1417);
+    });
+
+    test('columns in any order still parse correctly', () {
+      const content =
+          'NazivOpstineL;OrgOblik;broj gazdinstava;AktivnaGazdinstva;Regija;NazivRegije;SifraOpstine;NazivOrgOblik\n'
+          'Barajevo;1;1417;1385;1;GRAD BEOGRAD;10;Porodicno\n';
+      final bytes = utf8.encode(content);
+      final records = CsvParser.parse(bytes);
+      expect(records.length, 1);
+      expect(records[0].regionCode, '1');
+      expect(records[0].regionName, 'GRAD BEOGRAD');
+      expect(records[0].municipalityCode, '10');
+      expect(records[0].municipalityName, 'Barajevo');
+      expect(records[0].orgForm, OrgForm.familyFarm);
+      expect(records[0].totalRegistered, 1417);
+      expect(records[0].activeHoldings, 1385);
     });
   });
 }

@@ -10,7 +10,7 @@ import 'package:rpg_claude/data/models/org_form.dart';
 import 'package:rpg_claude/data/models/record.dart';
 
 const _csvContent =
-    'sifra_regiona;region;sifra_opstine;opstina;organizacioni_oblik;naziv_org_oblik;broj_ukupno_registrovanih;broj_aktivnih\n'
+    'Regija;NazivRegije;SifraOpstine;NazivOpstineL;OrgOblik;NazivOrgOblik;broj gazdinstava;AktivnaGazdinstva\n'
     '1;GRAD BEOGRAD;10;Barajevo;1;Porodicno;100;90\n';
 
 void main() {
