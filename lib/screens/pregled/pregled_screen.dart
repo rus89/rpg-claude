@@ -113,7 +113,7 @@ class _PregledBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        _BarChartSection(latest: latest, context: context),
+        _BarChartSection(latest: latest),
         const SizedBox(height: 24),
         _MunicipalityRankings(snapshots: snapshots, resolver: resolver),
       ],
@@ -129,10 +129,9 @@ class _PregledBody extends StatelessWidget {
 }
 
 class _BarChartSection extends StatelessWidget {
-  const _BarChartSection({required this.latest, required this.context});
+  const _BarChartSection({required this.latest});
 
   final Snapshot latest;
-  final BuildContext context;
 
   @override
   Widget build(BuildContext context) {
@@ -322,7 +321,8 @@ class _MunicipalityRankings extends StatelessWidget {
   Map<String, _MunicipalityCount> _aggregateActive(Snapshot snapshot) {
     final map = <String, _MunicipalityCount>{};
     for (final r in snapshot.records) {
-      final key = resolver?.canonicalKey(r.municipalityName) ??
+      final key =
+          resolver?.canonicalKey(r.municipalityName) ??
           normaliseSerbianName(r.municipalityName);
       final existing = map[key];
       final display =
