@@ -18,8 +18,14 @@ class _OpstineScreenState extends ConsumerState<OpstineScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final allNames = ref.watch(municipalityNamesProvider);
-    final filtered = allNames
+    final resolverAsync = ref.watch(nameResolverProvider);
+    final allCsvNames = ref.watch(municipalityNamesProvider);
+
+    final resolver = resolverAsync.valueOrNull;
+    final displayNames = resolver != null
+        ? resolver.allDisplayNames
+        : allCsvNames;
+    final filtered = displayNames
         .where((n) => n.toLowerCase().contains(_query.toLowerCase()))
         .toList();
 
@@ -46,9 +52,8 @@ class _OpstineScreenState extends ConsumerState<OpstineScreen> {
                 return ListTile(
                   title: Text(name),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(
-                    '/opstine/${Uri.encodeComponent(name)}',
-                  ),
+                  onTap: () =>
+                      context.push('/opstine/${Uri.encodeComponent(name)}'),
                 );
               },
             ),

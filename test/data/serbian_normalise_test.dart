@@ -1,5 +1,5 @@
 // ABOUTME: Tests for Serbian name normalisation used in municipality matching.
-// ABOUTME: Covers diacritic stripping, whitespace removal, and corrupted đ handling.
+// ABOUTME: Covers diacritic stripping, whitespace removal, and corrupted character handling.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rpg_claude/data/serbian_normalise.dart';
@@ -13,31 +13,38 @@ void main() {
       );
     });
 
-    test('replaces š with s', () {
-      expect(normaliseSerbianName('Šabac'), 'sabac');
+    test('strips š', () {
+      expect(normaliseSerbianName('Šabac'), 'abac');
     });
 
-    test('replaces č with c', () {
-      expect(normaliseSerbianName('Čačak'), 'cacak');
+    test('strips č', () {
+      expect(normaliseSerbianName('Čačak'), 'aak');
     });
 
-    test('replaces ž with z', () {
-      expect(normaliseSerbianName('Žabalj'), 'zabalj');
+    test('strips ž', () {
+      expect(normaliseSerbianName('Žabalj'), 'abalj');
     });
 
-    test('replaces ć with c', () {
-      expect(normaliseSerbianName('Ćuprija'), 'cuprija');
+    test('strips ć', () {
+      expect(normaliseSerbianName('Ćuprija'), 'uprija');
     });
 
     test('strips đ', () {
       expect(normaliseSerbianName('Đurđevo'), 'urevo');
     });
 
-    test('strips ? so corrupted đ matches', () {
-      // CSV has literal '?' where đ should be
+    test('strips ? so corrupted diacritics match', () {
+      // CSV has literal '?' where diacritics should be
       expect(
         normaliseSerbianName('Žitora?a'),
         normaliseSerbianName('Žitorađa'),
+      );
+    });
+
+    test('matches CSV "?a?ak" to GeoJSON "Čačak"', () {
+      expect(
+        normaliseSerbianName('?a?ak'),
+        normaliseSerbianName('Čačak'),
       );
     });
 

@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../data/serbian_normalise.dart';
 import '../../providers/data_provider.dart';
 
 class OpstinaDetailScreen extends ConsumerWidget {
@@ -21,15 +22,20 @@ class OpstinaDetailScreen extends ConsumerWidget {
       error: (e, _) => Scaffold(body: Center(child: Text('Greška: $e'))),
       data: (snapshots) {
         final fmt = NumberFormat('#,###', 'sr');
+        final normalised = normaliseSerbianName(municipalityName);
         final latest = snapshots.last;
         final latestRecords = latest.records
-            .where((r) => r.municipalityName == municipalityName)
+            .where(
+              (r) => normaliseSerbianName(r.municipalityName) == normalised,
+            )
             .toList();
 
         // Trend: total active per snapshot
         final trendSpots = snapshots.asMap().entries.map((entry) {
           final total = entry.value.records
-              .where((r) => r.municipalityName == municipalityName)
+              .where(
+                (r) => normaliseSerbianName(r.municipalityName) == normalised,
+              )
               .fold(0, (sum, r) => sum + r.activeHoldings);
           return FlSpot(entry.key.toDouble(), total.toDouble());
         }).toList();

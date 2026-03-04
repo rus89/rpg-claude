@@ -1,21 +1,23 @@
 // ABOUTME: Serbian name utilities for fuzzy matching and display formatting.
 // ABOUTME: Used to match municipality names across GeoJSON and CSV data sources.
 
-/// Normalises a Serbian name by lowercasing, stripping or replacing diacritics,
+/// Normalises a Serbian name by lowercasing, stripping diacritics and '?',
 /// and removing all whitespace.
 ///
-/// đ and ? are both stripped rather than replaced, because the government CSV
-/// data stores đ as a literal '?' character (data quality issue). Stripping
-/// both ensures GeoJSON names (with đ) match CSV names (with ?).
+/// All Serbian diacritics (š, đ, č, ć, ž) and '?' are stripped rather than
+/// replaced with base letters. The government CSV data stores various
+/// diacritics as literal '?' characters (data quality issue). Stripping
+/// both diacritics and '?' ensures GeoJSON names match CSV names regardless
+/// of which characters were corrupted.
 String normaliseSerbianName(String name) {
   return name
       .toLowerCase()
-      .replaceAll('š', 's')
+      .replaceAll('š', '')
       .replaceAll('đ', '')
       .replaceAll('?', '')
-      .replaceAll('č', 'c')
-      .replaceAll('ć', 'c')
-      .replaceAll('ž', 'z')
+      .replaceAll('č', '')
+      .replaceAll('ć', '')
+      .replaceAll('ž', '')
       .replaceAll(RegExp(r'\s+'), '')
       .trim();
 }
