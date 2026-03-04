@@ -8,6 +8,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import '../../data/models/record.dart';
+import '../../data/name_resolver.dart';
 import '../../data/serbian_normalise.dart';
 import '../../providers/data_provider.dart';
 
@@ -64,6 +65,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
   @override
   Widget build(BuildContext context) {
     final dataAsync = ref.watch(dataRepositoryProvider);
+    final resolver = ref.watch(nameResolverProvider).valueOrNull;
 
     return dataAsync.when(
       loading: () =>
@@ -75,7 +77,8 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
         if (snapshots.isNotEmpty) {
           final latest = snapshots.last;
           for (final r in latest.records) {
-            final key = normaliseSerbianName(r.municipalityName);
+            final key = resolver?.canonicalKey(r.municipalityName) ??
+                normaliseSerbianName(r.municipalityName);
             activeByMunicipality[key] =
                 (activeByMunicipality[key] ?? 0) + r.activeHoldings;
           }
@@ -117,6 +120,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                     name: _tappedMunicipality!,
                     records: snapshots.last.records,
                     activeByMunicipality: activeByMunicipality,
+                    resolver: resolver,
                     onClose: () => setState(() => _tappedMunicipality = null),
                   ),
                 ),
@@ -199,12 +203,14 @@ class _MunicipalityOverlay extends StatelessWidget {
     required this.records,
     required this.activeByMunicipality,
     required this.onClose,
+    this.resolver,
   });
 
   final String name;
   final List<Record> records;
   final Map<String, int> activeByMunicipality;
   final VoidCallback onClose;
+  final NameResolver? resolver;
 
   @override
   Widget build(BuildContext context) {
@@ -212,7 +218,9 @@ class _MunicipalityOverlay extends StatelessWidget {
     final totalActive = activeByMunicipality[normalised] ?? 0;
 
     final municipalityRecords = records.where((r) {
-      return normaliseSerbianName(r.municipalityName) == normalised;
+      final key = resolver?.canonicalKey(r.municipalityName) ??
+          normaliseSerbianName(r.municipalityName);
+      return key == normalised;
     }).toList();
 
     return Container(

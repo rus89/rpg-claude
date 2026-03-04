@@ -68,6 +68,33 @@ void main() {
     });
   });
 
+  group('cleanCsvMunicipality', () {
+    test('strips " - grad" suffix', () {
+      expect(cleanCsvMunicipality('Novi Sad - grad'), 'Novi Sad');
+    });
+
+    test('strips " -grad" suffix (no leading space before dash)', () {
+      expect(cleanCsvMunicipality('Niš -grad'), 'Niš');
+    });
+
+    test('splits on "/" and takes first part, trimmed', () {
+      expect(cleanCsvMunicipality('Majdanpek/D.Milan44290'), 'Majdanpek');
+    });
+
+    test('splits on "/" with spaces and takes first part, trimmed', () {
+      expect(cleanCsvMunicipality('Lu?ani /Gu?a 41302'), 'Lu?ani');
+    });
+
+    test('leaves normal names unchanged', () {
+      expect(cleanCsvMunicipality('Barajevo'), 'Barajevo');
+    });
+
+    test('handles both slash and grad suffix', () {
+      // Split on "/" first, then strip " - grad" from the result
+      expect(cleanCsvMunicipality('Foo - grad/Bar'), 'Foo');
+    });
+  });
+
   group('displayName', () {
     test('inserts spaces into CamelCase GeoJSON names', () {
       expect(displayName('NovaVaroš'), 'Nova Varoš');

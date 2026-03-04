@@ -14,15 +14,21 @@ import 'package:latlong2/latlong.dart';
 import 'package:rpg_claude/data/models/org_form.dart';
 import 'package:rpg_claude/data/models/record.dart';
 import 'package:rpg_claude/data/models/snapshot.dart';
+import 'package:rpg_claude/data/name_resolver.dart';
 import 'package:rpg_claude/providers/data_provider.dart';
 import 'package:rpg_claude/screens/mapa/mapa_screen.dart';
 import 'package:rpg_claude/theme.dart';
+
+final _resolver = NameResolver(['Barajevo', 'NoviBeograd', 'Inđija']);
 
 void main() {
   testWidgets('renders FlutterMap widget', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        overrides: [
+          dataRepositoryProvider.overrideWith(() => _Fixture()),
+          nameResolverProvider.overrideWith((ref) async => _resolver),
+        ],
         child: MaterialApp(home: MapaScreen(tileProvider: _NoOpTileProvider())),
       ),
     );
@@ -37,7 +43,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        overrides: [
+          dataRepositoryProvider.overrideWith(() => _Fixture()),
+          nameResolverProvider.overrideWith((ref) async => _resolver),
+        ],
         child: MaterialApp(
           home: MapaScreen(
             tileProvider: _NoOpTileProvider(),
@@ -69,7 +78,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        overrides: [
+          dataRepositoryProvider.overrideWith(() => _Fixture()),
+          nameResolverProvider.overrideWith((ref) async => _resolver),
+        ],
         child: MaterialApp(
           home: MapaScreen(
             tileProvider: _NoOpTileProvider(),
@@ -102,7 +114,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        overrides: [
+          dataRepositoryProvider.overrideWith(() => _Fixture()),
+          nameResolverProvider.overrideWith((ref) async => _resolver),
+        ],
         child: MaterialApp(
           home: MapaScreen(
             tileProvider: _NoOpTileProvider(),
@@ -134,7 +149,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        overrides: [
+          dataRepositoryProvider.overrideWith(() => _Fixture()),
+          nameResolverProvider.overrideWith((ref) async => _resolver),
+        ],
         child: MaterialApp(
           theme: appTheme,
           home: MapaScreen(
@@ -169,6 +187,7 @@ void main() {
       ProviderScope(
         overrides: [
           dataRepositoryProvider.overrideWith(() => _SpacedNameFixture()),
+          nameResolverProvider.overrideWith((ref) async => _resolver),
         ],
         child: MaterialApp(
           home: MapaScreen(
@@ -202,7 +221,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        overrides: [
+          dataRepositoryProvider.overrideWith(() => _Fixture()),
+          nameResolverProvider.overrideWith((ref) async => _resolver),
+        ],
         child: MaterialApp(
           home: MapaScreen(
             tileProvider: _NoOpTileProvider(),
@@ -231,7 +253,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [dataRepositoryProvider.overrideWith(() => _DjFixture())],
+        overrides: [
+          dataRepositoryProvider.overrideWith(() => _DjFixture()),
+          nameResolverProvider.overrideWith((ref) async => _resolver),
+        ],
         child: MaterialApp(
           home: MapaScreen(
             tileProvider: _NoOpTileProvider(),
