@@ -53,15 +53,17 @@ void main() {
       expect(resolver.displayName('Barajevo'), 'Barajevo');
     });
 
-    test('allDisplayNames returns sorted list of all GeoJSON display names',
-        () {
-      final names = resolver.allDisplayNames;
-      expect(names.length, 6);
-      expect(names.first, 'Barajevo');
-      // CamelCase split
-      expect(names.contains('Nova Varoš'), isTrue);
-      expect(names.contains('Malo Crniće'), isTrue);
-      expect(names.contains('Medveđa'), isTrue);
-    });
+    test(
+      'allDisplayNames returns sorted list of all GeoJSON display names',
+      () {
+        final names = resolver.allDisplayNames;
+        expect(names.length, 6);
+        expect(names.first, 'Barajevo');
+        // CamelCase split
+        expect(names.contains('Nova Varoš'), isTrue);
+        expect(names.contains('Malo Crniće'), isTrue);
+        expect(names.contains('Medveđa'), isTrue);
+      },
+    );
   });
 }

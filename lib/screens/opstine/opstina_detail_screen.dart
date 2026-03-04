@@ -87,8 +87,7 @@ class OpstinaDetailScreen extends ConsumerWidget {
                             getTitlesWidget: (value, _) {
                               final idx = dateTicks.indexOf(value);
                               if (idx < 0) return const SizedBox();
-                              if (idx % 3 != 0 &&
-                                  idx != dateTicks.length - 1) {
+                              if (idx % 3 != 0 && idx != dateTicks.length - 1) {
                                 return const SizedBox();
                               }
                               return Padding(

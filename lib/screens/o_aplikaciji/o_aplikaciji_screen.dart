@@ -117,10 +117,7 @@ class _InfoCard extends StatelessWidget {
                   Text(title, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
                   Text(body),
-                  if (link != null) ...[
-                    const SizedBox(height: 4),
-                    link!,
-                  ],
+                  if (link != null) ...[const SizedBox(height: 4), link!],
                 ],
               ),
             ),

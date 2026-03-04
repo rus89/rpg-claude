@@ -17,16 +17,15 @@ Record _rec(
   OrgForm orgForm = OrgForm.familyFarm,
   required int registered,
   required int active,
-}) =>
-    Record(
-      regionCode: '1',
-      regionName: 'R1',
-      municipalityCode: '10',
-      municipalityName: name,
-      orgForm: orgForm,
-      totalRegistered: registered,
-      activeHoldings: active,
-    );
+}) => Record(
+  regionCode: '1',
+  regionName: 'R1',
+  municipalityCode: '10',
+  municipalityName: name,
+  orgForm: orgForm,
+  totalRegistered: registered,
+  activeHoldings: active,
+);
 
 final _snapshot1 = Snapshot(
   date: DateTime(2025, 6, 30),
@@ -64,12 +63,12 @@ final _resolver = NameResolver([
 ]);
 
 Widget _buildApp() => ProviderScope(
-      overrides: [
-        dataRepositoryProvider.overrideWith(() => _FixtureRepository()),
-        nameResolverProvider.overrideWith((ref) async => _resolver),
-      ],
-      child: const MaterialApp(home: PregledScreen()),
-    );
+  overrides: [
+    dataRepositoryProvider.overrideWith(() => _FixtureRepository()),
+    nameResolverProvider.overrideWith((ref) async => _resolver),
+  ],
+  child: const MaterialApp(home: PregledScreen()),
+);
 
 void main() {
   testWidgets('shows total registered and active holdings', (tester) async {

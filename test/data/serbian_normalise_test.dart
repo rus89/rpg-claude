@@ -42,10 +42,7 @@ void main() {
     });
 
     test('matches CSV "?a?ak" to GeoJSON "Čačak"', () {
-      expect(
-        normaliseSerbianName('?a?ak'),
-        normaliseSerbianName('Čačak'),
-      );
+      expect(normaliseSerbianName('?a?ak'), normaliseSerbianName('Čačak'));
     });
 
     test('matches GeoJSON "MaliIđoš" to CSV "Mali I?oš"', () {

@@ -64,22 +64,25 @@ class CsvParser {
     final records = <Record>[];
     for (final row in rows.skip(1)) {
       try {
-        final regionCode =
-            _cell(row, columnMap['regionCode'])?.trim() ?? '';
-        final regionName =
-            _cell(row, columnMap['regionName'])?.trim() ?? '';
+        final regionCode = _cell(row, columnMap['regionCode'])?.trim() ?? '';
+        final regionName = _cell(row, columnMap['regionName'])?.trim() ?? '';
         final municipalityCode =
             _cell(row, columnMap['municipalityCode'])?.trim() ?? '';
-        final municipalityName =
-            _cell(row, columnMap['municipalityName'])!.trim();
-        final orgFormCode =
-            int.parse(_cell(row, columnMap['orgFormCode'])!.trim());
-        final totalRegistered =
-            int.parse(_cell(row, columnMap['totalRegistered'])!.trim());
+        final municipalityName = _cell(
+          row,
+          columnMap['municipalityName'],
+        )!.trim();
+        final orgFormCode = int.parse(
+          _cell(row, columnMap['orgFormCode'])!.trim(),
+        );
+        final totalRegistered = int.parse(
+          _cell(row, columnMap['totalRegistered'])!.trim(),
+        );
 
         final activeCell = _cell(row, columnMap['activeHoldings']);
-        final activeHoldings =
-            activeCell != null ? int.parse(activeCell.trim()) : 0;
+        final activeHoldings = activeCell != null
+            ? int.parse(activeCell.trim())
+            : 0;
 
         records.add(
           Record(

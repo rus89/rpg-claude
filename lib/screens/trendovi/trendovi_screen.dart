@@ -40,7 +40,8 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
 
         final spots = snapshots.map((snapshot) {
           final records = snapshot.records.where((r) {
-            final matchesMunicipality = selectedNorm == null ||
+            final matchesMunicipality =
+                selectedNorm == null ||
                 normaliseSerbianName(r.municipalityName) == selectedNorm;
             final matchesForm = _selectedForms.contains(r.orgForm);
             return matchesMunicipality && matchesForm;
@@ -49,9 +50,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
           return FlSpot(dateToX(snapshot.date), total.toDouble());
         }).toList();
 
-        final dateTicks = snapshots
-            .map((s) => dateToX(s.date))
-            .toList();
+        final dateTicks = snapshots.map((s) => dateToX(s.date)).toList();
 
         return Scaffold(
           appBar: AppBar(title: const Text('Trendovi')),
@@ -72,8 +71,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
                       (n) => DropdownMenuItem(value: n, child: Text(n)),
                     ),
                   ],
-                  onChanged: (v) =>
-                      setState(() => _selectedMunicipality = v),
+                  onChanged: (v) => setState(() => _selectedMunicipality = v),
                 ),
                 const SizedBox(height: 12),
                 Wrap(
@@ -83,8 +81,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
                         (form) => FilterChip(
                           label: Text(form.displayName),
                           selected: _selectedForms.contains(form),
-                          selectedColor:
-                              Theme.of(context).colorScheme.primary,
+                          selectedColor: Theme.of(context).colorScheme.primary,
                           labelStyle: TextStyle(
                             color: _selectedForms.contains(form)
                                 ? Colors.white
@@ -122,8 +119,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
                               final idx = dateTicks.indexOf(value);
                               if (idx < 0) return const SizedBox();
                               // Show every 3rd label to avoid crowding
-                              if (idx % 3 != 0 &&
-                                  idx != dateTicks.length - 1) {
+                              if (idx % 3 != 0 && idx != dateTicks.length - 1) {
                                 return const SizedBox();
                               }
                               return Padding(

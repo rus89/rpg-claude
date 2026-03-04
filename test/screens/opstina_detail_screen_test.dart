@@ -61,13 +61,9 @@ final _fixtures = [
 ];
 
 Widget _buildApp({String name = 'Barajevo'}) => ProviderScope(
-      overrides: [
-        dataRepositoryProvider.overrideWith(() => _Fixture()),
-      ],
-      child: MaterialApp(
-        home: OpstinaDetailScreen(municipalityName: name),
-      ),
-    );
+  overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+  child: MaterialApp(home: OpstinaDetailScreen(municipalityName: name)),
+);
 
 void main() {
   testWidgets('shows municipality name in app bar', (tester) async {

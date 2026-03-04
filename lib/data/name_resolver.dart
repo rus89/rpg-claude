@@ -35,8 +35,7 @@ class NameResolver {
     return names;
   }
 
-  static final _camelBoundary =
-      RegExp(r'(?<=[a-zšđčćž])(?=[A-ZŠĐČĆŽ])');
+  static final _camelBoundary = RegExp(r'(?<=[a-zšđčćž])(?=[A-ZŠĐČĆŽ])');
 
   static String _splitCamelCase(String name) {
     return name.replaceAll(_camelBoundary, ' ');

@@ -195,15 +195,14 @@ void main() {
     addTearDown(hitNotifier.dispose);
   });
 
-  testWidgets('shows explanatory note when tapped municipality has 0 active',
-      (tester) async {
+  testWidgets('shows explanatory note when tapped municipality has 0 active', (
+    tester,
+  ) async {
     final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          dataRepositoryProvider.overrideWith(() => _Fixture()),
-        ],
+        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
         child: MaterialApp(
           home: MapaScreen(
             tileProvider: _NoOpTileProvider(),
@@ -222,10 +221,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(
-      find.textContaining('objedinjeni'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('objedinjeni'), findsOneWidget);
 
     addTearDown(hitNotifier.dispose);
   });
