@@ -1,5 +1,39 @@
 # Project Journal
 
+## 2026-03-04: Data foundation and improvements (branch: feature/data-foundation-and-improvements)
+
+Implementing plan from `tender-sauteeing-shannon.md` — 6 tasks addressing CSV parser, name resolution, screen enhancements, chart fixes, and minor UI fixes. Tasks 1-5 complete, Task 6 (final verification) pending.
+
+### What was done
+
+- **CSV parser rewrite** (`lib/data/csv_parser.dart`): Header-based column mapping instead of hardcoded indices. Supports 8 canonical columns with variant spellings (case-insensitive). Required columns check, optional activeHoldings defaulting to 0.
+- **Normaliser fix** (`lib/data/serbian_normalise.dart`): Changed from replacing diacritics with base letters (č→c) to stripping them entirely. Government CSV has `?` replacing not just đ but also č, š, ž, ć. Stripping both diacritics and `?` produces matching keys ("Čačak" and "?a?ak" both → "aak").
+- **NameResolver** (`lib/data/name_resolver.dart`): Maps CSV municipality names to canonical GeoJSON names via normalisation. CamelCase splitting for display. `nameResolverProvider` loads GeoJSON asset.
+- **Navigation**: GoRouter handles Unicode path parameters natively — manual `Uri.encodeComponent`/`Uri.decodeComponent` caused double-decode crash. Removed both.
+- **Pregled enhancements**: Delta indicators on summary cards, activity rate card, permanent bar chart value labels, top 5/bottom 5 municipality rankings.
+- **Chart fixes**: `isCurved: false`, proportional date-based x-axis, y-axis labels with K/M abbreviation, bottom labels on detail chart.
+- **Mapa**: Explanatory note for 0-count municipalities on overlay tap.
+- **O aplikaciji**: Tappable link to RPG dataset page via url_launcher.
+
+### Issues found during testing (Milan flagged)
+
+- Names were resolved in Opštine list but navigation crashed on diacritics — GoRouter double-decode issue
+- Milan mentioned "some issues" remaining to discuss in next session — need to pick up Task 6 and address feedback
+
+### Lessons learned
+
+- Government CSV `?` corruption is broader than just đ — affects č, š, ž, ć too. The normaliser must handle all of these uniformly.
+- GoRouter decodes `pathParameters` automatically. Never double-decode with `Uri.decodeComponent`.
+- When writing a NameResolver, test with names that have the actual data corruption pattern, not just the documented one.
+- `fl_chart` y-axis labels can collide with list item text in tests (e.g. "100" appearing twice). Use `findsWidgets` for values that may appear in both chart labels and content.
+
+### Status
+
+- Branch: `feature/data-foundation-and-improvements` (7 commits ahead of main)
+- 93 tests pass, analyzer clean
+- Tasks 1-5 complete, Task 6 (final verification) pending
+- Milan has issues to discuss in next session
+
 ## 2026-03-03: Visual redesign (branch: feature/visual-redesign)
 
 Implemented full visual redesign across all screens. 11 tasks from `docs/plans/2026-03-03-visual-redesign.md`, executed via executing-plans skill in 4 batches.
