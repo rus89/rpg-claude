@@ -19,7 +19,8 @@ class OAplikacijiScreen extends StatelessWidget {
       _InfoCard(
         icon: Icons.info_outline,
         title: 'O aplikaciji',
-        body: 'Ova aplikacija prikazuje otvorene podatke o registrovanim '
+        body:
+            'Ova aplikacija prikazuje otvorene podatke o registrovanim '
             'poljoprivrednim gazdinstvima u Srbiji (RPG), preuzete sa portala '
             'data.gov.rs. Cilj aplikacije je obrazovni — da omogući svim '
             'zainteresovanim građanima lak pristup ovim podacima.',
@@ -27,7 +28,8 @@ class OAplikacijiScreen extends StatelessWidget {
       _InfoCard(
         icon: Icons.gavel,
         title: 'Napomena o nezavisnosti',
-        body: 'Ova aplikacija je razvio nezavisan developer i nije '
+        body:
+            'Ova aplikacija je razvio nezavisan developer i nije '
             'povezana ni sa jednim državnim organom, institucijom ili '
             'organizacijom. Podaci se preuzimaju direktno sa portala '
             'data.gov.rs i koriste se isključivo u informativne i '
@@ -36,7 +38,8 @@ class OAplikacijiScreen extends StatelessWidget {
       _InfoCard(
         icon: Icons.open_in_new,
         title: 'Izvor podataka',
-        body: 'Podaci potiču od Uprave za agrarna plaćanja i dostupni '
+        body:
+            'Podaci potiču od Uprave za agrarna plaćanja i dostupni '
             'su na:',
         link: _DataSourceLink(),
       ),
@@ -49,23 +52,21 @@ class OAplikacijiScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (desktop)
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: infoCards
-                    .map(
-                      (card) => SizedBox(
-                        width: (MediaQuery.sizeOf(context).width - 80) / 2,
-                        child: card,
-                      ),
-                    )
-                    .toList(),
-              )
-            else
-              ...infoCards.expand(
-                (card) => [card, const SizedBox(height: 12)],
+            if (desktop) ...[
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: infoCards[0]),
+                    const SizedBox(width: 12),
+                    Expanded(child: infoCards[1]),
+                  ],
+                ),
               ),
+              const SizedBox(height: 12),
+              infoCards[2],
+            ] else
+              ...infoCards.expand((card) => [card, const SizedBox(height: 12)]),
             const SizedBox(height: 24),
             Text(
               'Vodič kroz aplikaciju',
