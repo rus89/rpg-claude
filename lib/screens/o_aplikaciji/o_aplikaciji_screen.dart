@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../layout/breakpoints.dart';
 import '../../layout/screen_scaffold.dart';
 import '../../theme.dart';
 
@@ -12,6 +13,35 @@ class OAplikacijiScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final desktop = isDesktop(context);
+
+    const infoCards = [
+      _InfoCard(
+        icon: Icons.info_outline,
+        title: 'O aplikaciji',
+        body: 'Ova aplikacija prikazuje otvorene podatke o registrovanim '
+            'poljoprivrednim gazdinstvima u Srbiji (RPG), preuzete sa portala '
+            'data.gov.rs. Cilj aplikacije je obrazovni — da omogući svim '
+            'zainteresovanim građanima lak pristup ovim podacima.',
+      ),
+      _InfoCard(
+        icon: Icons.gavel,
+        title: 'Napomena o nezavisnosti',
+        body: 'Ova aplikacija je razvio nezavisan developer i nije '
+            'povezana ni sa jednim državnim organom, institucijom ili '
+            'organizacijom. Podaci se preuzimaju direktno sa portala '
+            'data.gov.rs i koriste se isključivo u informativne i '
+            'obrazovne svrhe.',
+      ),
+      _InfoCard(
+        icon: Icons.open_in_new,
+        title: 'Izvor podataka',
+        body: 'Podaci potiču od Uprave za agrarna plaćanja i dostupni '
+            'su na:',
+        link: _DataSourceLink(),
+      ),
+    ];
+
     return ScreenScaffold(
       title: 'O aplikaciji',
       child: SingleChildScrollView(
@@ -19,35 +49,23 @@ class OAplikacijiScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _InfoCard(
-              icon: Icons.info_outline,
-              title: 'O aplikaciji',
-              body:
-                  'Ova aplikacija prikazuje otvorene podatke o registrovanim '
-                  'poljoprivrednim gazdinstvima u Srbiji (RPG), preuzete sa portala '
-                  'data.gov.rs. Cilj aplikacije je obrazovni — da omogući svim '
-                  'zainteresovanim građanima lak pristup ovim podacima.',
-            ),
-            const SizedBox(height: 12),
-            const _InfoCard(
-              icon: Icons.gavel,
-              title: 'Napomena o nezavisnosti',
-              body:
-                  'Ova aplikacija je razvio nezavisan developer i nije '
-                  'povezana ni sa jednim državnim organom, institucijom ili '
-                  'organizacijom. Podaci se preuzimaju direktno sa portala '
-                  'data.gov.rs i koriste se isključivo u informativne i '
-                  'obrazovne svrhe.',
-            ),
-            const SizedBox(height: 12),
-            const _InfoCard(
-              icon: Icons.open_in_new,
-              title: 'Izvor podataka',
-              body:
-                  'Podaci potiču od Uprave za agrarna plaćanja i dostupni '
-                  'su na:',
-              link: _DataSourceLink(),
-            ),
+            if (desktop)
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: infoCards
+                    .map(
+                      (card) => SizedBox(
+                        width: (MediaQuery.sizeOf(context).width - 80) / 2,
+                        child: card,
+                      ),
+                    )
+                    .toList(),
+              )
+            else
+              ...infoCards.expand(
+                (card) => [card, const SizedBox(height: 12)],
+              ),
             const SizedBox(height: 24),
             Text(
               'Vodič kroz aplikaciju',

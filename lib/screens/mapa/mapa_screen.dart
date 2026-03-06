@@ -10,6 +10,7 @@ import 'package:latlong2/latlong.dart';
 import '../../data/models/record.dart';
 import '../../data/name_resolver.dart';
 import '../../data/serbian_normalise.dart';
+import '../../layout/breakpoints.dart';
 import '../../layout/screen_scaffold.dart';
 import '../../providers/data_provider.dart';
 
@@ -119,13 +120,28 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  child: _MunicipalityOverlay(
-                    name: _tappedMunicipality!,
-                    records: snapshots.last.records,
-                    activeByMunicipality: activeByMunicipality,
-                    resolver: resolver,
-                    onClose: () => setState(() => _tappedMunicipality = null),
-                  ),
+                  child: isDesktop(context)
+                      ? Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 600),
+                            child: _MunicipalityOverlay(
+                              name: _tappedMunicipality!,
+                              records: snapshots.last.records,
+                              activeByMunicipality: activeByMunicipality,
+                              resolver: resolver,
+                              onClose: () =>
+                                  setState(() => _tappedMunicipality = null),
+                            ),
+                          ),
+                        )
+                      : _MunicipalityOverlay(
+                          name: _tappedMunicipality!,
+                          records: snapshots.last.records,
+                          activeByMunicipality: activeByMunicipality,
+                          resolver: resolver,
+                          onClose: () =>
+                              setState(() => _tappedMunicipality = null),
+                        ),
                 ),
             ],
           ),

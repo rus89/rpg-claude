@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../data/serbian_normalise.dart';
+import '../../layout/breakpoints.dart';
 import '../../layout/screen_scaffold.dart';
 import '../../providers/data_provider.dart';
 import '../../utils/chart_helpers.dart';
@@ -51,106 +52,132 @@ class OpstinaDetailScreen extends ConsumerWidget {
 
         final dateTicks = snapshots.map((s) => dateToX(s.date)).toList();
 
+        final desktop = isDesktop(context);
+        final chartHeight = desktop ? 280.0 : 160.0;
+
+        final orgFormSection = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Aktivna gazdinstva po obliku',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            ...latestRecords.map(
+              (r) => ListTile(
+                title: Text(r.orgForm.displayName),
+                trailing: Text(fmt.format(r.activeHoldings)),
+              ),
+            ),
+          ],
+        );
+
+        final chartSection = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Trend aktivnih gazdinstava',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: chartHeight,
+              child: LineChart(
+                LineChartData(
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: trendSpots,
+                      isCurved: false,
+                      color: Theme.of(context).colorScheme.primary,
+                      dotData: const FlDotData(show: true),
+                    ),
+                  ],
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipColor: (_) =>
+                          const Color.fromARGB(255, 237, 191, 136),
+                      getTooltipItems: (spots) {
+                        final fmt = NumberFormat('#,###', 'sr');
+                        return spots
+                            .map(
+                              (spot) => LineTooltipItem(
+                                fmt.format(spot.y.toInt()),
+                                const TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            )
+                            .toList();
+                      },
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 28,
+                        getTitlesWidget: (value, _) {
+                          final idx = dateTicks.indexOf(value);
+                          if (idx < 0) return const SizedBox();
+                          if (idx % 3 != 0 && idx != dateTicks.length - 1) {
+                            return const SizedBox();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              formatDateLabel(snapshots[idx].date),
+                              style: const TextStyle(fontSize: 9),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 50,
+                        getTitlesWidget: (value, _) => Text(
+                          abbreviateCount(value),
+                          style: const TextStyle(fontSize: 9),
+                        ),
+                      ),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+
         return ScreenScaffold(
           title: municipalityName,
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Aktivna gazdinstva po obliku',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                ...latestRecords.map(
-                  (r) => ListTile(
-                    title: Text(r.orgForm.displayName),
-                    trailing: Text(fmt.format(r.activeHoldings)),
+            child: desktop
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: orgFormSection),
+                      const SizedBox(width: 24),
+                      Expanded(flex: 2, child: chartSection),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      orgFormSection,
+                      const SizedBox(height: 24),
+                      chartSection,
+                    ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Trend aktivnih gazdinstava',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 160,
-                  child: LineChart(
-                    LineChartData(
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: trendSpots,
-                          isCurved: false,
-                          color: Theme.of(context).colorScheme.primary,
-                          dotData: const FlDotData(show: true),
-                        ),
-                      ],
-                      lineTouchData: LineTouchData(
-                        touchTooltipData: LineTouchTooltipData(
-                          getTooltipColor: (_) =>
-                              const Color.fromARGB(255, 237, 191, 136),
-                          getTooltipItems: (spots) {
-                            final fmt = NumberFormat('#,###', 'sr');
-                            return spots
-                                .map(
-                                  (spot) => LineTooltipItem(
-                                    fmt.format(spot.y.toInt()),
-                                    const TextStyle(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                )
-                                .toList();
-                          },
-                        ),
-                      ),
-                      titlesData: FlTitlesData(
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 28,
-                            getTitlesWidget: (value, _) {
-                              final idx = dateTicks.indexOf(value);
-                              if (idx < 0) return const SizedBox();
-                              if (idx % 3 != 0 && idx != dateTicks.length - 1) {
-                                return const SizedBox();
-                              }
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  formatDateLabel(snapshots[idx].date),
-                                  style: const TextStyle(fontSize: 9),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 50,
-                            getTitlesWidget: (value, _) => Text(
-                              abbreviateCount(value),
-                              style: const TextStyle(fontSize: 9),
-                            ),
-                          ),
-                        ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         );
       },

@@ -11,6 +11,7 @@ import '../../data/models/org_form.dart';
 import '../../data/models/snapshot.dart';
 import '../../data/name_resolver.dart';
 import '../../data/serbian_normalise.dart';
+import '../../layout/breakpoints.dart';
 import '../../layout/screen_scaffold.dart';
 import '../../providers/data_provider.dart';
 import '../../theme.dart';
@@ -167,7 +168,7 @@ class _BarChartSection extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          height: 240,
+          height: isDesktop(context) ? 360 : 240,
           child: BarChart(
             BarChartData(
               maxY: maxValue * 1.15,
@@ -270,50 +271,73 @@ class _MunicipalityRankings extends StatelessWidget {
         .take(5)
         .toList();
 
+    final topActiveSection = _RankingSection(
+      title: 'Top 5 opština po broju aktivnih',
+      items: top5Active
+          .map(
+            (e) => _RankingItem(
+              name: e.value.displayName,
+              trailing: fmt.format(e.value.count),
+              onTap: () => context.push('/opstine/${e.value.displayName}'),
+            ),
+          )
+          .toList(),
+    );
+
+    final growthSection = _RankingSection(
+      title: 'Top 5 opština po rastu',
+      items: top5Growth
+          .map(
+            (g) => _RankingItem(
+              name: g.displayName,
+              trailing:
+                  '+${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
+              trailingColor: Colors.green.shade700,
+            ),
+          )
+          .toList(),
+    );
+
+    final declineSection = _RankingSection(
+      title: 'Opštine u opadanju',
+      items: bottom5Decline
+          .map(
+            (g) => _RankingItem(
+              name: g.displayName,
+              trailing:
+                  '${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
+              trailingColor: Colors.red.shade700,
+            ),
+          )
+          .toList(),
+    );
+
+    final hasMultiple = snapshots.length > 1;
+
+    if (isDesktop(context) && hasMultiple) {
+      return IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: topActiveSection),
+            const SizedBox(width: 16),
+            Expanded(child: growthSection),
+            const SizedBox(width: 16),
+            Expanded(child: declineSection),
+          ],
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _RankingSection(
-          title: 'Top 5 opština po broju aktivnih',
-          items: top5Active
-              .map(
-                (e) => _RankingItem(
-                  name: e.value.displayName,
-                  trailing: fmt.format(e.value.count),
-                  onTap: () => context.push('/opstine/${e.value.displayName}'),
-                ),
-              )
-              .toList(),
-        ),
-        const SizedBox(height: 24),
-        if (snapshots.length > 1) ...[
-          _RankingSection(
-            title: 'Top 5 opština po rastu',
-            items: top5Growth
-                .map(
-                  (g) => _RankingItem(
-                    name: g.displayName,
-                    trailing:
-                        '+${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
-                    trailingColor: Colors.green.shade700,
-                  ),
-                )
-                .toList(),
-          ),
+        topActiveSection,
+        if (hasMultiple) ...[
           const SizedBox(height: 24),
-          _RankingSection(
-            title: 'Opštine u opadanju',
-            items: bottom5Decline
-                .map(
-                  (g) => _RankingItem(
-                    name: g.displayName,
-                    trailing:
-                        '${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
-                    trailingColor: Colors.red.shade700,
-                  ),
-                )
-                .toList(),
-          ),
+          growthSection,
+          const SizedBox(height: 24),
+          declineSection,
         ],
       ],
     );

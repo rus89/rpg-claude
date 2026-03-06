@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/org_form.dart';
 import '../../data/serbian_normalise.dart';
+import '../../layout/breakpoints.dart';
 import '../../layout/screen_scaffold.dart';
 import '../../providers/data_provider.dart';
 import '../../utils/chart_helpers.dart';
@@ -103,7 +104,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
-                  height: 280,
+                  height: isDesktop(context) ? 400 : 280,
                   child: LineChart(
                     LineChartData(
                       lineBarsData: [

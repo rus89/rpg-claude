@@ -67,7 +67,7 @@ Widget _buildApp() => ProviderScope(
     dataRepositoryProvider.overrideWith(() => _FixtureRepository()),
     nameResolverProvider.overrideWith((ref) async => _resolver),
   ],
-  child: const MaterialApp(home: PregledScreen()),
+  child: const MaterialApp(home: Scaffold(body: PregledScreen())),
 );
 
 void main() {
@@ -145,6 +145,22 @@ void main() {
     expect(find.text('-12,5%'), findsOneWidget);
     expect(find.text('-8,3%'), findsOneWidget);
     expect(find.text('-6,7%'), findsOneWidget);
+  });
+
+  group('desktop (>= 1024px)', () {
+    testWidgets('renders rankings in a 3-column row', (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Barajevo'), findsWidgets);
+      expect(find.text('+20,0%'), findsOneWidget);
+      expect(find.text('-12,5%'), findsOneWidget);
+    });
   });
 }
 
