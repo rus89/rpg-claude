@@ -21,9 +21,8 @@ class OpstinaDetailScreen extends ConsumerWidget {
     final resolver = ref.watch(nameResolverProvider).valueOrNull;
 
     return dataAsync.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (e, _) => Scaffold(body: Center(child: Text('Greška: $e'))),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Greška: $e')),
       data: (snapshots) {
         final fmt = NumberFormat('#,###', 'sr');
         final normalised = normaliseSerbianName(municipalityName);

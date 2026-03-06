@@ -25,12 +25,11 @@ class PregledScreen extends ConsumerWidget {
     final resolver = ref.watch(nameResolverProvider).valueOrNull;
 
     return dataAsync.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (e, _) => Scaffold(body: Center(child: Text('Greška: $e'))),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Greška: $e')),
       data: (snapshots) {
         if (snapshots.isEmpty) {
-          return const Scaffold(body: Center(child: Text('Nema podataka')));
+          return const Center(child: Text('Nema podataka'));
         }
         return ScreenScaffold(
           title: 'Pregled',
@@ -290,8 +289,7 @@ class _MunicipalityRankings extends StatelessWidget {
           .map(
             (g) => _RankingItem(
               name: g.displayName,
-              trailing:
-                  '+${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
+              trailing: '+${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
               trailingColor: Colors.green.shade700,
             ),
           )
@@ -304,8 +302,7 @@ class _MunicipalityRankings extends StatelessWidget {
           .map(
             (g) => _RankingItem(
               name: g.displayName,
-              trailing:
-                  '${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
+              trailing: '${g.growth.toStringAsFixed(1).replaceAll('.', ',')}%',
               trailingColor: Colors.red.shade700,
             ),
           )

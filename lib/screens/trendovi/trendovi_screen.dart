@@ -33,9 +33,8 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
         : allCsvNames;
 
     return dataAsync.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (e, _) => Scaffold(body: Center(child: Text('Greška: $e'))),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Greška: $e')),
       data: (snapshots) {
         final selectedNorm = _selectedMunicipality != null
             ? normaliseSerbianName(_selectedMunicipality!)
