@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../theme.dart';
 
 class OAplikacijiScreen extends StatelessWidget {
@@ -129,7 +130,7 @@ class _InfoCard extends StatelessWidget {
 }
 
 const _dataSourceUrl =
-    'https://data.gov.rs/s/resources/rpg-broj-svikh-registrovanikh-poljoprivrednikh-gazdinstava-aktivna-gazdinstva/';
+    'https://data.gov.rs/sr/datasets/rpg-broj-svikh-registrovanikh-poljoprivrednikh-gazdinstava-aktivna-gazdinstva/';
 
 class _DataSourceLink extends StatelessWidget {
   const _DataSourceLink();

@@ -86,6 +86,23 @@ class OpstinaDetailScreen extends ConsumerWidget {
                           dotData: const FlDotData(show: true),
                         ),
                       ],
+                      lineTouchData: LineTouchData(
+                        touchTooltipData: LineTouchTooltipData(
+                          getTooltipColor: (_) =>
+                              const Color.fromARGB(255, 237, 191, 136),
+                          getTooltipItems: (spots) {
+                            final fmt = NumberFormat('#,###', 'sr');
+                            return spots.map((spot) => LineTooltipItem(
+                                  fmt.format(spot.y.toInt()),
+                                  const TextStyle(
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 11,
+                                  ),
+                                )).toList();
+                          },
+                        ),
+                      ),
                       titlesData: FlTitlesData(
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(

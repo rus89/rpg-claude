@@ -4,6 +4,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../data/models/org_form.dart';
 import '../../data/serbian_normalise.dart';
 import '../../providers/data_provider.dart';
@@ -112,6 +113,23 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
                           dotData: const FlDotData(show: true),
                         ),
                       ],
+                      lineTouchData: LineTouchData(
+                        touchTooltipData: LineTouchTooltipData(
+                          getTooltipColor: (_) =>
+                              const Color.fromARGB(255, 237, 191, 136),
+                          getTooltipItems: (spots) {
+                            final fmt = NumberFormat('#,###', 'sr');
+                            return spots.map((spot) => LineTooltipItem(
+                                  fmt.format(spot.y.toInt()),
+                                  const TextStyle(
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 11,
+                                  ),
+                                )).toList();
+                          },
+                        ),
+                      ),
                       titlesData: FlTitlesData(
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
