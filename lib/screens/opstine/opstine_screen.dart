@@ -14,7 +14,14 @@ class OpstineScreen extends ConsumerStatefulWidget {
 }
 
 class _OpstineScreenState extends ConsumerState<OpstineScreen> {
+  final _searchController = TextEditingController();
   String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +43,19 @@ class _OpstineScreenState extends ConsumerState<OpstineScreen> {
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
-              decoration: const InputDecoration(
+              controller: _searchController,
+              decoration: InputDecoration(
                 hintText: 'Pretraži opštine...',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _query.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _query = '');
+                        },
+                      )
+                    : null,
               ),
               onChanged: (v) => setState(() => _query = v),
             ),

@@ -62,6 +62,35 @@ void main() {
     expect(find.text('Barajevo'), findsOneWidget);
     expect(find.text('Čukarica'), findsNothing);
   });
+
+  testWidgets('clear button resets search', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+        child: const MaterialApp(home: OpstineScreen()),
+      ),
+    );
+    await tester.pump();
+
+    // Type a search term
+    await tester.enterText(find.byType(TextField), 'Bara');
+    await tester.pump();
+    expect(find.text('Čukarica'), findsNothing);
+
+    // Clear button should be visible
+    expect(find.byIcon(Icons.clear), findsOneWidget);
+
+    // Tap clear button
+    await tester.tap(find.byIcon(Icons.clear));
+    await tester.pump();
+
+    // Both municipalities should be visible again
+    expect(find.text('Barajevo'), findsOneWidget);
+    expect(find.text('Čukarica'), findsOneWidget);
+
+    // Clear button should be hidden when search is empty
+    expect(find.byIcon(Icons.clear), findsNothing);
+  });
 }
 
 class _Fixture extends DataRepository {
