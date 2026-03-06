@@ -59,6 +59,29 @@ void main() {
     await tester.pump();
     expect(find.byType(LineChart), findsOneWidget);
   });
+
+  group('desktop (>= 1024px)', () {
+    testWidgets('renders line chart at desktop width', (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dataRepositoryProvider.overrideWith(() => _Fixture()),
+            nameResolverProvider.overrideWith((ref) async => _resolver),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(body: TrendoviScreen()),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.byType(LineChart), findsOneWidget);
+    });
+  });
 }
 
 class _Fixture extends DataRepository {

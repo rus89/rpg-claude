@@ -91,6 +91,25 @@ void main() {
     // Clear button should be hidden when search is empty
     expect(find.byIcon(Icons.clear), findsNothing);
   });
+
+  group('desktop (>= 1024px)', () {
+    testWidgets('renders municipality list at desktop width', (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [dataRepositoryProvider.overrideWith(() => _Fixture())],
+          child: const MaterialApp(home: Scaffold(body: OpstineScreen())),
+        ),
+      );
+      await tester.pump();
+      expect(find.text('Barajevo'), findsOneWidget);
+      expect(find.text('Čukarica'), findsOneWidget);
+    });
+  });
 }
 
 class _Fixture extends DataRepository {

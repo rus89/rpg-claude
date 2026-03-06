@@ -37,4 +37,19 @@ void main() {
     await tester.scrollUntilVisible(find.text('Opštine'), 100);
     expect(find.text('Opštine'), findsOneWidget);
   });
+
+  group('desktop (>= 1024px)', () {
+    testWidgets('renders info cards at desktop width', (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: OAplikacijiScreen())),
+      );
+      expect(find.textContaining('nezavisan'), findsWidgets);
+      expect(find.byIcon(Icons.info_outline), findsOneWidget);
+    });
+  });
 }
