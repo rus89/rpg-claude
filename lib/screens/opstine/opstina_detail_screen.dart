@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../data/serbian_normalise.dart';
+import '../../layout/screen_scaffold.dart';
 import '../../providers/data_provider.dart';
 import '../../utils/chart_helpers.dart';
 
@@ -50,9 +51,9 @@ class OpstinaDetailScreen extends ConsumerWidget {
 
         final dateTicks = snapshots.map((s) => dateToX(s.date)).toList();
 
-        return Scaffold(
-          appBar: AppBar(title: Text(municipalityName)),
-          body: SingleChildScrollView(
+        return ScreenScaffold(
+          title: municipalityName,
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,14 +93,18 @@ class OpstinaDetailScreen extends ConsumerWidget {
                               const Color.fromARGB(255, 237, 191, 136),
                           getTooltipItems: (spots) {
                             final fmt = NumberFormat('#,###', 'sr');
-                            return spots.map((spot) => LineTooltipItem(
-                                  fmt.format(spot.y.toInt()),
-                                  const TextStyle(
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 11,
+                            return spots
+                                .map(
+                                  (spot) => LineTooltipItem(
+                                    fmt.format(spot.y.toInt()),
+                                    const TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11,
+                                    ),
                                   ),
-                                )).toList();
+                                )
+                                .toList();
                           },
                         ),
                       ),

@@ -10,6 +10,7 @@ import 'package:latlong2/latlong.dart';
 import '../../data/models/record.dart';
 import '../../data/name_resolver.dart';
 import '../../data/serbian_normalise.dart';
+import '../../layout/screen_scaffold.dart';
 import '../../providers/data_provider.dart';
 
 class MapaScreen extends ConsumerStatefulWidget {
@@ -89,9 +90,10 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
           );
         }
 
-        return Scaffold(
-          appBar: AppBar(title: const Text('Mapa')),
-          body: Stack(
+        return ScreenScaffold(
+          title: 'Mapa',
+          fullWidth: true,
+          child: Stack(
             children: [
               FlutterMap(
                 options: const MapOptions(

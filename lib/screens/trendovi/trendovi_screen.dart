@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/org_form.dart';
 import '../../data/serbian_normalise.dart';
+import '../../layout/screen_scaffold.dart';
 import '../../providers/data_provider.dart';
 import '../../utils/chart_helpers.dart';
 
@@ -55,9 +56,9 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
 
         final dateTicks = snapshots.map((s) => dateToX(s.date)).toList();
 
-        return Scaffold(
-          appBar: AppBar(title: const Text('Trendovi')),
-          body: SingleChildScrollView(
+        return ScreenScaffold(
+          title: 'Trendovi',
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,14 +120,18 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
                               const Color.fromARGB(255, 237, 191, 136),
                           getTooltipItems: (spots) {
                             final fmt = NumberFormat('#,###', 'sr');
-                            return spots.map((spot) => LineTooltipItem(
-                                  fmt.format(spot.y.toInt()),
-                                  const TextStyle(
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 11,
+                            return spots
+                                .map(
+                                  (spot) => LineTooltipItem(
+                                    fmt.format(spot.y.toInt()),
+                                    const TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11,
+                                    ),
                                   ),
-                                )).toList();
+                                )
+                                .toList();
                           },
                         ),
                       ),

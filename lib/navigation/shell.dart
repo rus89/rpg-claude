@@ -27,7 +27,7 @@ class AppShell extends StatelessWidget {
     if (isDesktop(context)) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('RPG Srbija'),
+          title: const Text('Registrovana Poljoprivredna Gazdinstva Srbije'),
           actions: [
             for (var i = 0; i < _destinations.length; i++)
               _NavButton(
@@ -46,8 +46,7 @@ class AppShell extends StatelessWidget {
       body: child,
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex,
-        onDestinationSelected: (index) =>
-            context.go(_destinations[index].$2),
+        onDestinationSelected: (index) => context.go(_destinations[index].$2),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.bar_chart), label: 'Pregled'),
           NavigationDestination(icon: Icon(Icons.list), label: 'Opštine'),
@@ -89,7 +88,8 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final foreground = Theme.of(context).appBarTheme.foregroundColor ?? Colors.white;
+    final foreground =
+        Theme.of(context).appBarTheme.foregroundColor ?? Colors.white;
 
     return TextButton(
       onPressed: onTap,

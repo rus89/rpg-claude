@@ -2,6 +2,7 @@
 // ABOUTME: Uses refreshListenable so the router is created once and never recreated.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -42,29 +43,41 @@ GoRouter router(Ref ref) {
         routes: [
           GoRoute(
             path: '/pregled',
-            builder: (context, state) => const PregledScreen(),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: PregledScreen(),
+            ),
           ),
           GoRoute(
             path: '/opstine',
-            builder: (context, state) => const OpstineScreen(),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: OpstineScreen(),
+            ),
           ),
           GoRoute(
             path: '/opstine/:name',
-            builder: (context, state) => OpstinaDetailScreen(
-              municipalityName: state.pathParameters['name']!,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: OpstinaDetailScreen(
+                municipalityName: state.pathParameters['name']!,
+              ),
             ),
           ),
           GoRoute(
             path: '/trendovi',
-            builder: (context, state) => const TrendoviScreen(),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: TrendoviScreen(),
+            ),
           ),
           GoRoute(
             path: '/mapa',
-            builder: (context, state) => const MapaScreen(),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: MapaScreen(),
+            ),
           ),
           GoRoute(
             path: '/o-aplikaciji',
-            builder: (context, state) => const OAplikacijiScreen(),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: OAplikacijiScreen(),
+            ),
           ),
         ],
       ),

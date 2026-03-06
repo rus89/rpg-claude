@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../layout/screen_scaffold.dart';
 import '../../providers/data_provider.dart';
 
 class OpstineScreen extends ConsumerStatefulWidget {
@@ -36,9 +37,9 @@ class _OpstineScreenState extends ConsumerState<OpstineScreen> {
         .where((n) => n.toLowerCase().contains(_query.toLowerCase()))
         .toList();
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Opštine')),
-      body: Column(
+    return ScreenScaffold(
+      title: 'Opštine',
+      child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(12),

@@ -11,6 +11,7 @@ import '../../data/models/org_form.dart';
 import '../../data/models/snapshot.dart';
 import '../../data/name_resolver.dart';
 import '../../data/serbian_normalise.dart';
+import '../../layout/screen_scaffold.dart';
 import '../../providers/data_provider.dart';
 import '../../theme.dart';
 
@@ -30,9 +31,9 @@ class PregledScreen extends ConsumerWidget {
         if (snapshots.isEmpty) {
           return const Scaffold(body: Center(child: Text('Nema podataka')));
         }
-        return Scaffold(
-          appBar: AppBar(title: const Text('Pregled')),
-          body: SingleChildScrollView(
+        return ScreenScaffold(
+          title: 'Pregled',
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: _PregledBody(snapshots: snapshots, resolver: resolver),
           ),

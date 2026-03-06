@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../layout/screen_scaffold.dart';
 import '../../theme.dart';
 
 class OAplikacijiScreen extends StatelessWidget {
@@ -11,9 +12,9 @@ class OAplikacijiScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('O aplikaciji')),
-      body: SingleChildScrollView(
+    return ScreenScaffold(
+      title: 'O aplikaciji',
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
