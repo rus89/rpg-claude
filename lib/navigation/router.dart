@@ -43,15 +43,13 @@ GoRouter router(Ref ref) {
         routes: [
           GoRoute(
             path: '/pregled',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: PregledScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: PregledScreen()),
           ),
           GoRoute(
             path: '/opstine',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: OpstineScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: OpstineScreen()),
           ),
           GoRoute(
             path: '/opstine/:name',
@@ -63,21 +61,18 @@ GoRouter router(Ref ref) {
           ),
           GoRoute(
             path: '/trendovi',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: TrendoviScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: TrendoviScreen()),
           ),
           GoRoute(
             path: '/mapa',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: MapaScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: MapaScreen()),
           ),
           GoRoute(
             path: '/o-aplikaciji',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: OAplikacijiScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: OAplikacijiScreen()),
           ),
         ],
       ),

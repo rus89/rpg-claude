@@ -296,9 +296,7 @@ void main() {
             nameResolverProvider.overrideWith((ref) async => _resolver),
           ],
           child: MaterialApp(
-            home: Scaffold(
-              body: MapaScreen(tileProvider: _NoOpTileProvider()),
-            ),
+            home: Scaffold(body: MapaScreen(tileProvider: _NoOpTileProvider())),
           ),
         ),
       );

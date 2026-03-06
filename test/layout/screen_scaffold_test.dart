@@ -41,9 +41,7 @@ void main() {
       final boxes = tester.widgetList<ConstrainedBox>(
         find.byType(ConstrainedBox),
       );
-      final hasMaxWidth = boxes.any(
-        (b) => b.constraints.maxWidth == 1200,
-      );
+      final hasMaxWidth = boxes.any((b) => b.constraints.maxWidth == 1200);
       expect(hasMaxWidth, isTrue);
     });
 
@@ -52,9 +50,7 @@ void main() {
       final boxes = tester.widgetList<ConstrainedBox>(
         find.byType(ConstrainedBox),
       );
-      final hasMaxWidth = boxes.any(
-        (b) => b.constraints.maxWidth == 1200,
-      );
+      final hasMaxWidth = boxes.any((b) => b.constraints.maxWidth == 1200);
       expect(hasMaxWidth, isFalse);
       expect(find.text('content'), findsOneWidget);
     });

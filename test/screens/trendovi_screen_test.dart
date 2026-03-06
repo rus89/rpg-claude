@@ -73,9 +73,7 @@ void main() {
             dataRepositoryProvider.overrideWith(() => _Fixture()),
             nameResolverProvider.overrideWith((ref) async => _resolver),
           ],
-          child: const MaterialApp(
-            home: Scaffold(body: TrendoviScreen()),
-          ),
+          child: const MaterialApp(home: Scaffold(body: TrendoviScreen())),
         ),
       );
       await tester.pump();
