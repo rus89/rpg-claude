@@ -98,9 +98,7 @@ void main() {
     });
 
     test('handles trailing semicolons', () {
-      final records = FarmSizeParser.parse(
-        utf8.encode(_trailingSemicolonCsv),
-      );
+      final records = FarmSizeParser.parse(utf8.encode(_trailingSemicolonCsv));
       expect(records.length, 1);
       expect(records.first.municipalityName, 'Barajevo');
     });

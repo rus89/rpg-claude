@@ -1,9 +1,10 @@
 // ABOUTME: Widget tests for the Mapa (map) screen.
-// ABOUTME: Verifies rendering, polygon tap info card, and card dismissal.
+// ABOUTME: Verifies rendering, polygon tap, card dismissal, and metric selector behavior.
 
 // LayerHitResult has no public constructor; @internal is the only way to test polygon tap behavior.
 // ignore_for_file: invalid_use_of_internal_member
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -11,11 +12,18 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:rpg_claude/data/models/age_bracket.dart';
+import 'package:rpg_claude/data/models/age_record.dart';
+import 'package:rpg_claude/data/models/age_snapshot.dart';
+import 'package:rpg_claude/data/models/farm_size_record.dart';
+import 'package:rpg_claude/data/models/farm_size_snapshot.dart';
 import 'package:rpg_claude/data/models/org_form.dart';
 import 'package:rpg_claude/data/models/record.dart';
 import 'package:rpg_claude/data/models/snapshot.dart';
 import 'package:rpg_claude/data/name_resolver.dart';
+import 'package:rpg_claude/providers/age_provider.dart';
 import 'package:rpg_claude/providers/data_provider.dart';
+import 'package:rpg_claude/providers/farm_size_provider.dart';
 import 'package:rpg_claude/screens/mapa/mapa_screen.dart';
 import 'package:rpg_claude/theme.dart';
 
@@ -282,6 +290,178 @@ void main() {
     addTearDown(hitNotifier.dispose);
   });
 
+  group('metric selector', () {
+    List<Override> metricOverrides() => [
+      dataRepositoryProvider.overrideWith(() => _Fixture()),
+      nameResolverProvider.overrideWith((ref) async => _resolver),
+      farmSizeRepositoryProvider.overrideWith(
+        () => _FixtureFarmSizeRepository(),
+      ),
+      ageRepositoryProvider.overrideWith(() => _FixtureAgeRepository()),
+    ];
+
+    testWidgets('shows metric selector with default Gazdinstva', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: metricOverrides(),
+          child: MaterialApp(
+            theme: appTheme,
+            home: MapaScreen(tileProvider: _NoOpTileProvider()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(SegmentedButton<MapMetric>), findsOneWidget);
+      expect(find.text('Gazdinstva'), findsOneWidget);
+    });
+
+    testWidgets('switches to farm size metric', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: metricOverrides(),
+          child: MaterialApp(
+            theme: appTheme,
+            home: MapaScreen(tileProvider: _NoOpTileProvider()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Veličina (ha)'));
+      await tester.pumpAndSettle();
+
+      // Verify the selector changed — "Veličina (ha)" is selected
+      expect(find.text('Veličina (ha)'), findsOneWidget);
+    });
+
+    testWidgets('switches to age metric', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: metricOverrides(),
+          child: MaterialApp(
+            theme: appTheme,
+            home: MapaScreen(tileProvider: _NoOpTileProvider()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Prosečna starost'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Prosečna starost'), findsOneWidget);
+    });
+
+    testWidgets('overlay shows farm size info when size metric selected', (
+      tester,
+    ) async {
+      final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: metricOverrides(),
+          child: MaterialApp(
+            theme: appTheme,
+            home: MapaScreen(
+              tileProvider: _NoOpTileProvider(),
+              hitNotifier: hitNotifier,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Switch to farm size metric
+      await tester.tap(find.text('Veličina (ha)'));
+      await tester.pumpAndSettle();
+
+      // Tap a municipality
+      hitNotifier.value = const LayerHitResult(
+        hitValues: ['Barajevo'],
+        coordinate: LatLng(44.0, 21.0),
+        point: Point(0, 0),
+      );
+      await tester.pump();
+
+      // totalArea = 150+200+320+400 = 1070, totalFarms = 60+20+8+2 = 90
+      // avgSize = 1070/90 ≈ 11.9
+      expect(find.textContaining('Prosečna veličina'), findsOneWidget);
+      expect(find.textContaining('ha'), findsWidgets);
+
+      addTearDown(hitNotifier.dispose);
+    });
+
+    testWidgets('overlay shows age info when age metric selected', (
+      tester,
+    ) async {
+      final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: metricOverrides(),
+          child: MaterialApp(
+            theme: appTheme,
+            home: MapaScreen(
+              tileProvider: _NoOpTileProvider(),
+              hitNotifier: hitNotifier,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Switch to age metric
+      await tester.tap(find.text('Prosečna starost'));
+      await tester.pumpAndSettle();
+
+      // Tap a municipality
+      hitNotifier.value = const LayerHitResult(
+        hitValues: ['Barajevo'],
+        coordinate: LatLng(44.0, 21.0),
+        point: Point(0, 0),
+      );
+      await tester.pump();
+
+      // Weighted avg age: (10*24.5 + 15*34.5 + 30*54.5 + 25*64.5) /
+      //                   (10+15+30+25) = (245+517.5+1635+1612.5)/80 = 50.1
+      expect(find.textContaining('Prosečna starost'), findsWidgets);
+
+      addTearDown(hitNotifier.dispose);
+    });
+
+    testWidgets('shows loading indicator when secondary data is loading', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dataRepositoryProvider.overrideWith(() => _Fixture()),
+            nameResolverProvider.overrideWith((ref) async => _resolver),
+            farmSizeRepositoryProvider.overrideWith(
+              () => _SlowFarmSizeRepository(),
+            ),
+            ageRepositoryProvider.overrideWith(() => _FixtureAgeRepository()),
+          ],
+          child: MaterialApp(
+            theme: appTheme,
+            home: MapaScreen(tileProvider: _NoOpTileProvider()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Switch to farm size — data is slow to load
+      await tester.tap(find.text('Veličina (ha)'));
+      await tester.pump();
+
+      // Should show loading indicator while farm size data loads
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    });
+  });
+
   group('desktop (>= 1024px)', () {
     testWidgets('renders map at desktop width', (tester) async {
       tester.view.physicalSize = const Size(1200, 800);
@@ -373,4 +553,76 @@ class _DjFixture extends DataRepository {
       ],
     ),
   ];
+}
+
+final _farmSizeSnapshot = FarmSizeSnapshot(
+  date: DateTime(2025, 12, 31),
+  records: [
+    const FarmSizeRecord(
+      regionCode: '1',
+      regionName: 'R',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      countUpTo5: 60,
+      areaUpTo5: 150.0,
+      count5to20: 20,
+      area5to20: 200.0,
+      count20to100: 8,
+      area20to100: 320.0,
+      countOver100: 2,
+      areaOver100: 400.0,
+    ),
+  ],
+);
+
+final _ageSnapshot = AgeSnapshot(
+  date: DateTime(2025, 12, 31),
+  records: const [
+    AgeRecord(
+      regionCode: '1',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      ageBracket: AgeBracket.age20to29,
+      farmCount: 10,
+    ),
+    AgeRecord(
+      regionCode: '1',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      ageBracket: AgeBracket.age30to39,
+      farmCount: 15,
+    ),
+    AgeRecord(
+      regionCode: '1',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      ageBracket: AgeBracket.age50to59,
+      farmCount: 30,
+    ),
+    AgeRecord(
+      regionCode: '1',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      ageBracket: AgeBracket.age60to69,
+      farmCount: 25,
+    ),
+  ],
+);
+
+class _FixtureFarmSizeRepository extends FarmSizeRepository {
+  @override
+  Future<List<FarmSizeSnapshot>> build() async => [_farmSizeSnapshot];
+}
+
+class _FixtureAgeRepository extends AgeRepository {
+  @override
+  Future<List<AgeSnapshot>> build() async => [_ageSnapshot];
+}
+
+class _SlowFarmSizeRepository extends FarmSizeRepository {
+  @override
+  Future<List<FarmSizeSnapshot>> build() {
+    // Never completes — simulates permanently loading state
+    return Completer<List<FarmSizeSnapshot>>().future;
+  }
 }

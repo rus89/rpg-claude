@@ -20,8 +20,7 @@ bool _matchesMunicipality(
   NameResolver? resolver,
   String normalised,
 ) =>
-    (resolver?.canonicalKey(recordName) ??
-        normaliseSerbianName(recordName)) ==
+    (resolver?.canonicalKey(recordName) ?? normaliseSerbianName(recordName)) ==
     normalised;
 
 class OpstinaDetailScreen extends ConsumerWidget {
@@ -227,11 +226,7 @@ class _FarmSizeDetail extends ConsumerWidget {
         final latest = snapshots.last;
         final normalised = normaliseSerbianName(municipalityName);
         final matches = latest.records.where(
-          (r) => _matchesMunicipality(
-            r.municipalityName,
-            resolver,
-            normalised,
-          ),
+          (r) => _matchesMunicipality(r.municipalityName, resolver, normalised),
         );
         if (matches.isEmpty) return const SizedBox.shrink();
         final record = matches.first;
@@ -336,11 +331,7 @@ class _AgeDetail extends ConsumerWidget {
         final latest = snapshots.last;
         final normalised = normaliseSerbianName(municipalityName);
         final records = latest.records.where(
-          (r) => _matchesMunicipality(
-            r.municipalityName,
-            resolver,
-            normalised,
-          ),
+          (r) => _matchesMunicipality(r.municipalityName, resolver, normalised),
         );
         if (records.isEmpty) return const SizedBox.shrink();
 

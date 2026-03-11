@@ -41,9 +41,7 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      final snapshots = await container.read(
-        farmSizeRepositoryProvider.future,
-      );
+      final snapshots = await container.read(farmSizeRepositoryProvider.future);
       expect(snapshots.length, 1);
       expect(snapshots.first.records.length, 1);
       expect(snapshots.first.records.first.municipalityName, 'Barajevo');
