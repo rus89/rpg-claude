@@ -141,9 +141,7 @@ Widget _buildApp() => ProviderScope(
   overrides: [
     dataRepositoryProvider.overrideWith(() => _FixtureRepository()),
     nameResolverProvider.overrideWith((ref) async => _resolver),
-    farmSizeRepositoryProvider.overrideWith(
-      () => _FixtureFarmSizeRepository(),
-    ),
+    farmSizeRepositoryProvider.overrideWith(() => _FixtureFarmSizeRepository()),
     ageRepositoryProvider.overrideWith(() => _FixtureAgeRepository()),
   ],
   child: const MaterialApp(home: Scaffold(body: PregledScreen())),
@@ -261,10 +259,12 @@ void main() {
       await tester.pumpWidget(_buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('≤5 ha'), findsOneWidget);
-      expect(find.text('5–20 ha'), findsOneWidget);
-      expect(find.text('20–100 ha'), findsOneWidget);
-      expect(find.text('>100 ha'), findsOneWidget);
+      // Legend items: label + percentage
+      // 800/985=81.2%, 150/985=15.2%, 30/985=3.0%, 5/985=0.5%
+      expect(find.textContaining('≤5 ha'), findsOneWidget);
+      expect(find.textContaining('5–20 ha'), findsOneWidget);
+      expect(find.textContaining('20–100 ha'), findsOneWidget);
+      expect(find.textContaining('>100 ha'), findsOneWidget);
     });
 
     testWidgets('hides farm size section on error', (tester) async {
@@ -276,9 +276,7 @@ void main() {
             farmSizeRepositoryProvider.overrideWith(
               () => _ErrorFarmSizeRepository(),
             ),
-            ageRepositoryProvider.overrideWith(
-              () => _FixtureAgeRepository(),
-            ),
+            ageRepositoryProvider.overrideWith(() => _FixtureAgeRepository()),
           ],
           child: const MaterialApp(home: Scaffold(body: PregledScreen())),
         ),
@@ -317,9 +315,7 @@ void main() {
             farmSizeRepositoryProvider.overrideWith(
               () => _FixtureFarmSizeRepository(),
             ),
-            ageRepositoryProvider.overrideWith(
-              () => _ErrorAgeRepository(),
-            ),
+            ageRepositoryProvider.overrideWith(() => _ErrorAgeRepository()),
           ],
           child: const MaterialApp(home: Scaffold(body: PregledScreen())),
         ),

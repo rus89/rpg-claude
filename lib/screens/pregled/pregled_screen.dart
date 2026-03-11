@@ -152,20 +152,32 @@ class _FarmSizeSummary extends ConsumerWidget {
         if (snapshots.isEmpty) return const SizedBox.shrink();
         final latest = snapshots.last;
 
-        final totalFarms =
-            latest.records.fold(0, (sum, r) => sum + r.totalFarms);
-        final totalArea =
-            latest.records.fold(0.0, (sum, r) => sum + r.totalArea);
+        final totalFarms = latest.records.fold(
+          0,
+          (sum, r) => sum + r.totalFarms,
+        );
+        final totalArea = latest.records.fold(
+          0.0,
+          (sum, r) => sum + r.totalArea,
+        );
         final avgSize = totalFarms > 0 ? totalArea / totalFarms : 0.0;
 
-        final countUpTo5 =
-            latest.records.fold(0, (sum, r) => sum + r.countUpTo5);
-        final count5to20 =
-            latest.records.fold(0, (sum, r) => sum + r.count5to20);
-        final count20to100 =
-            latest.records.fold(0, (sum, r) => sum + r.count20to100);
-        final countOver100 =
-            latest.records.fold(0, (sum, r) => sum + r.countOver100);
+        final countUpTo5 = latest.records.fold(
+          0,
+          (sum, r) => sum + r.countUpTo5,
+        );
+        final count5to20 = latest.records.fold(
+          0,
+          (sum, r) => sum + r.count5to20,
+        );
+        final count20to100 = latest.records.fold(
+          0,
+          (sum, r) => sum + r.count20to100,
+        );
+        final countOver100 = latest.records.fold(
+          0,
+          (sum, r) => sum + r.countOver100,
+        );
 
         final brackets = [
           ('≤5 ha', countUpTo5, 0.3),
@@ -175,8 +187,7 @@ class _FarmSizeSummary extends ConsumerWidget {
         ];
 
         final primary = Theme.of(context).colorScheme.primary;
-        final avgFormatted =
-            avgSize.toStringAsFixed(1).replaceAll('.', ',');
+        final avgFormatted = avgSize.toStringAsFixed(1).replaceAll('.', ',');
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,42 +220,35 @@ class _FarmSizeSummary extends ConsumerWidget {
                                 child: Container(
                                   height: 28,
                                   color: primary.withValues(alpha: b.$3),
-                                  alignment: Alignment.center,
-                                  child: FittedBox(
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 2,
-                                      ),
-                                      child: Text(
-                                        '${(b.$2 / totalFarms * 100).toStringAsFixed(0)}%',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: b.$3 >= 0.7
-                                              ? Colors.white
-                                              : Colors.black87,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
                                 ),
                               ),
                             )
                             .toList(),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Row(
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 8,
                       children: brackets
-                          .where((b) => b.$2 > 0)
                           .map(
-                            (b) => Expanded(
-                              flex: b.$2,
-                              child: Text(
-                                b.$1,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 10),
-                              ),
+                            (b) => Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: primary.withValues(alpha: b.$3),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${b.$1}: ${(b.$2 / totalFarms * 100).toStringAsFixed(1).replaceAll('.', ',')}%',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ],
                             ),
                           )
                           .toList(),
@@ -369,8 +373,7 @@ class _AgeSummary extends ConsumerWidget {
                                 showTitles: true,
                                 getTitlesWidget: (value, _) {
                                   final idx = value.toInt();
-                                  if (idx < 0 ||
-                                      idx >= sortedBrackets.length) {
+                                  if (idx < 0 || idx >= sortedBrackets.length) {
                                     return const SizedBox.shrink();
                                   }
                                   return Padding(

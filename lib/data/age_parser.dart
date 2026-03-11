@@ -12,7 +12,7 @@ class AgeParser {
     'regionCode': ['regija', 'sifregije'],
     'municipalityCode': ['sifraopstine'],
     'municipalityName': ['nazivopstinel'],
-    'ageBracket': ['opseg godina', 'opseggodina'],
+    'ageBracket': ['birthrange', 'opseg godina', 'opseggodina'],
     'farmCount': ['brojdomacinstva', 'brojpg', 'broj domacinstva', 'broj pg'],
   };
 

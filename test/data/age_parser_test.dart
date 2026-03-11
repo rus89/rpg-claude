@@ -67,6 +67,12 @@ const _opsegGodinaCsv =
     'Regija;SifraOpstine;NazivOpstineL;OpsegGodina;BrojDomacinstva\n'
     '1;10;Barajevo;10 - 19;100\n';
 
+// BirthRange header variant (used in real data)
+const _birthRangeCsv =
+    'Regija;SifraOpstine;NazivOpstineL;BirthRange;BrojPG\n'
+    '1;10;Barajevo;okt.19;50\n'
+    '1;10;Barajevo;20 - 29;100\n';
+
 void main() {
   group('AgeParser', () {
     test('parses valid CSV with standard age labels', () {
@@ -147,6 +153,15 @@ void main() {
       final records = AgeParser.parse(utf8.encode(_opsegGodinaCsv));
       expect(records.length, 1);
       expect(records[0].ageBracket, AgeBracket.age10to19);
+    });
+
+    test('handles BirthRange header variant from real data', () {
+      final records = AgeParser.parse(utf8.encode(_birthRangeCsv));
+      expect(records.length, 2);
+      expect(records[0].ageBracket, AgeBracket.age10to19);
+      expect(records[0].farmCount, 50);
+      expect(records[1].ageBracket, AgeBracket.age20to29);
+      expect(records[1].farmCount, 100);
     });
 
     test('stores regionCode and municipalityCode when present', () {
