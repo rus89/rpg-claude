@@ -13,7 +13,7 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     return MaterialApp.router(
-      title: 'RPG Srbija',
+      title: 'Registrovana Poljoprivredna Gazdinstva Srbije',
       routerConfig: router,
       theme: appTheme,
     );

@@ -1,11 +1,11 @@
 {
-    "name": "rpg_claude",
-    "short_name": "rpg_claude",
+    "name": "Registrovana Poljoprivredna Gazdinstva Srbije",
+    "short_name": "RPG Srbija",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#5C7A45",
+    "theme_color": "#5C7A45",
+    "description": "Registrovana Poljoprivredna Gazdinstva Srbije",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
