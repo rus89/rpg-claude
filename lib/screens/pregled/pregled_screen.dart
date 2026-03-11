@@ -1,5 +1,5 @@
 // ABOUTME: Pregled (overview) screen showing national RPG totals for the latest snapshot.
-// ABOUTME: Displays summary cards with deltas, bar chart, and municipality rankings.
+// ABOUTME: Displays summary cards, bar chart, municipality rankings, farm size distribution, and age structure.
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +7,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../data/models/age_bracket.dart';
 import '../../data/models/org_form.dart';
 import '../../data/models/snapshot.dart';
 import '../../data/name_resolver.dart';
 import '../../data/serbian_normalise.dart';
 import '../../layout/breakpoints.dart';
 import '../../layout/screen_scaffold.dart';
+import '../../providers/age_provider.dart';
 import '../../providers/data_provider.dart';
+import '../../providers/farm_size_provider.dart';
 import '../../theme.dart';
 
 class PregledScreen extends ConsumerWidget {
@@ -117,6 +120,10 @@ class _PregledBody extends StatelessWidget {
         _BarChartSection(latest: latest),
         const SizedBox(height: 24),
         _MunicipalityRankings(snapshots: snapshots, resolver: resolver),
+        const SizedBox(height: 24),
+        const _FarmSizeSummary(),
+        const SizedBox(height: 24),
+        const _AgeSummary(),
       ],
     );
   }
@@ -126,6 +133,277 @@ class _PregledBody extends StatelessWidget {
     final pct = (current - prev) / prev * 100;
     final sign = pct >= 0 ? '+' : '';
     return '$sign${pct.toStringAsFixed(1).replaceAll('.', ',')}%';
+  }
+}
+
+class _FarmSizeSummary extends ConsumerWidget {
+  const _FarmSizeSummary();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncValue = ref.watch(farmSizeRepositoryProvider);
+    return asyncValue.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (snapshots) {
+        if (snapshots.isEmpty) return const SizedBox.shrink();
+        final latest = snapshots.last;
+
+        final totalFarms =
+            latest.records.fold(0, (sum, r) => sum + r.totalFarms);
+        final totalArea =
+            latest.records.fold(0.0, (sum, r) => sum + r.totalArea);
+        final avgSize = totalFarms > 0 ? totalArea / totalFarms : 0.0;
+
+        final countUpTo5 =
+            latest.records.fold(0, (sum, r) => sum + r.countUpTo5);
+        final count5to20 =
+            latest.records.fold(0, (sum, r) => sum + r.count5to20);
+        final count20to100 =
+            latest.records.fold(0, (sum, r) => sum + r.count20to100);
+        final countOver100 =
+            latest.records.fold(0, (sum, r) => sum + r.countOver100);
+
+        final brackets = [
+          ('≤5 ha', countUpTo5, 0.3),
+          ('5–20 ha', count5to20, 0.5),
+          ('20–100 ha', count20to100, 0.7),
+          ('>100 ha', countOver100, 1.0),
+        ];
+
+        final primary = Theme.of(context).colorScheme.primary;
+        final avgFormatted =
+            avgSize.toStringAsFixed(1).replaceAll('.', ',');
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Veličina gazdinstava',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            DecoratedBox(
+              decoration: cardDecoration,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Prosečna veličina: $avgFormatted ha',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Row(
+                        children: brackets
+                            .where((b) => b.$2 > 0)
+                            .map(
+                              (b) => Expanded(
+                                flex: b.$2,
+                                child: Container(
+                                  height: 28,
+                                  color: primary.withValues(alpha: b.$3),
+                                  alignment: Alignment.center,
+                                  child: FittedBox(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 2,
+                                      ),
+                                      child: Text(
+                                        '${(b.$2 / totalFarms * 100).toStringAsFixed(0)}%',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: b.$3 >= 0.7
+                                              ? Colors.white
+                                              : Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: brackets
+                          .where((b) => b.$2 > 0)
+                          .map(
+                            (b) => Expanded(
+                              flex: b.$2,
+                              child: Text(
+                                b.$1,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _AgeSummary extends ConsumerWidget {
+  const _AgeSummary();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncValue = ref.watch(ageRepositoryProvider);
+    return asyncValue.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (snapshots) {
+        if (snapshots.isEmpty) return const SizedBox.shrink();
+        final latest = snapshots.last;
+
+        var totalCount = 0;
+        var weightedSum = 0.0;
+        for (final r in latest.records) {
+          totalCount += r.farmCount;
+          weightedSum += r.farmCount * r.ageBracket.midpoint;
+        }
+        final avgAge = totalCount > 0 ? weightedSum / totalCount : 0.0;
+
+        final byBracket = <AgeBracket, int>{};
+        for (final r in latest.records) {
+          byBracket[r.ageBracket] =
+              (byBracket[r.ageBracket] ?? 0) + r.farmCount;
+        }
+
+        final sortedBrackets = byBracket.entries.toList()
+          ..sort((a, b) => a.key.index.compareTo(b.key.index));
+
+        final maxCount = sortedBrackets.fold(
+          0,
+          (max, e) => e.value > max ? e.value : max,
+        );
+
+        final primary = Theme.of(context).colorScheme.primary;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Starosna struktura nosioca',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            DecoratedBox(
+              decoration: cardDecoration,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Prosečna starost: ${avgAge.round()} godina',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: isDesktop(context) ? 280 : 200,
+                      child: BarChart(
+                        BarChartData(
+                          maxY: maxCount * 1.15,
+                          barGroups: sortedBrackets
+                              .asMap()
+                              .entries
+                              .map(
+                                (entry) => BarChartGroupData(
+                                  x: entry.key,
+                                  barRods: [
+                                    BarChartRodData(
+                                      toY: entry.value.value.toDouble(),
+                                      width: 16,
+                                      color: primary,
+                                    ),
+                                  ],
+                                  showingTooltipIndicators:
+                                      entry.value.value > 0 ? [0] : [],
+                                ),
+                              )
+                              .toList(),
+                          barTouchData: BarTouchData(
+                            enabled: false,
+                            touchTooltipData: BarTouchTooltipData(
+                              getTooltipColor: (_) =>
+                                  const Color.fromARGB(255, 237, 191, 136),
+                              fitInsideVertically: true,
+                              getTooltipItem:
+                                  (group, groupIndex, rod, rodIndex) {
+                                    final fmt = NumberFormat('#,###', 'sr');
+                                    return BarTooltipItem(
+                                      fmt.format(rod.toY.toInt()),
+                                      const TextStyle(
+                                        color: Colors.black87,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 11,
+                                      ),
+                                    );
+                                  },
+                            ),
+                          ),
+                          titlesData: FlTitlesData(
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                getTitlesWidget: (value, _) {
+                                  final idx = value.toInt();
+                                  if (idx < 0 ||
+                                      idx >= sortedBrackets.length) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      sortedBrackets[idx].key.displayName,
+                                      style: const TextStyle(fontSize: 9),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            leftTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            topTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            rightTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 

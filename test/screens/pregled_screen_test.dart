@@ -1,15 +1,22 @@
 // ABOUTME: Widget tests for the Pregled (overview) screen.
-// ABOUTME: Verifies summary cards, delta indicators, activity rate, bar chart, and municipality rankings.
+// ABOUTME: Verifies summary cards, delta indicators, activity rate, bar chart, municipality rankings, farm size, and age sections.
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rpg_claude/data/models/age_bracket.dart';
+import 'package:rpg_claude/data/models/age_record.dart';
+import 'package:rpg_claude/data/models/age_snapshot.dart';
+import 'package:rpg_claude/data/models/farm_size_record.dart';
+import 'package:rpg_claude/data/models/farm_size_snapshot.dart';
 import 'package:rpg_claude/data/models/org_form.dart';
 import 'package:rpg_claude/data/models/record.dart';
 import 'package:rpg_claude/data/models/snapshot.dart';
 import 'package:rpg_claude/data/name_resolver.dart';
+import 'package:rpg_claude/providers/age_provider.dart';
 import 'package:rpg_claude/providers/data_provider.dart';
+import 'package:rpg_claude/providers/farm_size_provider.dart';
 import 'package:rpg_claude/screens/pregled/pregled_screen.dart';
 
 Record _rec(
@@ -53,6 +60,74 @@ final _snapshot2 = Snapshot(
 
 final _fixtureSnapshots = [_snapshot1, _snapshot2];
 
+final _farmSizeSnapshot = FarmSizeSnapshot(
+  date: DateTime(2025, 12, 31),
+  records: [
+    const FarmSizeRecord(
+      regionCode: '1',
+      regionName: 'R1',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      countUpTo5: 800,
+      areaUpTo5: 1200.0,
+      count5to20: 150,
+      area5to20: 1500.0,
+      count20to100: 30,
+      area20to100: 1200.0,
+      countOver100: 5,
+      areaOver100: 800.0,
+    ),
+  ],
+);
+
+final _ageSnapshot = AgeSnapshot(
+  date: DateTime(2025, 12, 31),
+  records: [
+    const AgeRecord(
+      regionCode: '1',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      ageBracket: AgeBracket.age20to29,
+      farmCount: 50,
+    ),
+    const AgeRecord(
+      regionCode: '1',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      ageBracket: AgeBracket.age30to39,
+      farmCount: 100,
+    ),
+    const AgeRecord(
+      regionCode: '1',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      ageBracket: AgeBracket.age40to49,
+      farmCount: 200,
+    ),
+    const AgeRecord(
+      regionCode: '1',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      ageBracket: AgeBracket.age50to59,
+      farmCount: 300,
+    ),
+    const AgeRecord(
+      regionCode: '1',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      ageBracket: AgeBracket.age60to69,
+      farmCount: 250,
+    ),
+    const AgeRecord(
+      regionCode: '1',
+      municipalityCode: '10',
+      municipalityName: 'Barajevo',
+      ageBracket: AgeBracket.age70to79,
+      farmCount: 80,
+    ),
+  ],
+);
+
 final _resolver = NameResolver([
   'Barajevo',
   'Nis',
@@ -66,6 +141,10 @@ Widget _buildApp() => ProviderScope(
   overrides: [
     dataRepositoryProvider.overrideWith(() => _FixtureRepository()),
     nameResolverProvider.overrideWith((ref) async => _resolver),
+    farmSizeRepositoryProvider.overrideWith(
+      () => _FixtureFarmSizeRepository(),
+    ),
+    ageRepositoryProvider.overrideWith(() => _FixtureAgeRepository()),
   ],
   child: const MaterialApp(home: Scaffold(body: PregledScreen())),
 );
@@ -104,19 +183,24 @@ void main() {
             () => _SingleSnapshotRepository(),
           ),
           nameResolverProvider.overrideWith((ref) async => _resolver),
+          farmSizeRepositoryProvider.overrideWith(
+            () => _FixtureFarmSizeRepository(),
+          ),
+          ageRepositoryProvider.overrideWith(() => _FixtureAgeRepository()),
         ],
         child: const MaterialApp(home: PregledScreen()),
       ),
     );
     await tester.pumpAndSettle();
-    // Should not show any delta percentages
-    expect(find.textContaining('%'), findsOneWidget); // only activity rate
+    // Should not show any +/- delta percentages
+    expect(find.textContaining('+'), findsNothing);
+    expect(find.text('Stopa aktivnosti'), findsOneWidget);
   });
 
   testWidgets('renders a bar chart', (tester) async {
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
-    expect(find.byType(BarChart), findsOneWidget);
+    expect(find.byType(BarChart), findsWidgets);
   });
 
   testWidgets('shows top 5 municipalities by active count', (tester) async {
@@ -162,6 +246,89 @@ void main() {
       expect(find.text('-12,5%'), findsOneWidget);
     });
   });
+
+  group('farm size section', () {
+    testWidgets('shows farm size average headline', (tester) async {
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Veličina gazdinstava'), findsOneWidget);
+      // totalFarms=985, totalArea=4700, avg=4.77... -> "4,8 ha"
+      expect(find.textContaining('4,8 ha'), findsOneWidget);
+    });
+
+    testWidgets('shows farm size bracket distribution', (tester) async {
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('≤5 ha'), findsOneWidget);
+      expect(find.text('5–20 ha'), findsOneWidget);
+      expect(find.text('20–100 ha'), findsOneWidget);
+      expect(find.text('>100 ha'), findsOneWidget);
+    });
+
+    testWidgets('hides farm size section on error', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dataRepositoryProvider.overrideWith(() => _FixtureRepository()),
+            nameResolverProvider.overrideWith((ref) async => _resolver),
+            farmSizeRepositoryProvider.overrideWith(
+              () => _ErrorFarmSizeRepository(),
+            ),
+            ageRepositoryProvider.overrideWith(
+              () => _FixtureAgeRepository(),
+            ),
+          ],
+          child: const MaterialApp(home: Scaffold(body: PregledScreen())),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Veličina gazdinstava'), findsNothing);
+    });
+  });
+
+  group('age section', () {
+    testWidgets('shows age average headline', (tester) async {
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Starosna struktura nosioca'), findsOneWidget);
+      // weighted: 50*24.5+100*34.5+200*44.5+300*54.5+250*64.5+80*74.5=52010
+      // total=980, avg=53.07... -> "53 godina"
+      expect(find.textContaining('53 godina'), findsOneWidget);
+    });
+
+    testWidgets('shows age bracket distribution', (tester) async {
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
+
+      // Age brackets rendered as bar chart with labels
+      expect(find.byType(BarChart), findsWidgets);
+    });
+
+    testWidgets('hides age section on error', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dataRepositoryProvider.overrideWith(() => _FixtureRepository()),
+            nameResolverProvider.overrideWith((ref) async => _resolver),
+            farmSizeRepositoryProvider.overrideWith(
+              () => _FixtureFarmSizeRepository(),
+            ),
+            ageRepositoryProvider.overrideWith(
+              () => _ErrorAgeRepository(),
+            ),
+          ],
+          child: const MaterialApp(home: Scaffold(body: PregledScreen())),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Starosna struktura nosioca'), findsNothing);
+    });
+  });
 }
 
 class _FixtureRepository extends DataRepository {
@@ -172,4 +339,25 @@ class _FixtureRepository extends DataRepository {
 class _SingleSnapshotRepository extends DataRepository {
   @override
   Future<List<Snapshot>> build() async => [_snapshot2];
+}
+
+class _FixtureFarmSizeRepository extends FarmSizeRepository {
+  @override
+  Future<List<FarmSizeSnapshot>> build() async => [_farmSizeSnapshot];
+}
+
+class _FixtureAgeRepository extends AgeRepository {
+  @override
+  Future<List<AgeSnapshot>> build() async => [_ageSnapshot];
+}
+
+class _ErrorFarmSizeRepository extends FarmSizeRepository {
+  @override
+  Future<List<FarmSizeSnapshot>> build() async =>
+      throw Exception('farm size error');
+}
+
+class _ErrorAgeRepository extends AgeRepository {
+  @override
+  Future<List<AgeSnapshot>> build() async => throw Exception('age error');
 }
