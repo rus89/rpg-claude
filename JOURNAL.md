@@ -1,5 +1,16 @@
 # Project Journal
 
+## 2026-03-11: Code review findings to address later
+
+### Loader duplication (valid, low-severity)
+`lib/data/age_loader.dart` and `lib/data/farm_size_loader.dart` are 44 lines of near-identical code. Same parallel-fetch, skip-on-failure, sort, throw-if-all-fail pattern — only type parameters, default sources, and parser differ. Should extract a generic loader function.
+
+### Provider tests test mocked behavior (valid, should fix)
+`test/providers/age_provider_test.dart` and `test/providers/farm_size_provider_test.dart` override `build()` with hardcoded data, then assert the hardcoded data comes back. Zero real logic tested — only proves Riverpod's `overrideWith` works. Violates CLAUDE.md rule. These tests should either be deleted or rewritten to test actual loading logic (e.g., with fixture CSV bytes and injected fetch).
+
+### Conditional ref.watch() (not valid)
+Feedback claimed conditional `ref.watch()` in `trendovi_screen.dart:85-90` and `mapa_screen.dart:72-79` violates Riverpod rules. This is incorrect — Riverpod re-tracks subscriptions each build cycle (unlike React hooks). Conditional watches are idiomatic and intentional to avoid loading unused datasets.
+
 ## 2026-03-04: Fix CSV municipality name edge cases (branch: feature/data-foundation-and-improvements)
 
 ### What was done
