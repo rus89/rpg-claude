@@ -9,6 +9,7 @@ import '../../data/models/age_bracket.dart';
 import '../../data/models/age_snapshot.dart';
 import '../../data/models/farm_size_snapshot.dart';
 import '../../data/models/org_form.dart';
+import '../../data/models/snapshot.dart';
 import '../../data/name_resolver.dart';
 import '../../data/serbian_normalise.dart';
 import '../../layout/breakpoints.dart';
@@ -77,8 +78,9 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
     final dataAsync = ref.watch(dataRepositoryProvider);
     final resolver = ref.watch(nameResolverProvider).valueOrNull;
     final allCsvNames = ref.watch(municipalityNamesProvider);
-    final displayNames =
-        resolver != null ? resolver.allDisplayNames : allCsvNames;
+    final displayNames = resolver != null
+        ? resolver.allDisplayNames
+        : allCsvNames;
 
     final farmSizeAsync = _selectedDataset == _Dataset.velicina
         ? ref.watch(farmSizeRepositoryProvider)
@@ -131,8 +133,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
                       (n) => DropdownMenuItem(value: n, child: Text(n)),
                     ),
                   ],
-                  onChanged: (v) =>
-                      setState(() => _selectedMunicipality = v),
+                  onChanged: (v) => setState(() => _selectedMunicipality = v),
                 ),
                 const SizedBox(height: 12),
                 if (_selectedDataset == _Dataset.gazdinstva)
@@ -174,7 +175,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
 
   Widget _buildGazdinstvaChart(
     BuildContext context,
-    List<dynamic> snapshots,
+    List<Snapshot> snapshots,
     NameResolver? resolver,
   ) {
     final spots = snapshots.map((snapshot) {
@@ -186,7 +187,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
       return FlSpot(dateToX(snapshot.date), total.toDouble());
     }).toList();
 
-    final dates = snapshots.map((s) => s.date as DateTime).toList();
+    final dates = snapshots.map((s) => s.date).toList();
     return _buildChart(context, spots, dates);
   }
 
@@ -270,8 +271,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
           ],
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
-              getTooltipColor: (_) =>
-                  const Color.fromARGB(255, 237, 191, 136),
+              getTooltipColor: (_) => const Color.fromARGB(255, 237, 191, 136),
               getTooltipItems: (spots) {
                 final fmt = NumberFormat('#,###', 'sr');
                 return spots
