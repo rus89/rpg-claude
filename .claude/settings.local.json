@@ -12,7 +12,8 @@
       "Skill(code-review:code-review)",
       "Bash(brew list gh)",
       "Bash(dart run:*)",
-      "Bash(flutter:*)"
+      "Bash(flutter:*)",
+      "Bash(dart format:*)"
     ]
   }
 }
