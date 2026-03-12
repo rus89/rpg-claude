@@ -353,15 +353,16 @@ class _AgeSummary extends ConsumerWidget {
                               getTooltipColor: (_) =>
                                   const Color.fromARGB(255, 237, 191, 136),
                               fitInsideVertically: true,
+                              fitInsideHorizontally: true,
                               getTooltipItem:
                                   (group, groupIndex, rod, rodIndex) {
                                     final fmt = NumberFormat('#,###', 'sr');
                                     return BarTooltipItem(
                                       fmt.format(rod.toY.toInt()),
-                                      const TextStyle(
+                                      TextStyle(
                                         color: Colors.black87,
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 11,
+                                        fontSize: isDesktop(context) ? 11.0 : 9.0,
                                       ),
                                     );
                                   },
@@ -459,14 +460,15 @@ class _BarChartSection extends StatelessWidget {
                   getTooltipColor: (_) =>
                       const Color.fromARGB(255, 237, 191, 136),
                   fitInsideVertically: true,
+                  fitInsideHorizontally: true,
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     final fmt = NumberFormat('#,###', 'sr');
                     return BarTooltipItem(
                       fmt.format(rod.toY.toInt()),
-                      const TextStyle(
+                      TextStyle(
                         color: Colors.black87,
                         fontWeight: FontWeight.w600,
-                        fontSize: 11,
+                        fontSize: isDesktop(context) ? 11.0 : 9.0,
                       ),
                     );
                   },
@@ -715,7 +717,14 @@ class _SummaryCard extends StatelessWidget {
           children: [
             Text(label, style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 4),
-            Text(value, style: Theme.of(context).textTheme.headlineSmall),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
             if (delta != null) ...[
               const SizedBox(height: 4),
               Row(

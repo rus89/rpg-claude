@@ -330,11 +330,11 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('Veličina (ha)'));
+      await tester.tap(find.text('Veličina'));
       await tester.pumpAndSettle();
 
-      // Verify the selector changed — "Veličina (ha)" is selected
-      expect(find.text('Veličina (ha)'), findsOneWidget);
+      // Verify the selector changed — "Veličina" is selected
+      expect(find.text('Veličina'), findsOneWidget);
     });
 
     testWidgets('switches to age metric', (tester) async {
@@ -349,10 +349,10 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('Prosečna starost'));
+      await tester.tap(find.text('Starost'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Prosečna starost'), findsOneWidget);
+      expect(find.text('Starost'), findsOneWidget);
     });
 
     testWidgets('overlay shows farm size info when size metric selected', (
@@ -375,7 +375,7 @@ void main() {
       await tester.pump();
 
       // Switch to farm size metric
-      await tester.tap(find.text('Veličina (ha)'));
+      await tester.tap(find.text('Veličina'));
       await tester.pumpAndSettle();
 
       // Tap a municipality
@@ -414,7 +414,7 @@ void main() {
       await tester.pump();
 
       // Switch to age metric
-      await tester.tap(find.text('Prosečna starost'));
+      await tester.tap(find.text('Starost'));
       await tester.pumpAndSettle();
 
       // Tap a municipality
@@ -454,7 +454,7 @@ void main() {
       await tester.pump();
 
       // Switch to farm size — data is slow to load
-      await tester.tap(find.text('Veličina (ha)'));
+      await tester.tap(find.text('Veličina'));
       await tester.pump();
 
       // Should show loading indicator while farm size data loads

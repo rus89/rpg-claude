@@ -100,25 +100,29 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SegmentedButton<_Dataset>(
-                  segments: const [
-                    ButtonSegment(
-                      value: _Dataset.gazdinstva,
-                      label: Text('Gazdinstva'),
-                    ),
-                    ButtonSegment(
-                      value: _Dataset.velicina,
-                      label: Text('Veličina'),
-                    ),
-                    ButtonSegment(
-                      value: _Dataset.starost,
-                      label: Text('Starost'),
-                    ),
-                  ],
-                  selected: {_selectedDataset},
-                  onSelectionChanged: (selected) => setState(() {
-                    _selectedDataset = selected.first;
-                  }),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: SegmentedButton<_Dataset>(
+                    segments: const [
+                      ButtonSegment(
+                        value: _Dataset.gazdinstva,
+                        label: Text('Gazdinstva'),
+                      ),
+                      ButtonSegment(
+                        value: _Dataset.velicina,
+                        label: Text('Veličina'),
+                      ),
+                      ButtonSegment(
+                        value: _Dataset.starost,
+                        label: Text('Starost'),
+                      ),
+                    ],
+                    selected: {_selectedDataset},
+                    onSelectionChanged: (selected) => setState(() {
+                      _selectedDataset = selected.first;
+                    }),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String?>(
@@ -130,7 +134,13 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
                       child: Text('Srbija (ukupno)'),
                     ),
                     ...displayNames.map(
-                      (n) => DropdownMenuItem(value: n, child: Text(n)),
+                      (n) => DropdownMenuItem(
+                        value: n,
+                        child: Text(
+                          n,
+                          style: const TextStyle(fontWeight: FontWeight.w400),
+                        ),
+                      ),
                     ),
                   ],
                   onChanged: (v) => setState(() => _selectedMunicipality = v),

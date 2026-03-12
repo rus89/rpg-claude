@@ -33,15 +33,22 @@ class MapaScreen extends ConsumerStatefulWidget {
 }
 
 class _MapaScreenState extends ConsumerState<MapaScreen> {
+  // Approximate bounding box for Serbia
+  static final _serbiaBounds = LatLngBounds(
+    const LatLng(42.23, 18.82),
+    const LatLng(46.19, 23.01),
+  );
   Map<String, dynamic>? _geoJson;
   String? _tappedMunicipality;
   MapMetric _selectedMetric = MapMetric.gazdinstva;
   late final LayerHitNotifier<Object> _hitNotifier;
   late final bool _ownsNotifier;
+  late final MapController _mapController;
 
   @override
   void initState() {
     super.initState();
+    _mapController = MapController();
     _ownsNotifier = widget.hitNotifier == null;
     _hitNotifier = widget.hitNotifier ?? ValueNotifier(null);
     _loadGeoJson();
@@ -52,6 +59,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
   void dispose() {
     _hitNotifier.removeListener(_onPolygonHit);
     if (_ownsNotifier) _hitNotifier.dispose();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -142,9 +150,12 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
           child: Stack(
             children: [
               FlutterMap(
-                options: const MapOptions(
-                  initialCenter: LatLng(44.0, 21.0),
-                  initialZoom: 7.0,
+                mapController: _mapController,
+                options: MapOptions(
+                  initialCameraFit: CameraFit.bounds(
+                    bounds: _serbiaBounds,
+                    padding: const EdgeInsets.all(16),
+                  ),
                 ),
                 children: [
                   TileLayer(
@@ -166,9 +177,9 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
               ),
               Positioned(
                 top: 8,
-                left: 0,
-                right: 0,
-                child: Center(child: _buildMetricSelector(context)),
+                left: 8,
+                right: 8,
+                child: _buildMetricSelector(context),
               ),
               if (secondaryLoading)
                 const Positioned(
@@ -182,27 +193,60 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  child: isDesktop(context)
-                      ? Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 600),
-                            child: _buildOverlay(
-                              snapshots,
-                              activeByMunicipality,
-                              resolver,
-                              farmSizeAsync,
-                              ageAsync,
-                            ),
-                          ),
-                        )
-                      : _buildOverlay(
-                          snapshots,
-                          activeByMunicipality,
-                          resolver,
-                          farmSizeAsync,
-                          ageAsync,
-                        ),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: isDesktop(context) ? 600 : double.infinity,
+                      maxHeight:
+                          MediaQuery.sizeOf(context).height * 0.4,
+                    ),
+                    child: _buildOverlay(
+                      snapshots,
+                      activeByMunicipality,
+                      resolver,
+                      farmSizeAsync,
+                      ageAsync,
+                    ),
+                  ),
                 ),
+              Positioned(
+                bottom: _tappedMunicipality != null
+                    ? MediaQuery.sizeOf(context).height * 0.4 + 16
+                    : 16,
+                right: 16,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FloatingActionButton.small(
+                      heroTag: 'zoom_in',
+                      onPressed: () => _mapController.move(
+                        _mapController.camera.center,
+                        _mapController.camera.zoom + 1,
+                      ),
+                      child: const Icon(Icons.add),
+                    ),
+                    const SizedBox(height: 8),
+                    FloatingActionButton.small(
+                      heroTag: 'zoom_out',
+                      onPressed: () => _mapController.move(
+                        _mapController.camera.center,
+                        _mapController.camera.zoom - 1,
+                      ),
+                      child: const Icon(Icons.remove),
+                    ),
+                    const SizedBox(height: 8),
+                    FloatingActionButton.small(
+                      heroTag: 'recenter',
+                      onPressed: () => _mapController.fitCamera(
+                        CameraFit.bounds(
+                          bounds: _serbiaBounds,
+                          padding: const EdgeInsets.all(16),
+                        ),
+                      ),
+                      child: const Icon(Icons.my_location),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         );
@@ -211,28 +255,43 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
   }
 
   Widget _buildMetricSelector(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: SegmentedButton<MapMetric>(
-        segments: const [
-          ButtonSegment(value: MapMetric.gazdinstva, label: Text('Gazdinstva')),
-          ButtonSegment(
-            value: MapMetric.velicina,
-            label: Text('Veličina (ha)'),
-          ),
-          ButtonSegment(
-            value: MapMetric.starost,
-            label: Text('Prosečna starost'),
-          ),
-          ButtonSegment(value: MapMetric.mladji, label: Text('% < 40 god.')),
-        ],
-        selected: {_selectedMetric},
-        onSelectionChanged: (selected) => setState(() {
-          _selectedMetric = selected.first;
-        }),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: SegmentedButton<MapMetric>(
+          segments: [
+            const ButtonSegment(
+              value: MapMetric.gazdinstva,
+              label: Text('Gazdinstva'),
+            ),
+            ButtonSegment(
+              value: MapMetric.velicina,
+              label: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Veličina'),
+                  Text('(ha)', style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+            const ButtonSegment(
+              value: MapMetric.starost,
+              label: Text('Starost'),
+            ),
+            const ButtonSegment(
+              value: MapMetric.mladji,
+              label: Text('< 40 god.'),
+            ),
+          ],
+          selected: {_selectedMetric},
+          onSelectionChanged: (selected) => setState(() {
+            _selectedMetric = selected.first;
+          }),
+        ),
       ),
     );
   }
@@ -544,22 +603,24 @@ class _OverlayContainer extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Container(
-              width: 32,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Container(
+                width: 32,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          ...children,
-        ],
+            ...children,
+          ],
+        ),
       ),
     );
   }
