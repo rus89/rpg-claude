@@ -20,7 +20,7 @@ The current README is a Flutter boilerplate placeholder. This spec describes a p
 
 - Title: `RPG Serbia — Agricultural Farm Data Explorer`
 - One-liner: Interactive Flutter app visualizing registered agricultural farm data across Serbian municipalities, powered by open government data from data.gov.rs
-- Badges: Flutter, Dart, License: MIT, Tests: 205 passing
+- Badges: Flutter, Dart, License: MIT (static shields.io badges — no CI, so no dynamic test badge)
 
 ### 2. Screenshots
 
@@ -55,7 +55,7 @@ Table format:
 
 | Category | Technology |
 |---|---|
-| Framework | Flutter 3.11+ / Dart 3.11+ |
+| Framework | Flutter / Dart 3.11+ |
 | State Management | Riverpod (code-generated) |
 | Navigation | GoRouter |
 | Charts | fl_chart |
@@ -73,8 +73,9 @@ Table format:
 ### 6. Getting Started
 
 Prerequisites:
-- Flutter 3.11+ (Dart 3.11+)
-- Android SDK (API 21+) or iOS/Xcode 14+
+- Flutter SDK (Dart SDK ≥ 3.11.0)
+- Android: SDK with default Flutter minSdkVersion (currently 21)
+- iOS: Xcode with deployment target 13.0+
 
 Commands:
 ```
