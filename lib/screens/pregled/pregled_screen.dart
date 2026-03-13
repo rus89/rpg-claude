@@ -362,7 +362,9 @@ class _AgeSummary extends ConsumerWidget {
                                       TextStyle(
                                         color: Colors.black87,
                                         fontWeight: FontWeight.w600,
-                                        fontSize: isDesktop(context) ? 11.0 : 9.0,
+                                        fontSize: isDesktop(context)
+                                            ? 11.0
+                                            : 9.0,
                                       ),
                                     );
                                   },

@@ -196,8 +196,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       maxWidth: isDesktop(context) ? 600 : double.infinity,
-                      maxHeight:
-                          MediaQuery.sizeOf(context).height * 0.4,
+                      maxHeight: MediaQuery.sizeOf(context).height * 0.4,
                     ),
                     child: _buildOverlay(
                       snapshots,
