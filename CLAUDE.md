@@ -116,6 +116,12 @@ actual purpose.
 - NEVER SKIP, EVADE OR DISABLE A PRE-COMMIT HOOK
 - NEVER use `git add -A` unless you've just done a `git status` - Don't add random test files to the repo.
 
+## Build Tagging
+
+- When bumping the version in `pubspec.yaml` for a new build, tag the commit with `v<version>` (e.g., `v1.0.0+3`).
+- The tag goes on the commit that sets the new version — this is the commit that gets built and submitted to the store.
+- Format: `git tag v<version> <commit-hash>`
+
 ## Testing
 
 - Before committing or claiming a task complete, run `flutter test` and `flutter analyze`. Fix any test failures or analyzer issues before committing.
