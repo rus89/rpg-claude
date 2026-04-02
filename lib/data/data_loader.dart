@@ -4,25 +4,31 @@
 import 'package:flutter/foundation.dart';
 import 'csv_parser.dart';
 import 'data_source.dart';
+import 'fetch_error.dart';
 import 'models/record.dart';
 import 'models/snapshot.dart';
 
 class DataLoader {
   // Fetches and parses all CSV sources in parallel.
   // Returns snapshots sorted oldest-first, skipping any sources that fail.
-  // Throws if all sources fail.
+  // Throws FetchException if all sources fail.
   static Future<List<Snapshot>> loadAll({
     List<CsvSource>? sources,
     Future<List<int>> Function(String url)? fetchBytes,
   }) async {
     final effectiveSources = sources ?? DataSource.sources;
     final effectiveFetch = fetchBytes ?? DataSource.fetchBytes;
+    final errors = <FetchError>[];
     final futures = effectiveSources.map((source) async {
       try {
         final bytes = await effectiveFetch(source.url);
         final records = await compute(_parseInIsolate, bytes);
         return buildSnapshot(source.date, records);
-      } on Exception {
+      } on FetchException catch (e) {
+        errors.add(e.error);
+        return null;
+      } on Exception catch (e) {
+        errors.add(FetchError.classify(e));
         return null;
       }
     });
@@ -30,7 +36,7 @@ class DataLoader {
       futures,
     )).whereType<Snapshot>().toList();
     if (snapshots.isEmpty) {
-      throw Exception('All CSV sources failed to load');
+      throw FetchException(_pickMostRelevantError(errors));
     }
     snapshots.sort((a, b) => a.date.compareTo(b.date));
     return snapshots;
@@ -38,6 +44,21 @@ class DataLoader {
 
   static Snapshot buildSnapshot(DateTime date, List<Record> records) {
     return Snapshot(date: date, records: records);
+  }
+
+  // Priority: noInternet > timeout > serverError > clientError > unknown
+  static FetchError _pickMostRelevantError(List<FetchError> errors) {
+    const priority = [
+      FetchError.noInternet,
+      FetchError.timeout,
+      FetchError.serverError,
+      FetchError.clientError,
+      FetchError.unknown,
+    ];
+    for (final candidate in priority) {
+      if (errors.contains(candidate)) return candidate;
+    }
+    return FetchError.unknown;
   }
 }
 
