@@ -19,3 +19,20 @@ double dateToX(DateTime date) => date.millisecondsSinceEpoch.toDouble();
 
 /// Formats a date for chart axis labels.
 String formatDateLabel(DateTime date) => DateFormat('MM/yy').format(date);
+
+/// Calculates tooltip font size based on available chart width and bar count.
+/// Scales down for narrower charts with more bars to prevent overlap.
+double tooltipFontSize({required double chartWidth, required int barCount}) {
+  final barWidth = barCount > 0 ? chartWidth / barCount : chartWidth;
+  if (barWidth >= 100) return 11.0;
+  if (barWidth >= 50) return 9.0;
+  return 7.0;
+}
+
+/// Whether to show permanent tooltip labels above bars.
+/// Returns false when bars are too narrow for readable labels — in that case
+/// the chart should use tap-to-show tooltips instead.
+bool showPermanentTooltips({required double chartWidth, required int barCount}) {
+  final barWidth = barCount > 0 ? chartWidth / barCount : chartWidth;
+  return barWidth >= 30;
+}
