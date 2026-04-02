@@ -18,6 +18,7 @@ import '../../providers/age_provider.dart';
 import '../../providers/data_provider.dart';
 import '../../providers/farm_size_provider.dart';
 import '../../theme.dart';
+import '../../widgets/data_error_message.dart';
 
 class PregledScreen extends ConsumerWidget {
   const PregledScreen({super.key});
@@ -36,9 +37,22 @@ class PregledScreen extends ConsumerWidget {
         }
         return ScreenScaffold(
           title: 'Pregled',
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: _PregledBody(snapshots: snapshots, resolver: resolver),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              final farmSizeState = ref.read(farmSizeRepositoryProvider);
+              final ageState = ref.read(ageRepositoryProvider);
+              if (farmSizeState.hasError) {
+                ref.invalidate(farmSizeRepositoryProvider);
+              }
+              if (ageState.hasError) {
+                ref.invalidate(ageRepositoryProvider);
+              }
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: _PregledBody(snapshots: snapshots, resolver: resolver),
+            ),
           ),
         );
       },
@@ -147,7 +161,10 @@ class _FarmSizeSummary extends ConsumerWidget {
         padding: EdgeInsets.symmetric(vertical: 16),
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, __) => DataErrorMessage(
+        message: 'Podaci o veličini gazdinstava nisu dostupni',
+        onRetry: () => ref.invalidate(farmSizeRepositoryProvider),
+      ),
       data: (snapshots) {
         if (snapshots.isEmpty) return const SizedBox.shrink();
         final latest = snapshots.last;
@@ -275,7 +292,10 @@ class _AgeSummary extends ConsumerWidget {
         padding: EdgeInsets.symmetric(vertical: 16),
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, __) => DataErrorMessage(
+        message: 'Podaci o starosnoj strukturi nisu dostupni',
+        onRetry: () => ref.invalidate(ageRepositoryProvider),
+      ),
       data: (snapshots) {
         if (snapshots.isEmpty) return const SizedBox.shrink();
         final latest = snapshots.last;

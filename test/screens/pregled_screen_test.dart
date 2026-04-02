@@ -283,7 +283,25 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Veličina gazdinstava'), findsNothing);
+      expect(find.text('Podaci o veličini gazdinstava nisu dostupni'), findsOneWidget);
+    });
+
+    testWidgets('shows retry button when farm size fails', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dataRepositoryProvider.overrideWith(() => _FixtureRepository()),
+            nameResolverProvider.overrideWith((ref) async => _resolver),
+            farmSizeRepositoryProvider.overrideWith(
+              () => _ErrorFarmSizeRepository(),
+            ),
+            ageRepositoryProvider.overrideWith(() => _FixtureAgeRepository()),
+          ],
+          child: const MaterialApp(home: Scaffold(body: PregledScreen())),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Pokušaj ponovo'), findsOneWidget);
     });
   });
 
@@ -322,8 +340,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Starosna struktura nosioca'), findsNothing);
+      expect(find.text('Podaci o starosnoj strukturi nisu dostupni'), findsOneWidget);
     });
+  });
+
+  testWidgets('has RefreshIndicator for pull-to-refresh', (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+    expect(find.byType(RefreshIndicator), findsOneWidget);
   });
 }
 
