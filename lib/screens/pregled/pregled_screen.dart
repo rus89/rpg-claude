@@ -14,6 +14,7 @@ import '../../data/name_resolver.dart';
 import '../../data/serbian_normalise.dart';
 import '../../layout/breakpoints.dart';
 import '../../layout/screen_scaffold.dart';
+import '../../utils/chart_helpers.dart';
 import '../../providers/age_provider.dart';
 import '../../providers/data_provider.dart';
 import '../../providers/farm_size_provider.dart';
@@ -344,83 +345,99 @@ class _AgeSummary extends ConsumerWidget {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      height: isDesktop(context) ? 280 : 200,
-                      child: BarChart(
-                        BarChartData(
-                          maxY: maxCount * 1.15,
-                          barGroups: sortedBrackets
-                              .asMap()
-                              .entries
-                              .map(
-                                (entry) => BarChartGroupData(
-                                  x: entry.key,
-                                  barRods: [
-                                    BarChartRodData(
-                                      toY: entry.value.value.toDouble(),
-                                      width: 16,
-                                      color: primary,
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final chartWidth = constraints.maxWidth;
+                        final barCount = sortedBrackets.length;
+                        final permanent = showPermanentTooltips(
+                          chartWidth: chartWidth,
+                          barCount: barCount,
+                        );
+                        final fontSize = tooltipFontSize(
+                          chartWidth: chartWidth,
+                          barCount: barCount,
+                        );
+
+                        return SizedBox(
+                          height: isDesktop(context) ? 280 : 200,
+                          child: BarChart(
+                            BarChartData(
+                              maxY: maxCount * 1.15,
+                              barGroups: sortedBrackets
+                                  .asMap()
+                                  .entries
+                                  .map(
+                                    (entry) => BarChartGroupData(
+                                      x: entry.key,
+                                      barRods: [
+                                        BarChartRodData(
+                                          toY: entry.value.value.toDouble(),
+                                          width: 16,
+                                          color: primary,
+                                        ),
+                                      ],
+                                      showingTooltipIndicators:
+                                          permanent && entry.value.value > 0
+                                              ? [0]
+                                              : [],
                                     ),
-                                  ],
-                                  showingTooltipIndicators:
-                                      entry.value.value > 0 ? [0] : [],
+                                  )
+                                  .toList(),
+                              barTouchData: BarTouchData(
+                                enabled: !permanent,
+                                touchTooltipData: BarTouchTooltipData(
+                                  getTooltipColor: (_) =>
+                                      const Color.fromARGB(255, 237, 191, 136),
+                                  fitInsideVertically: true,
+                                  fitInsideHorizontally: true,
+                                  getTooltipItem:
+                                      (group, groupIndex, rod, rodIndex) {
+                                        final fmt = NumberFormat('#,###', 'sr');
+                                        return BarTooltipItem(
+                                          fmt.format(rod.toY.toInt()),
+                                          TextStyle(
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: fontSize,
+                                          ),
+                                        );
+                                      },
                                 ),
-                              )
-                              .toList(),
-                          barTouchData: BarTouchData(
-                            enabled: false,
-                            touchTooltipData: BarTouchTooltipData(
-                              getTooltipColor: (_) =>
-                                  const Color.fromARGB(255, 237, 191, 136),
-                              fitInsideVertically: true,
-                              fitInsideHorizontally: true,
-                              getTooltipItem:
-                                  (group, groupIndex, rod, rodIndex) {
-                                    final fmt = NumberFormat('#,###', 'sr');
-                                    return BarTooltipItem(
-                                      fmt.format(rod.toY.toInt()),
-                                      TextStyle(
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: isDesktop(context)
-                                            ? 11.0
-                                            : 9.0,
-                                      ),
-                                    );
-                                  },
-                            ),
-                          ),
-                          titlesData: FlTitlesData(
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                getTitlesWidget: (value, _) {
-                                  final idx = value.toInt();
-                                  if (idx < 0 || idx >= sortedBrackets.length) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text(
-                                      sortedBrackets[idx].key.displayName,
-                                      style: const TextStyle(fontSize: 9),
-                                    ),
-                                  );
-                                },
+                              ),
+                              titlesData: FlTitlesData(
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    getTitlesWidget: (value, _) {
+                                      final idx = value.toInt();
+                                      if (idx < 0 ||
+                                          idx >= sortedBrackets.length) {
+                                        return const SizedBox.shrink();
+                                      }
+                                      return Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Text(
+                                          sortedBrackets[idx].key.displayName,
+                                          style: const TextStyle(fontSize: 9),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                leftTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                topTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                rightTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
                               ),
                             ),
-                            leftTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            topTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            rightTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -445,21 +462,6 @@ class _BarChartSection extends StatelessWidget {
       byOrgForm[r.orgForm] = (byOrgForm[r.orgForm] ?? 0) + r.activeHoldings;
     }
 
-    final barGroups = OrgForm.values.asMap().entries.map((entry) {
-      final value = byOrgForm[entry.value] ?? 0;
-      return BarChartGroupData(
-        x: entry.key,
-        barRods: [
-          BarChartRodData(
-            toY: value.toDouble(),
-            width: 16,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ],
-        showingTooltipIndicators: value > 0 ? [0] : [],
-      );
-    }).toList();
-
     final maxValue = byOrgForm.values.fold(0, (a, b) => a > b ? a : b);
 
     return Column(
@@ -470,60 +472,90 @@ class _BarChartSection extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          height: isDesktop(context) ? 360 : 240,
-          child: BarChart(
-            BarChartData(
-              maxY: maxValue * 1.15,
-              barGroups: barGroups,
-              barTouchData: BarTouchData(
-                enabled: false,
-                touchTooltipData: BarTouchTooltipData(
-                  getTooltipColor: (_) =>
-                      const Color.fromARGB(255, 237, 191, 136),
-                  fitInsideVertically: true,
-                  fitInsideHorizontally: true,
-                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                    final fmt = NumberFormat('#,###', 'sr');
-                    return BarTooltipItem(
-                      fmt.format(rod.toY.toInt()),
-                      TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w600,
-                        fontSize: isDesktop(context) ? 11.0 : 9.0,
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final chartWidth = constraints.maxWidth;
+            final barCount = OrgForm.values.length;
+            final permanent = showPermanentTooltips(
+              chartWidth: chartWidth,
+              barCount: barCount,
+            );
+            final fontSize = tooltipFontSize(
+              chartWidth: chartWidth,
+              barCount: barCount,
+            );
+
+            final barGroups = OrgForm.values.asMap().entries.map((entry) {
+              final value = byOrgForm[entry.value] ?? 0;
+              return BarChartGroupData(
+                x: entry.key,
+                barRods: [
+                  BarChartRodData(
+                    toY: value.toDouble(),
+                    width: 16,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
+                showingTooltipIndicators: permanent && value > 0 ? [0] : [],
+              );
+            }).toList();
+
+            return SizedBox(
+              height: isDesktop(context) ? 360 : 240,
+              child: BarChart(
+                BarChartData(
+                  maxY: maxValue * 1.15,
+                  barGroups: barGroups,
+                  barTouchData: BarTouchData(
+                    enabled: !permanent,
+                    touchTooltipData: BarTouchTooltipData(
+                      getTooltipColor: (_) =>
+                          const Color.fromARGB(255, 237, 191, 136),
+                      fitInsideVertically: true,
+                      fitInsideHorizontally: true,
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        final fmt = NumberFormat('#,###', 'sr');
+                        return BarTooltipItem(
+                          fmt.format(rod.toY.toInt()),
+                          TextStyle(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w600,
+                            fontSize: fontSize,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, _) {
+                          final form = OrgForm.values[value.toInt()];
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              form.displayName.split(' ').first,
+                              style: const TextStyle(fontSize: 9),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              ),
-              titlesData: FlTitlesData(
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, _) {
-                      final form = OrgForm.values[value.toInt()];
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          form.displayName.split(' ').first,
-                          style: const TextStyle(fontSize: 9),
-                        ),
-                      );
-                    },
+                    ),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                   ),
                 ),
-                leftTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ],
     );
