@@ -5,9 +5,13 @@ import 'dart:async';
 import 'dart:io';
 
 enum FetchError {
-  noInternet('Nema internet konekcije. Povezite se na mrežu i pokušajte ponovo.'),
+  noInternet(
+    'Nema internet konekcije. Povezite se na mrežu i pokušajte ponovo.',
+  ),
   timeout('Server ne odgovara. Proverite konekciju i pokušajte ponovo.'),
-  serverError('Podaci trenutno nisu dostupni na serveru. Pokušajte ponovo kasnije.'),
+  serverError(
+    'Podaci trenutno nisu dostupni na serveru. Pokušajte ponovo kasnije.',
+  ),
   clientError('Izvor podataka nije pronađen. Pokušajte ponovo kasnije.'),
   unknown('Nije moguće učitati podatke. Proverite internet konekciju.');
 

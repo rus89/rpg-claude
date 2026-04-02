@@ -32,7 +32,10 @@ double tooltipFontSize({required double chartWidth, required int barCount}) {
 /// Whether to show permanent tooltip labels above bars.
 /// Returns false when bars are too narrow for readable labels — in that case
 /// the chart should use tap-to-show tooltips instead.
-bool showPermanentTooltips({required double chartWidth, required int barCount}) {
+bool showPermanentTooltips({
+  required double chartWidth,
+  required int barCount,
+}) {
   final barWidth = barCount > 0 ? chartWidth / barCount : chartWidth;
   return barWidth >= 30;
 }

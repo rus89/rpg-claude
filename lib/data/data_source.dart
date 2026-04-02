@@ -81,9 +81,9 @@ class DataSource {
   // Throws FetchException with a classified FetchError on failure.
   static Future<List<int>> fetchBytes(String url) async {
     try {
-      final response = await http.get(Uri.parse(url)).timeout(
-        const Duration(seconds: 30),
-      );
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 30));
       if (response.statusCode != 200) {
         throw FetchException(FetchError.fromStatusCode(response.statusCode));
       }

@@ -168,8 +168,9 @@ void main() {
     expect(find.byType(BarChart), findsAny);
   });
 
-  testWidgets('has a RefreshIndicator wrapping the scroll view',
-      (tester) async {
+  testWidgets('has a RefreshIndicator wrapping the scroll view', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildApp());
     await tester.pump();
     expect(find.byType(RefreshIndicator), findsOneWidget);

@@ -378,8 +378,8 @@ class _AgeSummary extends ConsumerWidget {
                                       ],
                                       showingTooltipIndicators:
                                           permanent && entry.value.value > 0
-                                              ? [0]
-                                              : [],
+                                          ? [0]
+                                          : [],
                                     ),
                                   )
                                   .toList(),

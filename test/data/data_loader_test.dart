@@ -75,32 +75,33 @@ void main() {
       );
     });
 
-    test('throws FetchException with noInternet when all fail with SocketException', () async {
-      final sources = [
-        CsvSource(url: 'bad1', date: DateTime(2020, 1, 1)),
-        CsvSource(url: 'bad2', date: DateTime(2021, 1, 1)),
-      ];
+    test(
+      'throws FetchException with noInternet when all fail with SocketException',
+      () async {
+        final sources = [
+          CsvSource(url: 'bad1', date: DateTime(2020, 1, 1)),
+          CsvSource(url: 'bad2', date: DateTime(2021, 1, 1)),
+        ];
 
-      expect(
-        () => DataLoader.loadAll(
-          sources: sources,
-          fetchBytes: (url) async =>
-              throw const SocketException('No route to host'),
-        ),
-        throwsA(
-          isA<FetchException>().having(
-            (e) => e.error,
-            'error',
-            FetchError.noInternet,
+        expect(
+          () => DataLoader.loadAll(
+            sources: sources,
+            fetchBytes: (url) async =>
+                throw const SocketException('No route to host'),
           ),
-        ),
-      );
-    });
+          throwsA(
+            isA<FetchException>().having(
+              (e) => e.error,
+              'error',
+              FetchError.noInternet,
+            ),
+          ),
+        );
+      },
+    );
 
     test('throws FetchException with serverError on HTTP failures', () async {
-      final sources = [
-        CsvSource(url: 'bad1', date: DateTime(2020, 1, 1)),
-      ];
+      final sources = [CsvSource(url: 'bad1', date: DateTime(2020, 1, 1))];
 
       expect(
         () => DataLoader.loadAll(

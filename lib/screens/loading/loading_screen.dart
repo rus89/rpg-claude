@@ -35,10 +35,7 @@ class LoadingScreen extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.error,
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  _errorMessage(error),
-                  textAlign: TextAlign.center,
-                ),
+                Text(_errorMessage(error), textAlign: TextAlign.center),
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () => ref.invalidate(dataRepositoryProvider),

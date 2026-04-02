@@ -283,7 +283,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Podaci o veličini gazdinstava nisu dostupni'), findsOneWidget);
+      expect(
+        find.text('Podaci o veličini gazdinstava nisu dostupni'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows retry button when farm size fails', (tester) async {
@@ -340,7 +343,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Podaci o starosnoj strukturi nisu dostupni'), findsOneWidget);
+      expect(
+        find.text('Podaci o starosnoj strukturi nisu dostupni'),
+        findsOneWidget,
+      );
     });
   });
 
