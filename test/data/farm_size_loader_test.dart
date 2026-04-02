@@ -2,10 +2,12 @@
 // ABOUTME: Verifies that partial fetch failures don't prevent loading available data.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rpg_claude/data/data_source.dart';
 import 'package:rpg_claude/data/farm_size_loader.dart';
+import 'package:rpg_claude/data/fetch_error.dart';
 
 const _csvContent =
     'Regija;NazivRegije;SifraOpstine;NazivOpstineL;Broj PG <=5;Povrsina Ukupno <=5;Broj PG 5-20;Povrsina Ukupno 5-20;Broj PG 20-100;Povrsina Ukupno 20-100;Broj PG >100;Povrsina Ukupno >100\n'
@@ -50,6 +52,21 @@ void main() {
           fetchBytes: (url) async => throw Exception('fail'),
         ),
         throwsException,
+      );
+    });
+
+    test('throws FetchException with noInternet when all fail with SocketException', () async {
+      final sources = [
+        CsvSource(url: 'bad1', date: DateTime(2020, 1, 1)),
+      ];
+      expect(
+        () => FarmSizeLoader.loadAll(
+          sources: sources,
+          fetchBytes: (url) async => throw const SocketException('No route to host'),
+        ),
+        throwsA(
+          isA<FetchException>().having((e) => e.error, 'error', FetchError.noInternet),
+        ),
       );
     });
 

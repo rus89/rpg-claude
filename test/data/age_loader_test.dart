@@ -2,10 +2,12 @@
 // ABOUTME: Verifies that partial fetch failures don't prevent loading available data.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rpg_claude/data/age_loader.dart';
 import 'package:rpg_claude/data/data_source.dart';
+import 'package:rpg_claude/data/fetch_error.dart';
 
 const _csvContent =
     'Regija;SifraOpstine;NazivOpstineL;Opseg Godina;BrojDomacinstva\n'
@@ -50,6 +52,21 @@ void main() {
           fetchBytes: (url) async => throw Exception('fail'),
         ),
         throwsException,
+      );
+    });
+
+    test('throws FetchException with noInternet when all fail with SocketException', () async {
+      final sources = [
+        CsvSource(url: 'bad1', date: DateTime(2020, 1, 1)),
+      ];
+      expect(
+        () => AgeLoader.loadAll(
+          sources: sources,
+          fetchBytes: (url) async => throw const SocketException('No route to host'),
+        ),
+        throwsA(
+          isA<FetchException>().having((e) => e.error, 'error', FetchError.noInternet),
+        ),
       );
     });
 
