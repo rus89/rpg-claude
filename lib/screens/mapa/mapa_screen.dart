@@ -730,7 +730,7 @@ class _FarmSizeOverlay extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'Greška pri učitavanju podataka',
+              'Podaci o veličini gazdinstava nisu dostupni',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
@@ -887,7 +887,7 @@ class _AgeOverlay extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'Greška pri učitavanju podataka',
+              'Podaci o starosnoj strukturi nisu dostupni',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
