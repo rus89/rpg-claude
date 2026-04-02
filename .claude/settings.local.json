@@ -13,7 +13,8 @@
       "Bash(brew list gh)",
       "Bash(dart run:*)",
       "Bash(flutter:*)",
-      "Bash(dart format:*)"
+      "Bash(dart format:*)",
+      "WebSearch"
     ]
   }
 }
