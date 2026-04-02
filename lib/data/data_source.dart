@@ -1,7 +1,10 @@
 // ABOUTME: Hardcoded list of all RPG CSV snapshot URLs with their data dates.
 // ABOUTME: Exposes a fetch method that returns raw bytes for a given URL.
 
+import 'dart:async';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'fetch_error.dart';
 
 class CsvSource {
   const CsvSource({required this.url, required this.date});
@@ -75,12 +78,24 @@ class DataSource {
   ];
 
   // Fetches raw bytes for a single CSV URL.
-  // Throws Exception on non-200 responses.
+  // Throws FetchException with a classified FetchError on failure.
   static Future<List<int>> fetchBytes(String url) async {
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode != 200) {
-      throw Exception('Failed to fetch $url: HTTP ${response.statusCode}');
+    try {
+      final response = await http.get(Uri.parse(url)).timeout(
+        const Duration(seconds: 30),
+      );
+      if (response.statusCode != 200) {
+        throw FetchException(FetchError.fromStatusCode(response.statusCode));
+      }
+      return response.bodyBytes;
+    } on FetchException {
+      rethrow;
+    } on TimeoutException {
+      throw const FetchException(FetchError.timeout);
+    } on SocketException {
+      throw const FetchException(FetchError.noInternet);
+    } on Exception {
+      throw const FetchException(FetchError.unknown);
     }
-    return response.bodyBytes;
   }
 }
