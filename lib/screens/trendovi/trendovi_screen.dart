@@ -18,6 +18,7 @@ import '../../providers/age_provider.dart';
 import '../../providers/data_provider.dart';
 import '../../providers/farm_size_provider.dart';
 import '../../utils/chart_helpers.dart';
+import '../../widgets/data_error_message.dart';
 
 enum _Dataset { gazdinstva, velicina, starost }
 
@@ -95,87 +96,99 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
       data: (snapshots) {
         return ScreenScaffold(
           title: 'Trendovi',
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: SegmentedButton<_Dataset>(
-                    segments: const [
-                      ButtonSegment(
-                        value: _Dataset.gazdinstva,
-                        label: Text('Gazdinstva'),
-                      ),
-                      ButtonSegment(
-                        value: _Dataset.velicina,
-                        label: Text('Veličina'),
-                      ),
-                      ButtonSegment(
-                        value: _Dataset.starost,
-                        label: Text('Starost'),
-                      ),
-                    ],
-                    selected: {_selectedDataset},
-                    onSelectionChanged: (selected) => setState(() {
-                      _selectedDataset = selected.first;
-                    }),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String?>(
-                  initialValue: _selectedMunicipality,
-                  decoration: const InputDecoration(labelText: 'Opština'),
-                  items: [
-                    const DropdownMenuItem(
-                      value: null,
-                      child: Text('Srbija (ukupno)'),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              if (_selectedDataset == _Dataset.velicina) {
+                final state = ref.read(farmSizeRepositoryProvider);
+                if (state.hasError) ref.invalidate(farmSizeRepositoryProvider);
+              } else if (_selectedDataset == _Dataset.starost) {
+                final state = ref.read(ageRepositoryProvider);
+                if (state.hasError) ref.invalidate(ageRepositoryProvider);
+              }
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: SegmentedButton<_Dataset>(
+                      segments: const [
+                        ButtonSegment(
+                          value: _Dataset.gazdinstva,
+                          label: Text('Gazdinstva'),
+                        ),
+                        ButtonSegment(
+                          value: _Dataset.velicina,
+                          label: Text('Veličina'),
+                        ),
+                        ButtonSegment(
+                          value: _Dataset.starost,
+                          label: Text('Starost'),
+                        ),
+                      ],
+                      selected: {_selectedDataset},
+                      onSelectionChanged: (selected) => setState(() {
+                        _selectedDataset = selected.first;
+                      }),
                     ),
-                    ...displayNames.map(
-                      (n) => DropdownMenuItem(
-                        value: n,
-                        child: Text(
-                          n,
-                          style: const TextStyle(fontWeight: FontWeight.w400),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String?>(
+                    initialValue: _selectedMunicipality,
+                    decoration: const InputDecoration(labelText: 'Opština'),
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text('Srbija (ukupno)'),
+                      ),
+                      ...displayNames.map(
+                        (n) => DropdownMenuItem(
+                          value: n,
+                          child: Text(
+                            n,
+                            style: const TextStyle(fontWeight: FontWeight.w400),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                  onChanged: (v) => setState(() => _selectedMunicipality = v),
-                ),
-                const SizedBox(height: 12),
-                if (_selectedDataset == _Dataset.gazdinstva)
-                  _buildFilterChips(
-                    context: context,
-                    values: OrgForm.values,
-                    label: (f) => f.displayName,
-                    selected: _selectedForms,
-                  )
-                else if (_selectedDataset == _Dataset.velicina)
-                  _buildFilterChips(
-                    context: context,
-                    values: const [0, 1, 2, 3],
-                    label: (i) =>
-                        const ['≤5 ha', '5–20 ha', '20–100 ha', '>100 ha'][i],
-                    selected: _selectedSizeBrackets,
-                  )
-                else
-                  _buildFilterChips(
-                    context: context,
-                    values: AgeBracket.values,
-                    label: (b) => b.displayName,
-                    selected: _selectedAgeBrackets,
+                    ],
+                    onChanged: (v) => setState(() => _selectedMunicipality = v),
                   ),
-                const SizedBox(height: 24),
-                if (_selectedDataset == _Dataset.gazdinstva)
-                  _buildGazdinstvaChart(context, snapshots, resolver)
-                else if (_selectedDataset == _Dataset.velicina)
-                  _buildVelicinaChart(context, farmSizeAsync!, resolver)
-                else
-                  _buildStarostChart(context, ageAsync!, resolver),
-              ],
+                  const SizedBox(height: 12),
+                  if (_selectedDataset == _Dataset.gazdinstva)
+                    _buildFilterChips(
+                      context: context,
+                      values: OrgForm.values,
+                      label: (f) => f.displayName,
+                      selected: _selectedForms,
+                    )
+                  else if (_selectedDataset == _Dataset.velicina)
+                    _buildFilterChips(
+                      context: context,
+                      values: const [0, 1, 2, 3],
+                      label: (i) =>
+                          const ['≤5 ha', '5–20 ha', '20–100 ha', '>100 ha'][i],
+                      selected: _selectedSizeBrackets,
+                    )
+                  else
+                    _buildFilterChips(
+                      context: context,
+                      values: AgeBracket.values,
+                      label: (b) => b.displayName,
+                      selected: _selectedAgeBrackets,
+                    ),
+                  const SizedBox(height: 24),
+                  if (_selectedDataset == _Dataset.gazdinstva)
+                    _buildGazdinstvaChart(context, snapshots, resolver)
+                  else if (_selectedDataset == _Dataset.velicina)
+                    _buildVelicinaChart(context, farmSizeAsync!, resolver)
+                  else
+                    _buildStarostChart(context, ageAsync!, resolver),
+                ],
+              ),
             ),
           ),
         );
@@ -211,8 +224,10 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
         height: 280,
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (e, _) =>
-          SizedBox(height: 280, child: Center(child: Text('Greška: $e'))),
+      error: (_, __) => DataErrorMessage(
+        message: 'Podaci o veličini gazdinstava nisu dostupni',
+        onRetry: () => ref.invalidate(farmSizeRepositoryProvider),
+      ),
       data: (snapshots) {
         final spots = snapshots.map((snapshot) {
           var total = 0;
@@ -242,8 +257,10 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
         height: 280,
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (e, _) =>
-          SizedBox(height: 280, child: Center(child: Text('Greška: $e'))),
+      error: (_, __) => DataErrorMessage(
+        message: 'Podaci o starosnoj strukturi nisu dostupni',
+        onRetry: () => ref.invalidate(ageRepositoryProvider),
+      ),
       data: (snapshots) {
         final spots = snapshots.map((snapshot) {
           final total = snapshot.records

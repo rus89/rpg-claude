@@ -209,6 +209,12 @@ void main() {
     expect(find.byType(LineChart), findsOneWidget);
   });
 
+  testWidgets('has RefreshIndicator for pull-to-refresh', (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+    expect(find.byType(RefreshIndicator), findsOneWidget);
+  });
+
   group('desktop (>= 1024px)', () {
     testWidgets('renders line chart at desktop width', (tester) async {
       tester.view.physicalSize = const Size(1200, 800);
