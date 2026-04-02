@@ -168,7 +168,14 @@ void main() {
     expect(find.byType(BarChart), findsAny);
   });
 
-  testWidgets('hides farm size section on error', (tester) async {
+  testWidgets('has a RefreshIndicator wrapping the scroll view',
+      (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pump();
+    expect(find.byType(RefreshIndicator), findsOneWidget);
+  });
+
+  testWidgets('shows error message when farm size data fails', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -183,10 +190,13 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Veličina gazdinstava'), findsNothing);
+    expect(
+      find.text('Podaci o veličini gazdinstava nisu dostupni'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('hides age section on error', (tester) async {
+  testWidgets('shows error message when age data fails', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -201,7 +211,10 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Starosna struktura nosioca'), findsNothing);
+    expect(
+      find.text('Podaci o starosnoj strukturi nisu dostupni'),
+      findsOneWidget,
+    );
   });
 
   group('desktop (>= 1024px)', () {

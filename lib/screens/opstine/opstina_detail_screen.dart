@@ -14,6 +14,7 @@ import '../../providers/age_provider.dart';
 import '../../providers/data_provider.dart';
 import '../../providers/farm_size_provider.dart';
 import '../../utils/chart_helpers.dart';
+import '../../widgets/data_error_message.dart';
 
 bool _matchesMunicipality(
   String recordName,
@@ -172,33 +173,46 @@ class OpstinaDetailScreen extends ConsumerWidget {
 
         return ScreenScaffold(
           title: municipalityName,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                desktop
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: orgFormSection),
-                          const SizedBox(width: 24),
-                          Expanded(flex: 2, child: chartSection),
-                        ],
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          orgFormSection,
-                          const SizedBox(height: 24),
-                          chartSection,
-                        ],
-                      ),
-                const SizedBox(height: 24),
-                _FarmSizeDetail(municipalityName: municipalityName),
-                const SizedBox(height: 24),
-                _AgeDetail(municipalityName: municipalityName),
-              ],
+          child: RefreshIndicator(
+            onRefresh: () async {
+              final farmSizeState = ref.read(farmSizeRepositoryProvider);
+              final ageState = ref.read(ageRepositoryProvider);
+              if (farmSizeState.hasError) {
+                ref.invalidate(farmSizeRepositoryProvider);
+              }
+              if (ageState.hasError) {
+                ref.invalidate(ageRepositoryProvider);
+              }
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  desktop
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: orgFormSection),
+                            const SizedBox(width: 24),
+                            Expanded(flex: 2, child: chartSection),
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            orgFormSection,
+                            const SizedBox(height: 24),
+                            chartSection,
+                          ],
+                        ),
+                  const SizedBox(height: 24),
+                  _FarmSizeDetail(municipalityName: municipalityName),
+                  const SizedBox(height: 24),
+                  _AgeDetail(municipalityName: municipalityName),
+                ],
+              ),
             ),
           ),
         );
@@ -220,7 +234,10 @@ class _FarmSizeDetail extends ConsumerWidget {
         padding: EdgeInsets.symmetric(vertical: 16),
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, __) => DataErrorMessage(
+        message: 'Podaci o veličini gazdinstava nisu dostupni',
+        onRetry: () => ref.invalidate(farmSizeRepositoryProvider),
+      ),
       data: (snapshots) {
         if (snapshots.isEmpty) return const SizedBox.shrink();
         final latest = snapshots.last;
@@ -325,7 +342,10 @@ class _AgeDetail extends ConsumerWidget {
         padding: EdgeInsets.symmetric(vertical: 16),
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, __) => DataErrorMessage(
+        message: 'Podaci o starosnoj strukturi nisu dostupni',
+        onRetry: () => ref.invalidate(ageRepositoryProvider),
+      ),
       data: (snapshots) {
         if (snapshots.isEmpty) return const SizedBox.shrink();
         final latest = snapshots.last;
