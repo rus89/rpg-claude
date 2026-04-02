@@ -1,8 +1,9 @@
 // ABOUTME: Full-screen loading indicator shown while CSV data is being fetched.
-// ABOUTME: Shows error message and retry button if the fetch fails.
+// ABOUTME: Shows specific error messages based on failure type, with a retry button.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/fetch_error.dart';
 import '../../providers/data_provider.dart';
 
 class LoadingScreen extends ConsumerWidget {
@@ -23,26 +24,37 @@ class LoadingScreen extends ConsumerWidget {
               Text('Učitavanje podataka...'),
             ],
           ),
-          error: (error, _) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              const Text('Greška pri učitavanju podataka'),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(dataRepositoryProvider),
-                child: const Text('Pokušaj ponovo'),
-              ),
-            ],
+          error: (error, _) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _errorMessage(error),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => ref.invalidate(dataRepositoryProvider),
+                  child: const Text('Pokušaj ponovo'),
+                ),
+              ],
+            ),
           ),
           data: (_) => const SizedBox.shrink(),
         ),
       ),
     );
+  }
+
+  String _errorMessage(Object error) {
+    if (error is FetchException) return error.error.message;
+    return FetchError.unknown.message;
   }
 }
