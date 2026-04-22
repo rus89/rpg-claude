@@ -46,6 +46,8 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
   late final LayerHitNotifier<Object> _hitNotifier;
   late final bool _ownsNotifier;
   late final MapController _mapController;
+  final GlobalKey _overlayKey = GlobalKey();
+  double _overlayHeight = 0;
 
   @override
   void initState() {
@@ -100,10 +102,36 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
     }
   }
 
+  void _measureOverlayHeight() {
+    final renderObject = _overlayKey.currentContext?.findRenderObject();
+    final height = switch (renderObject) {
+      RenderBox(hasSize: true, :final size) => size.height,
+      _ => 0.0,
+    };
+    if (height != _overlayHeight && mounted) {
+      setState(() => _overlayHeight = height);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final dataAsync = ref.watch(dataRepositoryProvider);
     final resolver = ref.watch(nameResolverProvider).valueOrNull;
+
+    if (_tappedMunicipality != null) {
+      // Seed with the overlay's maxHeight constraint so chrome starts above
+      // the overlay before the first post-frame measurement arrives. This
+      // keeps tap targets (e.g. the overlay's close button) clear of the
+      // FAB column on the first frame after opening.
+      if (_overlayHeight == 0) {
+        _overlayHeight = MediaQuery.sizeOf(context).height * 0.4;
+      }
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _measureOverlayHeight(),
+      );
+    } else if (_overlayHeight != 0) {
+      _overlayHeight = 0;
+    }
 
     final farmSizeAsync = _selectedMetric == MapMetric.velicina
         ? ref.watch(farmSizeRepositoryProvider)
@@ -213,6 +241,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                   left: 0,
                   right: 0,
                   child: ConstrainedBox(
+                    key: _overlayKey,
                     constraints: BoxConstraints(
                       maxWidth: isDesktop(context) ? 600 : double.infinity,
                       maxHeight: MediaQuery.sizeOf(context).height * 0.4,
@@ -227,16 +256,12 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                   ),
                 ),
               Positioned(
-                bottom: _tappedMunicipality != null
-                    ? MediaQuery.sizeOf(context).height * 0.4
-                    : 0,
+                bottom: _tappedMunicipality != null ? _overlayHeight : 0,
                 left: 0,
                 child: _OsmAttribution(onTap: _openOsmCopyright),
               ),
               Positioned(
-                bottom: _tappedMunicipality != null
-                    ? MediaQuery.sizeOf(context).height * 0.4 + 16
-                    : 16,
+                bottom: _tappedMunicipality != null ? _overlayHeight + 16 : 16,
                 right: 16,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
