@@ -484,6 +484,84 @@ void main() {
       expect(find.byType(FlutterMap), findsOneWidget);
     });
   });
+
+  group('accessibility', () {
+    testWidgets('zoom and recenter FABs expose Serbian tooltips', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dataRepositoryProvider.overrideWith(() => _Fixture()),
+            nameResolverProvider.overrideWith((ref) async => _resolver),
+          ],
+          child: MaterialApp(
+            home: MapaScreen(tileProvider: _NoOpTileProvider()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byTooltip('Uvećaj'), findsOneWidget);
+      expect(find.byTooltip('Umanji'), findsOneWidget);
+      expect(find.byTooltip('Centriraj mapu'), findsOneWidget);
+    });
+
+    testWidgets('zoom and recenter FABs meet 48dp minimum tap target', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dataRepositoryProvider.overrideWith(() => _Fixture()),
+            nameResolverProvider.overrideWith((ref) async => _resolver),
+          ],
+          child: MaterialApp(
+            home: MapaScreen(tileProvider: _NoOpTileProvider()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      for (final tooltip in ['Uvećaj', 'Umanji', 'Centriraj mapu']) {
+        final fab = tester.widget<FloatingActionButton>(
+          find.ancestor(
+            of: find.byTooltip(tooltip),
+            matching: find.byType(FloatingActionButton),
+          ),
+        );
+        expect(
+          fab.materialTapTargetSize,
+          MaterialTapTargetSize.padded,
+          reason:
+              '$tooltip must use MaterialTapTargetSize.padded so the hit '
+              'region meets the 48dp minimum regardless of visual size.',
+        );
+      }
+    });
+
+    testWidgets('zoom and recenter FAB callbacks run without exceptions', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dataRepositoryProvider.overrideWith(() => _Fixture()),
+            nameResolverProvider.overrideWith((ref) async => _resolver),
+          ],
+          child: MaterialApp(
+            home: MapaScreen(tileProvider: _NoOpTileProvider()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      for (final tooltip in ['Uvećaj', 'Umanji', 'Centriraj mapu']) {
+        await tester.tap(find.byTooltip(tooltip));
+        await tester.pump();
+      }
+    });
+  });
 }
 
 // Returns a transparent 1x1 PNG without making network requests.

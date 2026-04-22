@@ -218,6 +218,67 @@ void main() {
     );
   });
 
+  group('accessibility', () {
+    testWidgets('trend line chart announces a summary for the opština', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      try {
+        await tester.pumpWidget(_buildApp());
+        await tester.pumpAndSettle();
+
+        // Latest snapshot Barajevo total active
+        // = familyFarm(100) + company(10) = 110, seeding the trend headline.
+        expect(
+          find.bySemanticsLabel(
+            RegExp(
+              r'Grafikon kretanja aktivnih gazdinstava za opštinu Barajevo.*110',
+            ),
+          ),
+          findsOneWidget,
+        );
+      } finally {
+        handle.dispose();
+      }
+    });
+
+    testWidgets('farm size bar chart announces a summary with total farms', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      try {
+        await tester.pumpWidget(_buildApp());
+        await tester.pumpAndSettle();
+
+        // Total farms = 500 + 100 + 20 + 3 = 623
+        expect(
+          find.bySemanticsLabel(RegExp(r'Grafikon.*veličin.*Barajevo.*623')),
+          findsOneWidget,
+        );
+      } finally {
+        handle.dispose();
+      }
+    });
+
+    testWidgets('age bar chart announces a summary with total operators', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      try {
+        await tester.pumpWidget(_buildApp());
+        await tester.pumpAndSettle();
+
+        // Total operators = 50 + 120 = 170
+        expect(
+          find.bySemanticsLabel(RegExp(r'Grafikon.*starosn.*Barajevo.*170')),
+          findsOneWidget,
+        );
+      } finally {
+        handle.dispose();
+      }
+    });
+  });
+
   group('desktop (>= 1024px)', () {
     testWidgets('renders org forms and chart side by side', (tester) async {
       tester.view.physicalSize = const Size(1200, 800);
