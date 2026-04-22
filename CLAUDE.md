@@ -180,3 +180,16 @@ YOU MUST follow this debugging framework for ANY technical issue:
 - Document architectural decisions and their outcomes for future reference
 - Track patterns in user feedback to improve collaboration over time
 - When you notice something that should be fixed but is unrelated to your current task, document it in your journal rather than fixing it immediately
+
+### Memory Hygiene (MEMORY.md and journal)
+
+NEVER write the following to memory or the journal as status — they rot and lie to future sessions:
+
+- Branch names with state ("10 commits ahead", "currently on X") — git is authoritative, always re-derive
+- Test counts, coverage percentages, analyzer pass/fail — re-run the tool
+- File paths to in-progress files, plan files, or "next task" docs — filesystem is authoritative
+- "Current work" / "next task" / "in-progress" blocks — these change between sessions and will be wrong within days
+
+Memory and the journal are for **durable facts**: architectural decisions, the *why* behind a choice, user preferences, reasoning that outlives a branch, lessons learned from incidents.
+
+Before writing a memory, ask: "will this claim still be true in 3 weeks without anyone updating it?" If no, don't write it — re-derive from the authoritative source (git, filesystem, test runner) at session start.
