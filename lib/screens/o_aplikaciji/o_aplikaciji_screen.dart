@@ -65,9 +65,9 @@ class _OAplikacijiScreenState extends State<OAplikacijiScreen> {
         buildFeedbackUri(info),
         mode: LaunchMode.externalApplication,
       );
-      if (!opened && mounted) _showSnack(_feedbackErrorMessage);
+      if (!opened && mounted) _showFeedbackFallback();
     } on PlatformException catch (_) {
-      if (mounted) _showSnack(_feedbackErrorMessage);
+      if (mounted) _showFeedbackFallback();
     }
   }
 
@@ -75,6 +75,20 @@ class _OAplikacijiScreenState extends State<OAplikacijiScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _showFeedbackFallback() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(_feedbackErrorMessage),
+        duration: const Duration(seconds: 8),
+        action: SnackBarAction(
+          label: 'Kopiraj',
+          onPressed: () =>
+              Clipboard.setData(const ClipboardData(text: _feedbackEmail)),
+        ),
+      ),
+    );
   }
 
   @override
