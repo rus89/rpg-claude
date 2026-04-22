@@ -355,6 +355,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(RefreshIndicator), findsOneWidget);
   });
+
+  group('accessibility', () {
+    testWidgets('org form bar chart announces a summary with totals', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
+
+      // Snapshot2 active total across all org forms = 1000+800+550+600+350+280
+      // = 3580, which seeds the chart summary.
+      expect(
+        find.bySemanticsLabel(
+          RegExp(r'Grafikon aktivnih gazdinstava.*3\.580'),
+        ),
+        findsOneWidget,
+      );
+      handle.dispose();
+    });
+  });
 }
 
 class _FixtureRepository extends DataRepository {

@@ -215,6 +215,20 @@ void main() {
     expect(find.byType(RefreshIndicator), findsOneWidget);
   });
 
+  group('accessibility', () {
+    testWidgets('line chart announces a trend summary', (tester) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
+
+      expect(
+        find.bySemanticsLabel(RegExp(r'Grafikon.*kretanj.*gazdinstav')),
+        findsOneWidget,
+      );
+      handle.dispose();
+    });
+  });
+
   group('desktop (>= 1024px)', () {
     testWidgets('renders line chart at desktop width', (tester) async {
       tester.view.physicalSize = const Size(1200, 800);
