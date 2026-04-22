@@ -99,7 +99,7 @@ Android 11+ (API 30+) requires declaring intent queries for external schemes. Th
 `https` (Play Store) generally resolves on Android 11+ without an explicit query under `url_launcher` ≥ 6.1.12, so the existing `data.gov.rs` link at [o_aplikaciji_screen.dart:161](lib/screens/o_aplikaciji/o_aplikaciji_screen.dart#L161) works. Only `mailto:` needs the query above.
 
 ### Version stamping
-- Add `package_info_plus: ^8.3.0` to `pubspec.yaml` dependencies.
+- Add `package_info_plus: ^10.1.0` to `pubspec.yaml` dependencies. (Latest stable on pub.dev as of 2026-04-22; the `PackageInfo.fromPlatform()` / `.version` / `.buildNumber` surface used here is unchanged from 8.x.)
 - Fetch `PackageInfo.fromPlatform()` once at screen init via a `FutureBuilder` or read it before building the tile's `onTap`. Cache in a local `String` field so the handler reads synchronously when tapped.
 - Format: `v${info.version}+${info.buildNumber}` → produces "v1.0.1+4" today.
 
@@ -108,7 +108,7 @@ Android 11+ (API 30+) requires declaring intent queries for external schemes. Th
 ```yaml
 dependencies:
   # existing entries…
-  package_info_plus: ^8.3.0
+  package_info_plus: ^10.1.0
 ```
 
 No other additions. `url_launcher` is already present at [pubspec.yaml:21](pubspec.yaml#L21).
@@ -143,7 +143,7 @@ Run `flutter test` — target: all existing tests still pass, plus new ones gree
 
 1. Add `SENDTO`/`mailto` intent to `AndroidManifest.xml` `<queries>` (Feature 3 blocker — do this first so manual Android smoke test later doesn't throw).
 2. Write failing tests (see Tests section).
-3. Add `package_info_plus` to pubspec, run `flutter pub get` (verify `^8.3.0` is still current on pub.dev; take latest stable 8.x if not).
+3. Add `package_info_plus` to pubspec (`^10.1.0` — verified on pub.dev 2026-04-22), run `flutter pub get`.
 4. Implement `_ActionCard` + `shouldShowRateTile` + `_buildFeedbackUri` + tile insertion.
 5. Wrap existing `_DataSourceLink.onTap` at [o_aplikaciji_screen.dart:161](lib/screens/o_aplikaciji/o_aplikaciji_screen.dart#L161) with the same try/catch + SnackBar pattern (consistency).
 6. Wire up `PackageInfo.fromPlatform()` loader.
