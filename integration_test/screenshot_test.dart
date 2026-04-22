@@ -10,8 +10,10 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:rpg_claude/main.dart' as app;
+import 'package:rpg_claude/screens/opstine/opstine_screen.dart';
 import 'package:rpg_claude/screens/pregled/pregled_screen.dart';
 
 void main() {
@@ -80,14 +82,10 @@ void main() {
 
     // 6. Opština detail — pin "Novi Sad" as the showcase. Alphabetical first
     //    would be "Ada", a weak ambassador for a Play Store screenshot.
-    //    ListView is lazy, so scroll the tile into view before tapping.
-    await tester.scrollUntilVisible(
-      find.widgetWithText(ListTile, 'Novi Sad'),
-      200.0,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ListTile, 'Novi Sad'));
+    //    Push via GoRouter directly so we never have to scroll a lazy ListView
+    //    whose internal Scrollable may not be findable from test context.
+    final opstineContext = tester.element(find.byType(OpstineScreen));
+    GoRouter.of(opstineContext).push('/opstine/Novi Sad');
     await tester.pumpAndSettle();
     await settleForScreenshot(tester);
     await binding.takeScreenshot('03_opstina_detail');
