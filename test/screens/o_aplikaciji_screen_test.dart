@@ -3,10 +3,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:rpg_claude/screens/o_aplikaciji/o_aplikaciji_screen.dart';
 import 'package:rpg_claude/theme.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 void main() {
   testWidgets('shows disclaimer text', (tester) async {
@@ -212,6 +215,165 @@ void main() {
       expect(params['body'], startsWith('Verzija aplikacije: v1.0.2+5'));
     });
   });
+
+  group('launch failure fallbacks', () {
+    setUp(() {
+      PackageInfo.setMockInitialValues(
+        appName: 'GeoAgro Srbija',
+        packageName: 'com.serbiaOpenData.rpg_claude',
+        version: '1.0.1',
+        buildNumber: '4',
+        buildSignature: '',
+      );
+    });
+
+    Future<_RecordingUrlLauncher> installLauncher({
+      bool result = true,
+      Object? throwError,
+    }) async {
+      final original = UrlLauncherPlatform.instance;
+      final launcher = _RecordingUrlLauncher(
+        result: result,
+        throwError: throwError,
+      );
+      UrlLauncherPlatform.instance = launcher;
+      addTearDown(() => UrlLauncherPlatform.instance = original);
+      return launcher;
+    }
+
+    Future<void> pumpAt(WidgetTester tester, {Size? size}) async {
+      if (size != null) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+      }
+      await tester.pumpWidget(
+        MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('rate tile shows link error snackbar when launch throws', (
+      tester,
+    ) async {
+      await installLauncher(throwError: PlatformException(code: 'FAILED'));
+      await pumpAt(tester, size: const Size(800, 2000));
+
+      await tester.tap(find.text('Oceni aplikaciju'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Nije moguće otvoriti link.'), findsOneWidget);
+    });
+
+    testWidgets(
+      'rate tile shows link error snackbar when launch returns false',
+      (tester) async {
+        await installLauncher(result: false);
+        await pumpAt(tester, size: const Size(800, 2000));
+
+        await tester.tap(find.text('Oceni aplikaciju'));
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(find.text('Nije moguće otvoriti link.'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'feedback tile shows copyable feedback error snackbar when launch throws',
+      (tester) async {
+        await installLauncher(throwError: PlatformException(code: 'FAILED'));
+        await pumpAt(tester, size: const Size(800, 2000));
+
+        await tester.tap(find.text('Prijavite grešku ili predlog'));
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        // The SnackBar text must surface the fallback email so the user has
+        // something they can act on.
+        expect(
+          find.textContaining('serbiaopendataapps@gmail.com'),
+          findsOneWidget,
+        );
+        // And a Kopiraj action so they can actually copy the email.
+        final action = tester.widget<SnackBarAction>(
+          find.byType(SnackBarAction),
+        );
+        expect(action.label, 'Kopiraj');
+      },
+    );
+
+    testWidgets(
+      'feedback tile Kopiraj action writes the email to the clipboard',
+      (tester) async {
+        await installLauncher(throwError: PlatformException(code: 'FAILED'));
+
+        final clipboardCalls = <MethodCall>[];
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        messenger.setMockMethodCallHandler(SystemChannels.platform, (
+          call,
+        ) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboardCalls.add(call);
+          }
+          return null;
+        });
+        addTearDown(
+          () =>
+              messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+        );
+
+        await pumpAt(tester, size: const Size(800, 2000));
+
+        await tester.tap(find.text('Prijavite grešku ili predlog'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Kopiraj'));
+        await tester.pumpAndSettle();
+
+        expect(clipboardCalls, hasLength(1));
+        final args = clipboardCalls.single.arguments as Map;
+        expect(args['text'], 'serbiaopendataapps@gmail.com');
+      },
+    );
+
+    testWidgets('data source link shows snackbar when launch throws', (
+      tester,
+    ) async {
+      await installLauncher(throwError: PlatformException(code: 'FAILED'));
+      await pumpAt(tester);
+
+      await tester.tap(find.text('data.gov.rs'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Nije moguće otvoriti link.'), findsOneWidget);
+    });
+  });
+}
+
+// Records launchUrl calls so tests can verify the exact URL is passed.
+class _RecordingUrlLauncher extends Fake
+    with MockPlatformInterfaceMixin
+    implements UrlLauncherPlatform {
+  _RecordingUrlLauncher({this.result = true, this.throwError});
+
+  final bool result;
+  final Object? throwError;
+  final List<String> launched = [];
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    launched.add(url);
+    if (throwError != null) throw throwError!;
+    return result;
+  }
+
+  @override
+  Future<bool> canLaunch(String url) async => true;
 }
 
 // Returns the nearest Opacity ancestor of [of], or null if none exists.
