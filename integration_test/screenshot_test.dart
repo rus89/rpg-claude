@@ -13,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:rpg_claude/main.dart' as app;
-import 'package:rpg_claude/screens/opstine/opstine_screen.dart';
 import 'package:rpg_claude/screens/pregled/pregled_screen.dart';
 
 void main() {
@@ -31,13 +30,6 @@ void main() {
   testWidgets('capture Play Store screenshots', (tester) async {
     // Note: /o-aplikaciji (info) tab is intentionally NOT captured — About
     // screens rarely perform well as Play Store marketing material.
-
-    // Scope icon lookups to the bottom NavigationBar so future icon reuse
-    // inside any screen can't accidentally match a tap target.
-    Finder navIcon(IconData icon) => find.descendant(
-      of: find.byType(NavigationBar),
-      matching: find.byIcon(icon),
-    );
 
     // 1. Launch the real app. Do NOT await — app.main() calls runApp() which
     //    never returns; awaiting hangs the test forever.
@@ -60,6 +52,10 @@ void main() {
       );
     }
 
+    // MaterialApp sits at the root and always matches exactly once — a stable
+    // anchor for GoRouter.of() across every navigation below.
+    GoRouter router() => GoRouter.of(tester.element(find.byType(MaterialApp)));
+
     // 3. Switch the Flutter surface to image-capture mode. Must be called once,
     //    after the UI is stable, before any takeScreenshot.
     await binding.convertFlutterSurfaceToImage();
@@ -68,8 +64,13 @@ void main() {
     await settleForScreenshot(tester);
     await binding.takeScreenshot('01_pregled');
 
-    // 5. Opštine list — bottom-nav Icons.list.
-    await tester.tap(navIcon(Icons.list));
+    // Navigate via GoRouter rather than tapping the nav chrome. Mobile shows
+    // a NavigationBar at the bottom; the tablet_10 viewport crosses the
+    // 1024 dp desktop breakpoint in lib/layout/breakpoints.dart and shows an
+    // AppBar with TextButtons instead. GoRouter works in both layouts.
+
+    // 5. Opštine list.
+    router().go('/opstine');
     await tester.pumpAndSettle();
     await settleForScreenshot(tester);
     await binding.takeScreenshot('02_opstine');
@@ -82,25 +83,22 @@ void main() {
 
     // 6. Opština detail — pin "Novi Sad" as the showcase. Alphabetical first
     //    would be "Ada", a weak ambassador for a Play Store screenshot.
-    //    Push via GoRouter directly so we never have to scroll a lazy ListView
-    //    whose internal Scrollable may not be findable from test context.
-    final opstineContext = tester.element(find.byType(OpstineScreen));
-    GoRouter.of(opstineContext).push('/opstine/Novi Sad');
+    router().push('/opstine/Novi Sad');
     await tester.pumpAndSettle();
     await settleForScreenshot(tester);
     await binding.takeScreenshot('03_opstina_detail');
-    await tester.tap(find.byType(BackButton));
+    router().pop();
     await tester.pumpAndSettle();
 
-    // 7. Trendovi — bottom-nav Icons.show_chart.
-    await tester.tap(navIcon(Icons.show_chart));
+    // 7. Trendovi.
+    router().go('/trendovi');
     await tester.pumpAndSettle();
     await settleForScreenshot(tester);
     await binding.takeScreenshot('04_trendovi');
 
     // 8. Mapa — flutter_map tile loading never idles, so pumpAndSettle would
     //    hang. 15 s is sized for the largest tablet viewport.
-    await tester.tap(navIcon(Icons.map));
+    router().go('/mapa');
     await tester.pump(const Duration(milliseconds: 300));
     await Future.delayed(const Duration(seconds: 15));
     await settleForScreenshot(tester);
