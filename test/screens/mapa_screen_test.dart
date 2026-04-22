@@ -484,6 +484,60 @@ void main() {
       expect(find.byType(FlutterMap), findsOneWidget);
     });
   });
+
+  group('accessibility', () {
+    testWidgets('zoom and recenter FABs expose Serbian tooltips', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dataRepositoryProvider.overrideWith(() => _Fixture()),
+            nameResolverProvider.overrideWith((ref) async => _resolver),
+          ],
+          child: MaterialApp(
+            home: MapaScreen(tileProvider: _NoOpTileProvider()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byTooltip('Uvećaj'), findsOneWidget);
+      expect(find.byTooltip('Umanji'), findsOneWidget);
+      expect(find.byTooltip('Centriraj mapu'), findsOneWidget);
+    });
+
+    testWidgets('zoom and recenter FABs meet 48dp minimum tap target', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dataRepositoryProvider.overrideWith(() => _Fixture()),
+            nameResolverProvider.overrideWith((ref) async => _resolver),
+          ],
+          child: MaterialApp(
+            home: MapaScreen(tileProvider: _NoOpTileProvider()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      for (final tooltip in ['Uvećaj', 'Umanji', 'Centriraj mapu']) {
+        final size = tester.getSize(find.byTooltip(tooltip));
+        expect(
+          size.width,
+          greaterThanOrEqualTo(48),
+          reason: '$tooltip width is ${size.width}, must be >= 48dp',
+        );
+        expect(
+          size.height,
+          greaterThanOrEqualTo(48),
+          reason: '$tooltip height is ${size.height}, must be >= 48dp',
+        );
+      }
+    });
+  });
 }
 
 // Returns a transparent 1x1 PNG without making network requests.
