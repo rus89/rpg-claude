@@ -7,8 +7,17 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-# TODO(project): on Apple Silicon use arm64-v8a; on Intel use x86_64.
-SYSTEM_IMAGE="system-images;android-34;google_apis;arm64-v8a"
+# ABI auto-detected from host: arm64 → arm64-v8a, x86_64 → x86_64.
+HOST_ARCH=$(uname -m)
+case "$HOST_ARCH" in
+  arm64)    ABI="arm64-v8a" ;;
+  x86_64)   ABI="x86_64" ;;
+  *)
+    echo "ERROR: Unsupported host architecture: $HOST_ARCH" >&2
+    exit 1
+    ;;
+esac
+SYSTEM_IMAGE="system-images;android-34;google_apis;${ABI}"
 
 # Bash 3.2 (default on macOS) lacks associative arrays. Use a case function.
 avd_name_for() {
@@ -51,6 +60,12 @@ run_device() {
   echo ""
   echo "=== Processing device: ${device_name} (AVD: ${avd_name}) ==="
 
+  # Capture the set of emulator serials BEFORE boot. Sequential runs can leave
+  # a not-yet-fully-shutdown prior serial in `adb devices`; diffing pre vs
+  # post isolates the serial that belongs to this boot.
+  local pre_serials
+  pre_serials=$(adb devices | grep 'emulator-' | awk '{print $1}' | sort)
+
   # Boot emulator in background; save PID for cleanup trap.
   emulator -avd "${avd_name}" &
   local EMULATOR_PID=$!
@@ -63,7 +78,9 @@ run_device() {
   while [ -z "$DEVICE_ID" ]; do
     sleep 3
     appear_waited=$((appear_waited + 3))
-    DEVICE_ID=$(adb devices | grep 'emulator-' | head -1 | awk '{print $1}')
+    local current_serials
+    current_serials=$(adb devices | grep 'emulator-' | awk '{print $1}' | sort)
+    DEVICE_ID=$(comm -23 <(echo "$current_serials") <(echo "$pre_serials") | head -1)
     if [ "$appear_waited" -ge 120 ] && [ -z "$DEVICE_ID" ]; then
       echo "ERROR: Emulator did not appear in adb devices within 2 minutes"
       exit 1
