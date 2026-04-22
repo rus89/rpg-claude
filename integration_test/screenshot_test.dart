@@ -52,9 +52,12 @@ void main() {
       );
     }
 
-    // MaterialApp sits at the root and always matches exactly once — a stable
-    // anchor for GoRouter.of() across every navigation below.
-    GoRouter router() => GoRouter.of(tester.element(find.byType(MaterialApp)));
+    // Grab the GoRouter once from a descendant context (PregledScreen sits
+    // inside the Router's InheritedGoRouter). The GoRouter instance is stable
+    // for the app lifetime, so we keep the reference and reuse it across every
+    // navigation below. MaterialApp itself can't be used — its own context
+    // sits ABOVE the InheritedGoRouter provider and GoRouter.of would assert.
+    final router = GoRouter.of(tester.element(find.byType(PregledScreen)));
 
     // 3. Switch the Flutter surface to image-capture mode. Must be called once,
     //    after the UI is stable, before any takeScreenshot.
@@ -70,7 +73,7 @@ void main() {
     // AppBar with TextButtons instead. GoRouter works in both layouts.
 
     // 5. Opštine list.
-    router().go('/opstine');
+    router.go('/opstine');
     await tester.pumpAndSettle();
     await settleForScreenshot(tester);
     await binding.takeScreenshot('02_opstine');
@@ -83,22 +86,22 @@ void main() {
 
     // 6. Opština detail — pin "Novi Sad" as the showcase. Alphabetical first
     //    would be "Ada", a weak ambassador for a Play Store screenshot.
-    router().push('/opstine/Novi Sad');
+    router.push('/opstine/Novi Sad');
     await tester.pumpAndSettle();
     await settleForScreenshot(tester);
     await binding.takeScreenshot('03_opstina_detail');
-    router().pop();
+    router.pop();
     await tester.pumpAndSettle();
 
     // 7. Trendovi.
-    router().go('/trendovi');
+    router.go('/trendovi');
     await tester.pumpAndSettle();
     await settleForScreenshot(tester);
     await binding.takeScreenshot('04_trendovi');
 
     // 8. Mapa — flutter_map tile loading never idles, so pumpAndSettle would
     //    hang. 15 s is sized for the largest tablet viewport.
-    router().go('/mapa');
+    router.go('/mapa');
     await tester.pump(const Duration(milliseconds: 300));
     await Future.delayed(const Duration(seconds: 15));
     await settleForScreenshot(tester);
