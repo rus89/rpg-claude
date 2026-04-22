@@ -2,8 +2,11 @@
 // ABOUTME: Verifies disclaimer text and data source credit are present.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rpg_claude/screens/o_aplikaciji/o_aplikaciji_screen.dart';
+import 'package:rpg_claude/theme.dart';
 
 void main() {
   testWidgets('shows disclaimer text', (tester) async {
@@ -50,6 +53,85 @@ void main() {
       );
       expect(find.textContaining('nezavisan'), findsWidgets);
       expect(find.byIcon(Icons.info_outline), findsOneWidget);
+    });
+  });
+
+  group('action tiles', () {
+    setUp(() {
+      PackageInfo.setMockInitialValues(
+        appName: 'GeoAgro Srbija',
+        packageName: 'com.serbiaOpenData.rpg_claude',
+        version: '1.0.1',
+        buildNumber: '4',
+        buildSignature: '',
+      );
+    });
+
+    testWidgets('renders both action tiles on non-web', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Oceni aplikaciju'), findsOneWidget);
+      expect(find.text('Prijavite grešku ili predlog'), findsOneWidget);
+    });
+
+    testWidgets(
+      'rate tile exposes button semantics with accessibility label',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 2000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        );
+        await tester.pumpAndSettle();
+
+        final data = tester
+            .getSemantics(find.byIcon(Icons.star_rate))
+            .getSemanticsData();
+        expect(
+          data.label,
+          contains('Oceni aplikaciju u Google Play prodavnici'),
+        );
+        // ignore: deprecated_member_use — flagsCollection is newer but SemanticsData.hasFlag still works across supported Flutter versions.
+        expect(data.hasFlag(SemanticsFlag.isButton), isTrue);
+        // ignore: deprecated_member_use
+        expect(data.hasFlag(SemanticsFlag.isEnabled), isTrue);
+        expect(data.hasAction(SemanticsAction.tap), isTrue);
+        handle.dispose();
+      },
+    );
+  });
+
+  group('shouldShowRateTile', () {
+    test('returns false on web', () {
+      expect(shouldShowRateTile(isWeb: true), isFalse);
+    });
+
+    test('returns true off web', () {
+      expect(shouldShowRateTile(isWeb: false), isTrue);
+    });
+  });
+
+  group('buildFeedbackUri', () {
+    test('produces mailto with version-stamped body and subject', () {
+      final info = PackageInfo(
+        appName: 'GeoAgro Srbija',
+        packageName: 'com.serbiaOpenData.rpg_claude',
+        version: '1.0.2',
+        buildNumber: '5',
+        buildSignature: '',
+      );
+      final uri = buildFeedbackUri(info);
+      expect(uri.scheme, 'mailto');
+      expect(uri.path, 'serbiaopendataapps@gmail.com');
+      final params = uri.queryParameters;
+      expect(params['subject'], 'GeoAgro Srbija — povratna informacija');
+      expect(params['body'], startsWith('Verzija aplikacije: v1.0.2+5'));
     });
   });
 }
