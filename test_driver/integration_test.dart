@@ -1,17 +1,7 @@
-// ABOUTME: Integration test driver — receives screenshot bytes from device and saves as PNGs.
-// ABOUTME: Runs on the host machine via `flutter drive`, not on the device.
+// ABOUTME: Integration test driver — passes through to the default integration runner.
+// ABOUTME: Screenshots are captured externally via `adb exec-out screencap` from the
+// ABOUTME: capture script watching the test's stdout marker lines, not via onScreenshot.
 
-import 'dart:io';
-import 'package:integration_test/integration_test_driver_extended.dart';
+import 'package:integration_test/integration_test_driver.dart';
 
-Future<void> main() => integrationDriver(
-  onScreenshot:
-      (String name, List<int> bytes, [Map<String, Object?>? args]) async {
-        final deviceName =
-            Platform.environment['SCREENSHOT_DEVICE_NAME'] ?? 'phone';
-        final file = File('assets/screenshots/raw/$deviceName/$name.png');
-        file.parent.createSync(recursive: true);
-        file.writeAsBytesSync(bytes);
-        return true;
-      },
-);
+Future<void> main() => integrationDriver();
