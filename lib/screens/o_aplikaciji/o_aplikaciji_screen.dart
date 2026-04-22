@@ -320,7 +320,7 @@ class _DataSourceLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => launchUrl(Uri.parse(_dataSourceUrl)),
+      onTap: () => _openDataSource(context),
       child: Text(
         'data.gov.rs',
         style: TextStyle(
@@ -329,6 +329,25 @@ class _DataSourceLink extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _openDataSource(BuildContext context) async {
+    try {
+      final opened = await launchUrl(
+        Uri.parse(_dataSourceUrl),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened && context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text(_linkErrorMessage)));
+      }
+    } on PlatformException catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(_linkErrorMessage)));
+    }
   }
 }
 
