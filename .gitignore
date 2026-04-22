@@ -49,3 +49,6 @@ app.*.map.json
 /android/key.properties
 *.jks
 *.keystore
+
+# Claude Code — personal overrides
+.claude/settings.local.json
