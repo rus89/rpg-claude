@@ -1,21 +1,34 @@
-// ABOUTME: Widget test verifying the Mapa screen shows OSM tile attribution.
-// ABOUTME: OSM Tile Usage Policy requires visible attribution whenever OSM tiles are displayed.
+// ABOUTME: Widget test verifying the Mapa screen shows an always-visible OSM
+// ABOUTME: tile attribution link that launches the OSM copyright URL on tap.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:rpg_claude/data/models/org_form.dart';
 import 'package:rpg_claude/data/models/record.dart';
 import 'package:rpg_claude/data/models/snapshot.dart';
 import 'package:rpg_claude/data/name_resolver.dart';
 import 'package:rpg_claude/providers/data_provider.dart';
 import 'package:rpg_claude/screens/mapa/mapa_screen.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 final _resolver = NameResolver(['Barajevo']);
+const _attributionText = '© OpenStreetMap contributors';
+const _semanticsLabel =
+    'OpenStreetMap contributors — otvara openstreetmap.org u pregledaču';
+const _osmCopyrightUrl = 'https://www.openstreetmap.org/copyright';
 
 void main() {
-  testWidgets('shows OpenStreetMap attribution text', (tester) async {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  Future<void> pumpMapa(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -25,9 +38,102 @@ void main() {
         child: MaterialApp(home: MapaScreen(tileProvider: _NoOpTileProvider())),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
+  }
 
-    expect(find.textContaining('OpenStreetMap'), findsOneWidget);
+  testWidgets('shows OSM attribution text visibly without interaction', (
+    tester,
+  ) async {
+    await pumpMapa(tester);
+
+    final textFinder = find.text(_attributionText);
+    expect(textFinder, findsOneWidget);
+
+    // Attribution must be on-screen without any user interaction.
+    final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+    final rect = tester.getRect(textFinder);
+    expect(rect.width, greaterThan(0));
+    expect(rect.height, greaterThan(0));
+    expect(rect.top, greaterThanOrEqualTo(0));
+    expect(rect.left, greaterThanOrEqualTo(0));
+    expect(rect.bottom, lessThanOrEqualTo(size.height));
+    expect(rect.right, lessThanOrEqualTo(size.width));
+
+    // No Offstage or zero-opacity ancestor should hide the text.
+    expect(
+      find.ancestor(of: textFinder, matching: find.byType(Offstage)),
+      findsNothing,
+    );
+    final opacities = tester.widgetList<Opacity>(
+      find.ancestor(of: textFinder, matching: find.byType(Opacity)),
+    );
+    for (final opacity in opacities) {
+      expect(opacity.opacity, greaterThan(0));
+    }
+  });
+
+  testWidgets('exposes the attribution as a link to screen readers', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    addTearDown(handle.dispose);
+
+    await pumpMapa(tester);
+
+    final linkNode = tester.getSemantics(
+      find
+          .ancestor(
+            of: find.text(_attributionText),
+            matching: find.byType(Semantics),
+          )
+          .first,
+    );
+    expect(
+      linkNode,
+      matchesSemantics(isLink: true, label: _semanticsLabel),
+    );
+  });
+
+  testWidgets('attribution tap target is at least 48x48 dp', (tester) async {
+    await pumpMapa(tester);
+
+    final tapTarget = find.ancestor(
+      of: find.text(_attributionText),
+      matching: find.byType(InkWell),
+    );
+    expect(tapTarget, findsOneWidget);
+
+    final size = tester.getSize(tapTarget);
+    expect(size.width, greaterThanOrEqualTo(48.0));
+    expect(size.height, greaterThanOrEqualTo(48.0));
+  });
+
+  testWidgets('tapping the attribution launches the OSM copyright URL', (
+    tester,
+  ) async {
+    final launcher = _RecordingUrlLauncher();
+    UrlLauncherPlatform.instance = launcher;
+
+    await pumpMapa(tester);
+
+    await tester.tap(find.text(_attributionText));
+    await tester.pumpAndSettle();
+
+    expect(launcher.launched, isNotEmpty);
+    expect(launcher.launched.single, _osmCopyrightUrl);
+  });
+
+  testWidgets('tapping the attribution does not throw when launch fails', (
+    tester,
+  ) async {
+    UrlLauncherPlatform.instance = _RecordingUrlLauncher(result: false);
+
+    await pumpMapa(tester);
+
+    await tester.tap(find.text(_attributionText));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
   });
 }
 
@@ -57,4 +163,23 @@ class _Fixture extends DataRepository {
       ],
     ),
   ];
+}
+
+// Records launchUrl calls so tests can verify the exact URL is passed.
+class _RecordingUrlLauncher extends Fake
+    with MockPlatformInterfaceMixin
+    implements UrlLauncherPlatform {
+  _RecordingUrlLauncher({this.result = true});
+
+  final bool result;
+  final List<String> launched = [];
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    launched.add(url);
+    return result;
+  }
+
+  @override
+  Future<bool> canLaunch(String url) async => true;
 }
