@@ -463,6 +463,11 @@ class _BarChartSection extends StatelessWidget {
     }
 
     final maxValue = byOrgForm.values.fold(0, (a, b) => a > b ? a : b);
+    final total = byOrgForm.values.fold(0, (a, b) => a + b);
+    final fmt = NumberFormat('#,###', 'sr');
+    final semanticLabel =
+        'Grafikon aktivnih gazdinstava po obliku organizacije. '
+        'Ukupno ${fmt.format(total)} gazdinstava.';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -500,56 +505,60 @@ class _BarChartSection extends StatelessWidget {
               );
             }).toList();
 
-            return SizedBox(
-              height: isDesktop(context) ? 360 : 240,
-              child: BarChart(
-                BarChartData(
-                  maxY: maxValue * 1.15,
-                  barGroups: barGroups,
-                  barTouchData: BarTouchData(
-                    enabled: !permanent,
-                    touchTooltipData: BarTouchTooltipData(
-                      getTooltipColor: (_) =>
-                          const Color.fromARGB(255, 237, 191, 136),
-                      fitInsideVertically: true,
-                      fitInsideHorizontally: true,
-                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        final fmt = NumberFormat('#,###', 'sr');
-                        return BarTooltipItem(
-                          fmt.format(rod.toY.toInt()),
-                          TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.w600,
-                            fontSize: fontSize,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  titlesData: FlTitlesData(
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, _) {
-                          final form = OrgForm.values[value.toInt()];
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              form.displayName.split(' ').first,
-                              style: const TextStyle(fontSize: 9),
+            return Semantics(
+              container: true,
+              label: semanticLabel,
+              child: SizedBox(
+                height: isDesktop(context) ? 360 : 240,
+                child: BarChart(
+                  BarChartData(
+                    maxY: maxValue * 1.15,
+                    barGroups: barGroups,
+                    barTouchData: BarTouchData(
+                      enabled: !permanent,
+                      touchTooltipData: BarTouchTooltipData(
+                        getTooltipColor: (_) =>
+                            const Color.fromARGB(255, 237, 191, 136),
+                        fitInsideVertically: true,
+                        fitInsideHorizontally: true,
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          final fmt = NumberFormat('#,###', 'sr');
+                          return BarTooltipItem(
+                            fmt.format(rod.toY.toInt()),
+                            TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600,
+                              fontSize: fontSize,
                             ),
                           );
                         },
                       ),
                     ),
-                    leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
+                    titlesData: FlTitlesData(
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, _) {
+                            final form = OrgForm.values[value.toInt()];
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                form.displayName.split(' ').first,
+                                style: const TextStyle(fontSize: 9),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      leftTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
                     ),
                   ),
                 ),

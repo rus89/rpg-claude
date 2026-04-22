@@ -367,9 +367,7 @@ void main() {
       // Snapshot2 active total across all org forms = 1000+800+550+600+350+280
       // = 3580, which seeds the chart summary.
       expect(
-        find.bySemanticsLabel(
-          RegExp(r'Grafikon aktivnih gazdinstava.*3\.580'),
-        ),
+        find.bySemanticsLabel(RegExp(r'Grafikon aktivnih gazdinstava.*3\.580')),
         findsOneWidget,
       );
       handle.dispose();

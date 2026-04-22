@@ -211,7 +211,12 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
     }).toList();
 
     final dates = snapshots.map((s) => s.date).toList();
-    return _buildChart(context, spots, dates);
+    return _buildChart(
+      context,
+      spots,
+      dates,
+      semanticLabel: _trendLabel('broja gazdinstava', spots),
+    );
   }
 
   Widget _buildVelicinaChart(
@@ -242,7 +247,12 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
         }).toList();
 
         final dates = snapshots.map((s) => s.date).toList();
-        return _buildChart(context, spots, dates);
+        return _buildChart(
+          context,
+          spots,
+          dates,
+          semanticLabel: _trendLabel('broja gazdinstava po veličini', spots),
+        );
       },
     );
   }
@@ -273,85 +283,110 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
         }).toList();
 
         final dates = snapshots.map((s) => s.date).toList();
-        return _buildChart(context, spots, dates);
+        return _buildChart(
+          context,
+          spots,
+          dates,
+          semanticLabel: _trendLabel('broja gazdinstava po starosti', spots),
+        );
       },
     );
+  }
+
+  // Produces a screen-reader label summarising the trend line: the dataset
+  // being plotted and the most recent value so TalkBack users get a headline
+  // number without needing to read each point.
+  String _trendLabel(String what, List<FlSpot> spots) {
+    final fmt = NumberFormat('#,###', 'sr');
+    final scope = _selectedMunicipality ?? 'Srbija';
+    if (spots.isEmpty) {
+      return 'Grafikon kretanja $what kroz vreme za $scope.';
+    }
+    final latest = spots.last.y.toInt();
+    return 'Grafikon kretanja $what kroz vreme za $scope. '
+        'Poslednja vrednost ${fmt.format(latest)}.';
   }
 
   Widget _buildChart(
     BuildContext context,
     List<FlSpot> spots,
-    List<DateTime> dates,
-  ) {
+    List<DateTime> dates, {
+    required String semanticLabel,
+  }) {
     final dateTicks = dates.map((d) => dateToX(d)).toList();
-    return SizedBox(
-      height: isDesktop(context) ? 400 : 280,
-      child: LineChart(
-        LineChartData(
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots,
-              isCurved: false,
-              color: Theme.of(context).colorScheme.primary,
-              dotData: const FlDotData(show: true),
-            ),
-          ],
-          lineTouchData: LineTouchData(
-            touchTooltipData: LineTouchTooltipData(
-              getTooltipColor: (_) => const Color.fromARGB(255, 237, 191, 136),
-              getTooltipItems: (spots) {
-                final fmt = NumberFormat('#,###', 'sr');
-                return spots
-                    .map(
-                      (spot) => LineTooltipItem(
-                        fmt.format(spot.y.toInt()),
-                        const TextStyle(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 11,
+    return Semantics(
+      container: true,
+      label: semanticLabel,
+      child: SizedBox(
+        height: isDesktop(context) ? 400 : 280,
+        child: LineChart(
+          LineChartData(
+            lineBarsData: [
+              LineChartBarData(
+                spots: spots,
+                isCurved: false,
+                color: Theme.of(context).colorScheme.primary,
+                dotData: const FlDotData(show: true),
+              ),
+            ],
+            lineTouchData: LineTouchData(
+              touchTooltipData: LineTouchTooltipData(
+                getTooltipColor: (_) =>
+                    const Color.fromARGB(255, 237, 191, 136),
+                getTooltipItems: (spots) {
+                  final fmt = NumberFormat('#,###', 'sr');
+                  return spots
+                      .map(
+                        (spot) => LineTooltipItem(
+                          fmt.format(spot.y.toInt()),
+                          const TextStyle(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11,
+                          ),
                         ),
-                      ),
-                    )
-                    .toList();
-              },
-            ),
-          ),
-          titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 28,
-                getTitlesWidget: (value, _) {
-                  final idx = dateTicks.indexOf(value);
-                  if (idx < 0) return const SizedBox();
-                  if (idx % 3 != 0 && idx != dateTicks.length - 1) {
-                    return const SizedBox();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      formatDateLabel(dates[idx]),
-                      style: const TextStyle(fontSize: 9),
-                    ),
-                  );
+                      )
+                      .toList();
                 },
               ),
             ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 50,
-                getTitlesWidget: (value, _) => Text(
-                  abbreviateCount(value),
-                  style: const TextStyle(fontSize: 9),
+            titlesData: FlTitlesData(
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 28,
+                  getTitlesWidget: (value, _) {
+                    final idx = dateTicks.indexOf(value);
+                    if (idx < 0) return const SizedBox();
+                    if (idx % 3 != 0 && idx != dateTicks.length - 1) {
+                      return const SizedBox();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        formatDateLabel(dates[idx]),
+                        style: const TextStyle(fontSize: 9),
+                      ),
+                    );
+                  },
                 ),
               ),
-            ),
-            topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 50,
+                  getTitlesWidget: (value, _) => Text(
+                    abbreviateCount(value),
+                    style: const TextStyle(fontSize: 9),
+                  ),
+                ),
+              ),
+              topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
             ),
           ),
         ),
