@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../data/models/age_bracket.dart';
 import '../../data/models/age_snapshot.dart';
 import '../../data/models/farm_size_snapshot.dart';
@@ -173,6 +174,17 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                         secondaryLoading,
                       ),
                     ),
+                  RichAttributionWidget(
+                    showFlutterMapAttribution: false,
+                    attributions: [
+                      TextSourceAttribution(
+                        'OpenStreetMap contributors',
+                        onTap: () => launchUrl(
+                          Uri.parse('https://www.openstreetmap.org/copyright'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               Positioned(
