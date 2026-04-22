@@ -16,6 +16,7 @@ class App extends ConsumerWidget {
       title: 'GeoAgro Srbija',
       routerConfig: router,
       theme: appTheme,
+      debugShowCheckedModeBanner: false,
     );
   }
 }

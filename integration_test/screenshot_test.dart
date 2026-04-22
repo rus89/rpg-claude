@@ -100,10 +100,12 @@ void main() {
     await binding.takeScreenshot('04_trendovi');
 
     // 8. Mapa — flutter_map tile loading never idles, so pumpAndSettle would
-    //    hang. 15 s is sized for the largest tablet viewport.
+    //    hang. 30 s is sized for cold-boot emulators that haven't cached
+    //    OSM tiles yet; 15 s produced screenshots with no tile backdrop
+    //    (choropleth rendered fine, tiles absent) on all three devices.
     router.go('/mapa');
     await tester.pump(const Duration(milliseconds: 300));
-    await Future.delayed(const Duration(seconds: 15));
+    await Future.delayed(const Duration(seconds: 30));
     await settleForScreenshot(tester);
     await binding.takeScreenshot('05_mapa');
   });
