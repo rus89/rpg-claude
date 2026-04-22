@@ -212,14 +212,17 @@ class _OAplikacijiScreenState extends State<OAplikacijiScreen> {
 bool shouldShowRateTile({bool isWeb = kIsWeb}) => !isWeb;
 
 @visibleForTesting
-Uri buildFeedbackUri(PackageInfo info) => Uri(
-  scheme: 'mailto',
-  path: _feedbackEmail,
-  queryParameters: {
-    'subject': _feedbackSubject,
-    'body': 'Verzija aplikacije: v${info.version}+${info.buildNumber}\n\n',
-  },
-);
+Uri buildFeedbackUri(PackageInfo info) {
+  // Encode per RFC 6068 (spaces as %20). Uri.queryParameters would encode
+  // spaces as '+' (form-urlencoded), which strict mailto handlers render
+  // literally instead of treating as space.
+  final body = 'Verzija aplikacije: v${info.version}+${info.buildNumber}\n\n';
+  return Uri.parse(
+    'mailto:$_feedbackEmail'
+    '?subject=${Uri.encodeComponent(_feedbackSubject)}'
+    '&body=${Uri.encodeComponent(body)}',
+  );
+}
 
 class _InfoCard extends StatelessWidget {
   const _InfoCard({

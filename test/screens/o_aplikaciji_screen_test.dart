@@ -241,7 +241,28 @@ void main() {
       expect(uri.path, 'serbiaopendataapps@gmail.com');
       final params = uri.queryParameters;
       expect(params['subject'], 'GeoAgro Srbija — povratna informacija');
-      expect(params['body'], startsWith('Verzija aplikacije: v1.0.2+5'));
+      expect(params['body'], 'Verzija aplikacije: v1.0.2+5\n\n');
+    });
+
+    test('encodes spaces as %20 (RFC 6068), not + (form-urlencoded)', () {
+      // Strict mailto handlers render + literally; only %20 is decoded back
+      // to a space. `Uri.queryParameters` decoding hides the difference,
+      // so this test inspects the raw string.
+      final info = PackageInfo(
+        appName: 'GeoAgro Srbija',
+        packageName: 'com.serbiaOpenData.rpg_claude',
+        version: '1.0.2',
+        buildNumber: '5',
+        buildSignature: '',
+      );
+      final encoded = buildFeedbackUri(info).toString();
+
+      expect(encoded, contains('GeoAgro%20Srbija'));
+      expect(encoded, contains('Verzija%20aplikacije'));
+      expect(encoded, isNot(contains('GeoAgro+Srbija')));
+      expect(encoded, isNot(contains('Verzija+aplikacije')));
+      // Literal '+' between version and build number must survive as %2B.
+      expect(encoded, contains('v1.0.2%2B5'));
     });
   });
 
