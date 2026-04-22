@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../data/models/age_bracket.dart';
 import '../../data/models/age_snapshot.dart';
 import '../../data/models/farm_size_snapshot.dart';
@@ -38,6 +39,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
     const LatLng(42.23, 18.82),
     const LatLng(46.19, 23.01),
   );
+  static const _osmCopyrightUrl = 'https://www.openstreetmap.org/copyright';
   Map<String, dynamic>? _geoJson;
   String? _tappedMunicipality;
   MapMetric _selectedMetric = MapMetric.gazdinstva;
@@ -78,6 +80,23 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
     );
     if (mounted) {
       setState(() => _geoJson = jsonDecode(raw) as Map<String, dynamic>);
+    }
+  }
+
+  Future<void> _openOsmCopyright() async {
+    final uri = Uri.parse(_osmCopyrightUrl);
+    try {
+      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!opened && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nije moguće otvoriti link.')),
+        );
+      }
+    } on PlatformException catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nije moguće otvoriti link.')),
+      );
     }
   }
 
@@ -207,6 +226,13 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                     ),
                   ),
                 ),
+              Positioned(
+                bottom: _tappedMunicipality != null
+                    ? MediaQuery.sizeOf(context).height * 0.4
+                    : 0,
+                left: 0,
+                child: _OsmAttribution(onTap: _openOsmCopyright),
+              ),
               Positioned(
                 bottom: _tappedMunicipality != null
                     ? MediaQuery.sizeOf(context).height * 0.4 + 16
@@ -480,6 +506,43 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
     return coords
         .map((c) => LatLng((c[1] as num).toDouble(), (c[0] as num).toDouble()))
         .toList();
+  }
+}
+
+class _OsmAttribution extends StatelessWidget {
+  const _OsmAttribution({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      link: true,
+      label:
+          'OpenStreetMap contributors — otvara openstreetmap.org u pregledaču',
+      excludeSemantics: true,
+      child: Material(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.85),
+        child: InkWell(
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '© OpenStreetMap contributors',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
