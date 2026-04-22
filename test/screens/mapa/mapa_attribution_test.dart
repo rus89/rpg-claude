@@ -24,7 +24,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   Future<void> pumpMapa(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -59,11 +59,13 @@ void main() {
     expect(rect.bottom, lessThanOrEqualTo(size.height));
     expect(rect.right, lessThanOrEqualTo(size.width));
 
-    // No Offstage or zero-opacity ancestor should hide the text.
-    expect(
+    // No ancestor should hide the text via Offstage or zero opacity.
+    final offstage = tester.widgetList<Offstage>(
       find.ancestor(of: textFinder, matching: find.byType(Offstage)),
-      findsNothing,
     );
+    for (final widget in offstage) {
+      expect(widget.offstage, isFalse);
+    }
     final opacities = tester.widgetList<Opacity>(
       find.ancestor(of: textFinder, matching: find.byType(Opacity)),
     );
@@ -76,8 +78,6 @@ void main() {
     tester,
   ) async {
     final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
-
     await pumpMapa(tester);
 
     final linkNode = tester.getSemantics(
@@ -88,10 +88,9 @@ void main() {
           )
           .first,
     );
-    expect(
-      linkNode,
-      matchesSemantics(isLink: true, label: _semanticsLabel),
-    );
+    expect(linkNode, matchesSemantics(isLink: true, label: _semanticsLabel));
+
+    handle.dispose();
   });
 
   testWidgets('attribution tap target is at least 48x48 dp', (tester) async {
