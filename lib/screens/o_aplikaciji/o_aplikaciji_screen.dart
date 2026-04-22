@@ -106,7 +106,9 @@ class _OAplikacijiScreenState extends State<OAplikacijiScreen> {
       _InfoCard(
         icon: Icons.open_in_new,
         title: 'Izvor podataka',
-        body: 'Podaci potiču od Uprave za agrarna plaćanja i dostupni ' 'su na:',
+        body:
+            'Podaci potiču od Uprave za agrarna plaćanja i dostupni '
+            'su na:',
         link: _DataSourceLink(),
       ),
     ];
@@ -263,10 +265,11 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final disabled = onTap == null;
     return Semantics(
       container: true,
       button: true,
-      enabled: onTap != null,
+      enabled: !disabled,
       label: semanticsLabel,
       onTap: onTap,
       child: DecoratedBox(
@@ -282,7 +285,10 @@ class _ActionCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(icon, color: primary, size: 28),
+                  Opacity(
+                    opacity: disabled ? 0.5 : 1.0,
+                    child: Icon(icon, color: primary, size: 28),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -300,7 +306,10 @@ class _ActionCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right, color: primary),
+                  Opacity(
+                    opacity: disabled ? 0.5 : 1.0,
+                    child: Icon(Icons.chevron_right, color: primary),
+                  ),
                 ],
               ),
             ),

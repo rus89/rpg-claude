@@ -56,6 +56,88 @@ void main() {
     });
   });
 
+  group('feedback tile disabled state', () {
+    testWidgets(
+      'feedback tile reports isEnabled:false and dims icon + chevron before '
+      'PackageInfo loads',
+      (tester) async {
+        final handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        );
+        // Do NOT pumpAndSettle — we want the state before _loadPackageInfo resolves.
+        await tester.pump();
+
+        final data = tester
+            .getSemantics(find.byIcon(Icons.mail_outline))
+            .getSemanticsData();
+        // ignore: deprecated_member_use
+        expect(data.hasFlag(SemanticsFlag.isButton), isTrue);
+        // ignore: deprecated_member_use
+        expect(data.hasFlag(SemanticsFlag.isEnabled), isFalse);
+
+        // The leading icon and trailing chevron must have a visible disabled
+        // affordance so taps don't silently vanish.
+        final mailIconOpacity = _nearestOpacity(
+          tester,
+          find.byIcon(Icons.mail_outline),
+        );
+        expect(mailIconOpacity, isNotNull);
+        expect(mailIconOpacity!.opacity, lessThanOrEqualTo(0.5));
+
+        // The chevron inside the feedback tile should share the disabled
+        // affordance. Scope the search to the feedback tile subtree so we
+        // don't accidentally match the (enabled) rate tile's chevron.
+        final feedbackTile = find.ancestor(
+          of: find.byIcon(Icons.mail_outline),
+          matching: find.byType(Semantics),
+        );
+        final chevron = find.descendant(
+          of: feedbackTile.first,
+          matching: find.byIcon(Icons.chevron_right),
+        );
+        expect(chevron, findsOneWidget);
+        final chevronOpacity = _nearestOpacity(tester, chevron);
+        expect(chevronOpacity, isNotNull);
+        expect(chevronOpacity!.opacity, lessThanOrEqualTo(0.5));
+
+        handle.dispose();
+      },
+    );
+
+    testWidgets(
+      'feedback tile becomes enabled and removes dim once PackageInfo loads',
+      (tester) async {
+        PackageInfo.setMockInitialValues(
+          appName: 'GeoAgro Srbija',
+          packageName: 'com.serbiaOpenData.rpg_claude',
+          version: '1.0.1',
+          buildNumber: '4',
+          buildSignature: '',
+        );
+        final handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        );
+        await tester.pumpAndSettle();
+
+        final data = tester
+            .getSemantics(find.byIcon(Icons.mail_outline))
+            .getSemanticsData();
+        // ignore: deprecated_member_use
+        expect(data.hasFlag(SemanticsFlag.isEnabled), isTrue);
+
+        final mailIconOpacity = _nearestOpacity(
+          tester,
+          find.byIcon(Icons.mail_outline),
+        );
+        // Either there is no dimming ancestor, or it's fully opaque.
+        expect(mailIconOpacity?.opacity ?? 1.0, equals(1.0));
+        handle.dispose();
+      },
+    );
+  });
+
   group('action tiles', () {
     setUp(() {
       PackageInfo.setMockInitialValues(
@@ -76,35 +158,31 @@ void main() {
       expect(find.text('Prijavite grešku ili predlog'), findsOneWidget);
     });
 
-    testWidgets(
-      'rate tile exposes button semantics with accessibility label',
-      (tester) async {
-        tester.view.physicalSize = const Size(800, 2000);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
+    testWidgets('rate tile exposes button semantics with accessibility label', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-        final handle = tester.ensureSemantics();
-        await tester.pumpWidget(
-          MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
-        );
-        await tester.pumpAndSettle();
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+      );
+      await tester.pumpAndSettle();
 
-        final data = tester
-            .getSemantics(find.byIcon(Icons.star_rate))
-            .getSemanticsData();
-        expect(
-          data.label,
-          contains('Oceni aplikaciju u Google Play prodavnici'),
-        );
-        // ignore: deprecated_member_use — flagsCollection is newer but SemanticsData.hasFlag still works across supported Flutter versions.
-        expect(data.hasFlag(SemanticsFlag.isButton), isTrue);
-        // ignore: deprecated_member_use
-        expect(data.hasFlag(SemanticsFlag.isEnabled), isTrue);
-        expect(data.hasAction(SemanticsAction.tap), isTrue);
-        handle.dispose();
-      },
-    );
+      final data = tester
+          .getSemantics(find.byIcon(Icons.star_rate))
+          .getSemanticsData();
+      expect(data.label, contains('Oceni aplikaciju u Google Play prodavnici'));
+      // ignore: deprecated_member_use — flagsCollection is newer but SemanticsData.hasFlag still works across supported Flutter versions.
+      expect(data.hasFlag(SemanticsFlag.isButton), isTrue);
+      // ignore: deprecated_member_use
+      expect(data.hasFlag(SemanticsFlag.isEnabled), isTrue);
+      expect(data.hasAction(SemanticsAction.tap), isTrue);
+      handle.dispose();
+    });
   });
 
   group('shouldShowRateTile', () {
@@ -134,4 +212,15 @@ void main() {
       expect(params['body'], startsWith('Verzija aplikacije: v1.0.2+5'));
     });
   });
+}
+
+// Returns the nearest Opacity ancestor of [of], or null if none exists.
+Opacity? _nearestOpacity(WidgetTester tester, Finder of) {
+  final matches = tester
+      .widgetList<Opacity>(
+        find.ancestor(of: of, matching: find.byType(Opacity)),
+      )
+      .toList();
+  if (matches.isEmpty) return null;
+  return matches.first;
 }
