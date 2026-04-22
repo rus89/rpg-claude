@@ -215,9 +215,10 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    FloatingActionButton(
+                    FloatingActionButton.small(
                       heroTag: 'zoom_in',
                       tooltip: 'Uvećaj',
+                      materialTapTargetSize: MaterialTapTargetSize.padded,
                       onPressed: () => _mapController.move(
                         _mapController.camera.center,
                         _mapController.camera.zoom + 1,
@@ -225,9 +226,10 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                       child: const Icon(Icons.add),
                     ),
                     const SizedBox(height: 8),
-                    FloatingActionButton(
+                    FloatingActionButton.small(
                       heroTag: 'zoom_out',
                       tooltip: 'Umanji',
+                      materialTapTargetSize: MaterialTapTargetSize.padded,
                       onPressed: () => _mapController.move(
                         _mapController.camera.center,
                         _mapController.camera.zoom - 1,
@@ -235,9 +237,10 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
                       child: const Icon(Icons.remove),
                     ),
                     const SizedBox(height: 8),
-                    FloatingActionButton(
+                    FloatingActionButton.small(
                       heroTag: 'recenter',
                       tooltip: 'Centriraj mapu',
+                      materialTapTargetSize: MaterialTapTargetSize.padded,
                       onPressed: () => _mapController.fitCamera(
                         CameraFit.bounds(
                           bounds: _serbiaBounds,
