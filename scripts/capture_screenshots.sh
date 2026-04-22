@@ -111,7 +111,6 @@ run_device() {
   SCREENSHOT_DEVICE_NAME="$device_name" flutter drive \
     --driver=test_driver/integration_test.dart \
     --target=integration_test/screenshot_test.dart \
-    --no-enable-impeller \
     -d "$DEVICE_ID" 2>&1 | while IFS= read -r line; do
       echo "$line"
       if [[ "$line" == *"<<SCREENSHOT>>"* ]]; then

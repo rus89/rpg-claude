@@ -97,11 +97,15 @@ void main() {
     await captureScreen(tester, '04_trendovi');
 
     // 7. Mapa — flutter_map tile loading never idles, so pumpAndSettle would
-    //    hang. 30 s gives cold-boot emulators time to fetch tiles before we
-    //    signal the capture script.
+    //    hang. Continuously pump for 30 s so fetched tiles actually get
+    //    painted into the Flutter surface. A bare Future.delayed doesn't
+    //    advance the frame scheduler under integration_test, so tiles that
+    //    arrive during the wait sit un-rendered until the next pump.
     router.go('/mapa');
     await tester.pump(const Duration(milliseconds: 300));
-    await Future.delayed(const Duration(seconds: 30));
+    for (var i = 0; i < 60; i++) {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
     await captureScreen(tester, '05_mapa');
   });
 }
