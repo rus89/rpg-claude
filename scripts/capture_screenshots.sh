@@ -64,7 +64,7 @@ run_device() {
   # a not-yet-fully-shutdown prior serial in `adb devices`; diffing pre vs
   # post isolates the serial that belongs to this boot.
   local pre_serials
-  pre_serials=$(adb devices | grep 'emulator-' | awk '{print $1}' | sort)
+  pre_serials=$(adb devices | grep 'emulator-' | awk '{print $1}' | sort || true)
 
   # Boot emulator in background; save PID for cleanup trap.
   emulator -avd "${avd_name}" &
@@ -79,7 +79,7 @@ run_device() {
     sleep 3
     appear_waited=$((appear_waited + 3))
     local current_serials
-    current_serials=$(adb devices | grep 'emulator-' | awk '{print $1}' | sort)
+    current_serials=$(adb devices | grep 'emulator-' | awk '{print $1}' | sort || true)
     DEVICE_ID=$(comm -23 <(echo "$current_serials") <(echo "$pre_serials") | head -1)
     if [ "$appear_waited" -ge 120 ] && [ -z "$DEVICE_ID" ]; then
       echo "ERROR: Emulator did not appear in adb devices within 2 minutes"
