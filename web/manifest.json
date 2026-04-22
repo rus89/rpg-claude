@@ -1,11 +1,11 @@
 {
-    "name": "Registrovana Poljoprivredna Gazdinstva Srbije",
+    "name": "GeoAgro Srbija",
     "short_name": "GeoAgro Srbija",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#5C7A45",
     "theme_color": "#5C7A45",
-    "description": "Registrovana Poljoprivredna Gazdinstva Srbije",
+    "description": "GeoAgro Srbija",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

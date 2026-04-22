@@ -1,4 +1,4 @@
-# RPG Serbia — Agricultural Farm Data Explorer
+# GeoAgro Srbija
 
 > Interactive Flutter app visualizing registered agricultural farm data across Serbian municipalities, powered by open government data from [data.gov.rs](https://data.gov.rs).
 

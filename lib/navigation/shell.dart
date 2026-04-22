@@ -27,7 +27,7 @@ class AppShell extends StatelessWidget {
     if (isDesktop(context)) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Registrovana Poljoprivredna Gazdinstva Srbije'),
+          title: const Text('GeoAgro Srbija'),
           actions: [
             for (var i = 0; i < _destinations.length; i++)
               _NavButton(

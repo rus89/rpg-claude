@@ -65,10 +65,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AppBar), findsOneWidget);
-      expect(
-        find.text('Registrovana Poljoprivredna Gazdinstva Srbije'),
-        findsOneWidget,
-      );
+      expect(find.text('GeoAgro Srbija'), findsOneWidget);
     });
 
     testWidgets('does not render bottom NavigationBar', (tester) async {
