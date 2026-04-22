@@ -103,14 +103,33 @@ run_device() {
 
   echo "Device ${DEVICE_ID} fully booted. Running flutter drive..."
 
-  # --no-enable-impeller is MANDATORY: convertFlutterSurfaceToImage() (required
-  # for takeScreenshot on Android) does not work with Impeller — it hangs
-  # silently. Must use Skia for the screenshot run.
+  # The test emits `<<SCREENSHOT>>name<<>>` marker lines via debugPrint at each
+  # capture point. We watch flutter drive's stdout for those markers and fire
+  # `adb exec-out screencap -p` to grab the live rendered surface — bypassing
+  # FlutterImageView, which would otherwise suppress network-sourced tile bitmaps.
+  mkdir -p "assets/screenshots/raw/${device_name}"
   SCREENSHOT_DEVICE_NAME="$device_name" flutter drive \
     --driver=test_driver/integration_test.dart \
     --target=integration_test/screenshot_test.dart \
     --no-enable-impeller \
-    -d "$DEVICE_ID"
+    -d "$DEVICE_ID" 2>&1 | while IFS= read -r line; do
+      echo "$line"
+      if [[ "$line" == *"<<SCREENSHOT>>"* ]]; then
+        shot_name=$(echo "$line" | sed -E 's/.*<<SCREENSHOT>>([A-Za-z0-9_]+)<<>>.*/\1/')
+        echo "[pipeline] capturing ${shot_name} on ${DEVICE_ID}..."
+        adb -s "$DEVICE_ID" exec-out screencap -p \
+          > "assets/screenshots/raw/${device_name}/${shot_name}.png" \
+          || echo "[pipeline] WARNING: screencap failed for ${shot_name}"
+      fi
+    done
+
+  # `while read` runs in a subshell, so PIPESTATUS reflects flutter drive's exit.
+  local DRIVE_EXIT=${PIPESTATUS[0]}
+  if [ "$DRIVE_EXIT" -ne 0 ]; then
+    echo "ERROR: flutter drive exited with code ${DRIVE_EXIT}"
+    adb -s "$DEVICE_ID" emu kill 2>/dev/null || true
+    exit "$DRIVE_EXIT"
+  fi
 
   echo "flutter drive complete. Shutting down ${DEVICE_ID}..."
 

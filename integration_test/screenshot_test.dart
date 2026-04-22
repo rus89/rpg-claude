@@ -16,15 +16,20 @@ import 'package:rpg_claude/main.dart' as app;
 import 'package:rpg_claude/screens/pregled/pregled_screen.dart';
 
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  // Ensure a frame is rasterized into FlutterImageView before each takeScreenshot.
-  // Without this, takeScreenshot blocks its RPC reply waiting for a frame that
-  // never arrives. Do NOT inline — every screenshot call needs it.
-  Future<void> settleForScreenshot(WidgetTester tester) async {
+  // Settle the tree, emit a marker line the capture script watches for, then
+  // wait long enough for the script to run `adb exec-out screencap -p`.
+  // We deliberately do NOT use binding.takeScreenshot / convertFlutterSurfaceToImage
+  // because on Android that path routes through FlutterImageView, which fails to
+  // composite network-sourced tile bitmaps (flutter_map) and produces screenshots
+  // with no OSM tile backdrop. adb screencap captures the live rendered surface.
+  Future<void> captureScreen(WidgetTester tester, String name) async {
     await tester.pump();
     await Future.delayed(const Duration(milliseconds: 500));
     await tester.pump();
+    debugPrint('<<SCREENSHOT>>$name<<>>');
+    await Future.delayed(const Duration(seconds: 2));
   }
 
   testWidgets('capture Play Store screenshots', (tester) async {
@@ -59,24 +64,18 @@ void main() {
     // sits ABOVE the InheritedGoRouter provider and GoRouter.of would assert.
     final router = GoRouter.of(tester.element(find.byType(PregledScreen)));
 
-    // 3. Switch the Flutter surface to image-capture mode. Must be called once,
-    //    after the UI is stable, before any takeScreenshot.
-    await binding.convertFlutterSurfaceToImage();
-
-    // 4. Pregled (home) — already on it after redirect.
-    await settleForScreenshot(tester);
-    await binding.takeScreenshot('01_pregled');
+    // 3. Pregled (home) — already on it after redirect.
+    await captureScreen(tester, '01_pregled');
 
     // Navigate via GoRouter rather than tapping the nav chrome. Mobile shows
     // a NavigationBar at the bottom; the tablet_10 viewport crosses the
     // 1024 dp desktop breakpoint in lib/layout/breakpoints.dart and shows an
     // AppBar with TextButtons instead. GoRouter works in both layouts.
 
-    // 5. Opštine list.
+    // 4. Opštine list.
     router.go('/opstine');
     await tester.pumpAndSettle();
-    await settleForScreenshot(tester);
-    await binding.takeScreenshot('02_opstine');
+    await captureScreen(tester, '02_opstine');
 
     expect(
       find.byType(ListTile),
@@ -84,29 +83,25 @@ void main() {
       reason: 'Municipality list must not be empty — check data.gov.rs',
     );
 
-    // 6. Opština detail — pin "Novi Sad" as the showcase. Alphabetical first
+    // 5. Opština detail — pin "Novi Sad" as the showcase. Alphabetical first
     //    would be "Ada", a weak ambassador for a Play Store screenshot.
     router.push('/opstine/Novi Sad');
     await tester.pumpAndSettle();
-    await settleForScreenshot(tester);
-    await binding.takeScreenshot('03_opstina_detail');
+    await captureScreen(tester, '03_opstina_detail');
     router.pop();
     await tester.pumpAndSettle();
 
-    // 7. Trendovi.
+    // 6. Trendovi.
     router.go('/trendovi');
     await tester.pumpAndSettle();
-    await settleForScreenshot(tester);
-    await binding.takeScreenshot('04_trendovi');
+    await captureScreen(tester, '04_trendovi');
 
-    // 8. Mapa — flutter_map tile loading never idles, so pumpAndSettle would
-    //    hang. 30 s is sized for cold-boot emulators that haven't cached
-    //    OSM tiles yet; 15 s produced screenshots with no tile backdrop
-    //    (choropleth rendered fine, tiles absent) on all three devices.
+    // 7. Mapa — flutter_map tile loading never idles, so pumpAndSettle would
+    //    hang. 30 s gives cold-boot emulators time to fetch tiles before we
+    //    signal the capture script.
     router.go('/mapa');
     await tester.pump(const Duration(milliseconds: 300));
     await Future.delayed(const Duration(seconds: 30));
-    await settleForScreenshot(tester);
-    await binding.takeScreenshot('05_mapa');
+    await captureScreen(tester, '05_mapa');
   });
 }
