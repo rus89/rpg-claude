@@ -223,44 +223,59 @@ void main() {
       tester,
     ) async {
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(_buildApp());
-      await tester.pumpAndSettle();
+      try {
+        await tester.pumpWidget(_buildApp());
+        await tester.pumpAndSettle();
 
-      expect(
-        find.bySemanticsLabel(RegExp(r'Grafikon.*Barajevo')),
-        findsWidgets,
-      );
-      handle.dispose();
+        // Latest snapshot Barajevo total active
+        // = familyFarm(100) + company(10) = 110, seeding the trend headline.
+        expect(
+          find.bySemanticsLabel(
+            RegExp(
+              r'Grafikon kretanja aktivnih gazdinstava za opštinu Barajevo.*110',
+            ),
+          ),
+          findsOneWidget,
+        );
+      } finally {
+        handle.dispose();
+      }
     });
 
     testWidgets('farm size bar chart announces a summary with total farms', (
       tester,
     ) async {
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(_buildApp());
-      await tester.pumpAndSettle();
+      try {
+        await tester.pumpWidget(_buildApp());
+        await tester.pumpAndSettle();
 
-      // Total farms = 500 + 100 + 20 + 3 = 623
-      expect(
-        find.bySemanticsLabel(RegExp(r'Grafikon.*veličin.*Barajevo.*623')),
-        findsOneWidget,
-      );
-      handle.dispose();
+        // Total farms = 500 + 100 + 20 + 3 = 623
+        expect(
+          find.bySemanticsLabel(RegExp(r'Grafikon.*veličin.*Barajevo.*623')),
+          findsOneWidget,
+        );
+      } finally {
+        handle.dispose();
+      }
     });
 
     testWidgets('age bar chart announces a summary with total operators', (
       tester,
     ) async {
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(_buildApp());
-      await tester.pumpAndSettle();
+      try {
+        await tester.pumpWidget(_buildApp());
+        await tester.pumpAndSettle();
 
-      // Total operators = 50 + 120 = 170
-      expect(
-        find.bySemanticsLabel(RegExp(r'Grafikon.*starosn.*Barajevo.*170')),
-        findsOneWidget,
-      );
-      handle.dispose();
+        // Total operators = 50 + 120 = 170
+        expect(
+          find.bySemanticsLabel(RegExp(r'Grafikon.*starosn.*Barajevo.*170')),
+          findsOneWidget,
+        );
+      } finally {
+        handle.dispose();
+      }
     });
   });
 

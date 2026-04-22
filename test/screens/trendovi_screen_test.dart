@@ -218,14 +218,21 @@ void main() {
   group('accessibility', () {
     testWidgets('line chart announces a trend summary', (tester) async {
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(_buildApp());
-      await tester.pumpAndSettle();
+      try {
+        await tester.pumpWidget(_buildApp());
+        await tester.pumpAndSettle();
 
-      expect(
-        find.bySemanticsLabel(RegExp(r'Grafikon.*kretanj.*gazdinstav')),
-        findsOneWidget,
-      );
-      handle.dispose();
+        // Default scope is "Srbija" (no municipality filter); latest Barajevo
+        // familyFarm activeHoldings is 100, so the headline ends in "100".
+        expect(
+          find.bySemanticsLabel(
+            RegExp(r'Grafikon kretanja broja gazdinstava.*Srbija.*100'),
+          ),
+          findsOneWidget,
+        );
+      } finally {
+        handle.dispose();
+      }
     });
   });
 

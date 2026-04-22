@@ -524,17 +524,41 @@ void main() {
       await tester.pump();
 
       for (final tooltip in ['Uvećaj', 'Umanji', 'Centriraj mapu']) {
-        final size = tester.getSize(find.byTooltip(tooltip));
-        expect(
-          size.width,
-          greaterThanOrEqualTo(48),
-          reason: '$tooltip width is ${size.width}, must be >= 48dp',
+        final fab = tester.widget<FloatingActionButton>(
+          find.ancestor(
+            of: find.byTooltip(tooltip),
+            matching: find.byType(FloatingActionButton),
+          ),
         );
         expect(
-          size.height,
-          greaterThanOrEqualTo(48),
-          reason: '$tooltip height is ${size.height}, must be >= 48dp',
+          fab.materialTapTargetSize,
+          MaterialTapTargetSize.padded,
+          reason:
+              '$tooltip must use MaterialTapTargetSize.padded so the hit '
+              'region meets the 48dp minimum regardless of visual size.',
         );
+      }
+    });
+
+    testWidgets('zoom and recenter FAB callbacks run without exceptions', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dataRepositoryProvider.overrideWith(() => _Fixture()),
+            nameResolverProvider.overrideWith((ref) async => _resolver),
+          ],
+          child: MaterialApp(
+            home: MapaScreen(tileProvider: _NoOpTileProvider()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      for (final tooltip in ['Uvećaj', 'Umanji', 'Centriraj mapu']) {
+        await tester.tap(find.byTooltip(tooltip));
+        await tester.pump();
       }
     });
   });
