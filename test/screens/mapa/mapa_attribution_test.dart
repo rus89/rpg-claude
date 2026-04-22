@@ -2,6 +2,7 @@
 // ABOUTME: tile attribution link that launches the OSM copyright URL on tap.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -110,8 +111,10 @@ void main() {
   testWidgets('tapping the attribution launches the OSM copyright URL', (
     tester,
   ) async {
+    final original = UrlLauncherPlatform.instance;
     final launcher = _RecordingUrlLauncher();
     UrlLauncherPlatform.instance = launcher;
+    addTearDown(() => UrlLauncherPlatform.instance = original);
 
     await pumpMapa(tester);
 
@@ -125,7 +128,9 @@ void main() {
   testWidgets('tapping the attribution does not throw when launch fails', (
     tester,
   ) async {
+    final original = UrlLauncherPlatform.instance;
     UrlLauncherPlatform.instance = _RecordingUrlLauncher(result: false);
+    addTearDown(() => UrlLauncherPlatform.instance = original);
 
     await pumpMapa(tester);
 
@@ -133,6 +138,25 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
+    expect(find.text('Nije moguće otvoriti link.'), findsOneWidget);
+  });
+
+  testWidgets('tapping the attribution shows a snackbar when launch throws', (
+    tester,
+  ) async {
+    final original = UrlLauncherPlatform.instance;
+    UrlLauncherPlatform.instance = _RecordingUrlLauncher(
+      throwError: PlatformException(code: 'FAILED'),
+    );
+    addTearDown(() => UrlLauncherPlatform.instance = original);
+
+    await pumpMapa(tester);
+
+    await tester.tap(find.text(_attributionText));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Nije moguće otvoriti link.'), findsOneWidget);
   });
 }
 
@@ -168,14 +192,16 @@ class _Fixture extends DataRepository {
 class _RecordingUrlLauncher extends Fake
     with MockPlatformInterfaceMixin
     implements UrlLauncherPlatform {
-  _RecordingUrlLauncher({this.result = true});
+  _RecordingUrlLauncher({this.result = true, this.throwError});
 
   final bool result;
+  final Object? throwError;
   final List<String> launched = [];
 
   @override
   Future<bool> launchUrl(String url, LaunchOptions options) async {
     launched.add(url);
+    if (throwError != null) throw throwError!;
     return result;
   }
 
