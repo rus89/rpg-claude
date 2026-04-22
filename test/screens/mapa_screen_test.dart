@@ -562,6 +562,129 @@ void main() {
       }
     });
   });
+
+  group('overlay chrome positioning', () {
+    testWidgets(
+      'FAB column bottom edge sits 16dp above overlay top edge when open',
+      (tester) async {
+        final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              dataRepositoryProvider.overrideWith(() => _Fixture()),
+              nameResolverProvider.overrideWith((ref) async => _resolver),
+            ],
+            child: MaterialApp(
+              theme: appTheme,
+              home: MapaScreen(
+                tileProvider: _NoOpTileProvider(),
+                hitNotifier: hitNotifier,
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        hitNotifier.value = const LayerHitResult(
+          hitValues: ['Barajevo'],
+          coordinate: LatLng(44.0, 21.0),
+          point: Point(0, 0),
+        );
+        // First pump processes setState for _tappedMunicipality.
+        await tester.pump();
+        // Second pump lets the post-frame overlay-height measurement
+        // settle into state so chrome repositions above the overlay.
+        await tester.pump();
+
+        final overlayFinder = find.ancestor(
+          of: find.text('Barajevo'),
+          matching: find.byType(ConstrainedBox),
+        );
+        expect(overlayFinder, findsWidgets);
+        final overlayRect = tester.getRect(overlayFinder.first);
+
+        final fabColumnFinder = find
+            .ancestor(
+              of: find.byTooltip('Uvećaj'),
+              matching: find.byType(Column),
+            )
+            .first;
+        final fabRect = tester.getRect(fabColumnFinder);
+
+        // FAB column sits above the overlay: its bottom edge should be
+        // ~16 logical pixels above the overlay's top edge.
+        expect(
+          fabRect.bottom,
+          closeTo(overlayRect.top - 16, 1.0),
+          reason:
+              'FAB column bottom should sit 16dp above overlay top — '
+              'actual gap: ${overlayRect.top - fabRect.bottom} dp.',
+        );
+
+        addTearDown(hitNotifier.dispose);
+      },
+    );
+
+    testWidgets(
+      'OSM attribution bottom edge sits at overlay top edge when open',
+      (tester) async {
+        final hitNotifier = ValueNotifier<LayerHitResult<Object>?>(null);
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              dataRepositoryProvider.overrideWith(() => _Fixture()),
+              nameResolverProvider.overrideWith((ref) async => _resolver),
+            ],
+            child: MaterialApp(
+              theme: appTheme,
+              home: MapaScreen(
+                tileProvider: _NoOpTileProvider(),
+                hitNotifier: hitNotifier,
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        hitNotifier.value = const LayerHitResult(
+          hitValues: ['Barajevo'],
+          coordinate: LatLng(44.0, 21.0),
+          point: Point(0, 0),
+        );
+        await tester.pump();
+        await tester.pump();
+
+        final overlayFinder = find.ancestor(
+          of: find.text('Barajevo'),
+          matching: find.byType(ConstrainedBox),
+        );
+        final overlayRect = tester.getRect(overlayFinder.first);
+
+        // Target the InkWell inside _OsmAttribution — its rect gives the
+        // attribution's outer bottom edge (minus the Semantics wrapper which
+        // paints nothing).
+        final attributionFinder = find.ancestor(
+          of: find.text('© OpenStreetMap contributors'),
+          matching: find.byType(InkWell),
+        );
+        final attributionRect = tester.getRect(attributionFinder.first);
+
+        // Attribution's bottom edge should sit at (or just above) the
+        // overlay's top edge — never floating in the middle of the screen.
+        expect(
+          attributionRect.bottom,
+          closeTo(overlayRect.top, 1.0),
+          reason:
+              'Attribution bottom should sit on overlay top — actual gap: '
+              '${overlayRect.top - attributionRect.bottom} dp.',
+        );
+
+        addTearDown(hitNotifier.dispose);
+      },
+    );
+  });
 }
 
 // Returns a transparent 1x1 PNG without making network requests.
