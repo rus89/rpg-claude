@@ -108,6 +108,35 @@ void main() {
       },
     );
 
+    testWidgets('feedback tile stays disabled and no exception leaks when '
+        'PackageInfo.fromPlatform throws', (tester) async {
+      // Force the package_info_plus method channel to throw so the
+      // _loadPackageInfo catch block runs. This is the scenario a real
+      // device could hit if the plugin fails to initialise.
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      const channel = MethodChannel('dev.fluttercommunity.plus/package_info');
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        throw PlatformException(code: 'UNAVAILABLE');
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+
+      final data = tester
+          .getSemantics(find.byIcon(Icons.mail_outline))
+          .getSemanticsData();
+      // ignore: deprecated_member_use
+      expect(data.hasFlag(SemanticsFlag.isEnabled), isFalse);
+      handle.dispose();
+    });
+
     testWidgets(
       'feedback tile becomes enabled and removes dim once PackageInfo loads',
       (tester) async {
