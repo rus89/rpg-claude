@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ABOUTME: Android network security config — blocks cleartext HTTP across all builds. -->
+<!-- ABOUTME: Referenced from AndroidManifest.xml via android:networkSecurityConfig. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>
