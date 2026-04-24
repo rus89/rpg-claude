@@ -51,7 +51,7 @@ app.*.map.json
 *.keystore
 
 # Claude Code — personal overrides
-.claude/settings.local.json
+.claude/
 
 # Play Store screenshot pipeline — raw captures are machine-generated
 /assets/screenshots/raw/
