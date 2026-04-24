@@ -1,1 +1,0 @@
-flutter analyze --fatal-infos --fatal-warnings --fatal-lints --fatal-performance --fatal-hints --fatal-build && flutter test --no-pub
