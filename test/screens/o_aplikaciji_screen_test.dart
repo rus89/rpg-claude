@@ -360,6 +360,48 @@ void main() {
       },
     );
 
+    testWidgets('privacy tile launches Privacy Policy URL', (tester) async {
+      final launcher = await installLauncher();
+      await pumpAt(tester, size: const Size(800, 2000));
+
+      await tester.tap(find.text('Politika privatnosti'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(launcher.launched, hasLength(1));
+      expect(
+        launcher.launched.single,
+        equals('https://sites.google.com/view/serbiaopendata/home'),
+      );
+    });
+
+    testWidgets('privacy tile shows link error snackbar when launch throws', (
+      tester,
+    ) async {
+      await installLauncher(throwError: PlatformException(code: 'FAILED'));
+      await pumpAt(tester, size: const Size(800, 2000));
+
+      await tester.tap(find.text('Politika privatnosti'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Nije moguće otvoriti link.'), findsOneWidget);
+    });
+
+    testWidgets(
+      'privacy tile shows link error snackbar when launch returns false',
+      (tester) async {
+        await installLauncher(result: false);
+        await pumpAt(tester, size: const Size(800, 2000));
+
+        await tester.tap(find.text('Politika privatnosti'));
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(find.text('Nije moguće otvoriti link.'), findsOneWidget);
+      },
+    );
+
     testWidgets(
       'feedback tile shows copyable feedback error snackbar when launch throws',
       (tester) async {
