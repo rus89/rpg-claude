@@ -12,26 +12,12 @@
 
 **Release split:**
 
-| Release | Tag | Features |
-| --- | --- | --- |
-| 1.0.3+6 | `v1.0.3+6` | Foundation + Privacy Policy tile + `in_app_review` |
-| 1.0.4+7 | `v1.0.4+7` | Dark mode + onboarding |
+| Release | Branch | Tag | Features |
+| --- | --- | --- | --- |
+| 1.0.3+6 | `main` | `v1.0.3+6` | Foundation + Privacy Policy tile + `in_app_review` |
+| 1.0.4+7 | `feature/dark-mode-onboarding` | `v1.0.4+7` | Dark mode + onboarding |
 
----
-
-## Task 0: Create feature branch
-
-**Files:** none (git only)
-
-- [ ] **Step 1: Create and check out branch**
-
-Run:
-
-```bash
-git checkout -b feature/phase-2
-```
-
-Expected: `Switched to a new branch 'feature/phase-2'`.
+Release 1 ships directly on `main` (small surface, low risk). Release 2 is a feature branch that PRs into `main` after the 1.0.3 build bakes on internal track.
 
 ---
 
@@ -739,14 +725,15 @@ Add a session-scoped flag in `_MapaScreenState` (right after the existing fields
   bool _reviewPromptAttempted = false;
 ```
 
-Inside `build()` (around line 117-118 where `dataAsync` is computed), after `final resolver = ref.watch(...)`, add a post-frame trigger that fires once after the first successful render with non-empty data:
+Inside `build()` (around line 117-118 where `dataAsync` is computed), after `final resolver = ref.watch(...)`, add a post-frame trigger that fires once after the first successful render with non-empty data. The flag mutation lives inside the post-frame callback (not in `build()`) so we never write state during a build pass:
 
 ```dart
     if (!_reviewPromptAttempted &&
         dataAsync.hasValue &&
         dataAsync.value!.isNotEmpty) {
-      _reviewPromptAttempted = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_reviewPromptAttempted || !mounted) return;
+        _reviewPromptAttempted = true;
         ref
             .read(reviewPrompterProvider.future)
             .then((p) => p.maybePrompt())
@@ -758,6 +745,8 @@ Inside `build()` (around line 117-118 where `dataAsync` is computed), after `fin
       });
     }
 ```
+
+A redundant `addPostFrameCallback` may be scheduled on the rebuild between when the gate first becomes true and when the callback runs; the in-callback `_reviewPromptAttempted` check makes those subsequent callbacks no-op.
 
 - [ ] **Step 2: Trigger from TrendoviScreen post-frame**
 
@@ -779,8 +768,9 @@ In `build()` after `final dataAsync = ref.watch(dataRepositoryProvider);`, add t
     if (!_reviewPromptAttempted &&
         dataAsync.hasValue &&
         dataAsync.value!.isNotEmpty) {
-      _reviewPromptAttempted = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_reviewPromptAttempted || !mounted) return;
+        _reviewPromptAttempted = true;
         ref
             .read(reviewPrompterProvider.future)
             .then((p) => p.maybePrompt())
@@ -899,18 +889,36 @@ git commit -m "chore: bump version to 1.0.3+6"
 git tag v1.0.3+6 HEAD
 ```
 
-- [ ] **Step 5: Push branch and tag**
+- [ ] **Step 5: Push main and tag**
 
 Confirm with Milan before pushing.
 
 ```bash
-git push -u origin feature/phase-2
+git push origin main
 git push origin v1.0.3+6
 ```
 
 - [ ] **Step 6: Submit Play Console internal track**
 
 Out-of-repo. Upload the AAB built from this commit to Play Console internal track. Paste the Privacy Policy URL into the Main store listing field.
+
+---
+
+## Task 5.5: Cut feature branch for release 2
+
+**Files:** none (git only)
+
+After 1.0.3 is built and uploaded, cut a branch for the dark-mode + onboarding work. Tasks 6–14 run on this branch and PR back into `main` once 1.0.4 has baked on internal track.
+
+- [ ] **Step 1: Create and check out the branch**
+
+```bash
+git checkout main
+git pull
+git checkout -b feature/dark-mode-onboarding
+```
+
+Expected: `Switched to a new branch 'feature/dark-mode-onboarding'`.
 
 ---
 
@@ -1713,6 +1721,7 @@ git commit -m "feat: add theme mode SegmentedButton in O aplikaciji"
 - Modify: `lib/screens/loading/loading_screen.dart`
 - Create: `test/golden/o_aplikaciji_dark_test.dart`
 - Create: `test/golden/pregled_dark_test.dart`
+- Create: `test/golden/trendovi_dark_test.dart`
 
 - [ ] **Step 1: Audit hardcoded colors**
 
@@ -1901,7 +1910,74 @@ flutter test test/golden/pregled_dark_test.dart
 
 Expected: golden created, then test passes.
 
-- [ ] **Step 8: Manual visual smoke (light + dark)**
+- [ ] **Step 8: Write golden test for `TrendoviScreen` (dark)**
+
+Trendovi is the chart-heaviest screen in the app and the place where dark-mode chart-color regressions would land — line color, axis label tokens, chip selected/unselected styling, and the deliberate `Colors.black87` tooltip-foreground decision from Step 1. A golden here pairs with the Pregled golden to give chart palette regressions an automatic regression net.
+
+Mirror the existing `test/screens/trendovi_screen_test.dart` fixture setup. Open that file and copy whatever provider overrides and seed data it uses to render the chart (at minimum `dataRepositoryProvider` and `nameResolverProvider`; copy any others the screen reads from). The Pregled golden's verbatim-copy approach in Step 6 is the same pattern — duplicate the fixtures rather than reaching into the screen test file from the golden test.
+
+Create `test/golden/trendovi_dark_test.dart`:
+
+```dart
+// ABOUTME: Golden test for the Trendovi screen in dark mode.
+// ABOUTME: Catches regressions in chart line color, axis labels, and chip styling.
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:rpg_claude/data/name_resolver.dart';
+import 'package:rpg_claude/providers/data_provider.dart';
+import 'package:rpg_claude/screens/trendovi/trendovi_screen.dart';
+import 'package:rpg_claude/theme.dart';
+
+// Copy fixture repositories, the _resolver constant, and any seed Snapshot
+// data verbatim from test/screens/trendovi_screen_test.dart. Use the same
+// override shape (AsyncNotifier overrideWith for repos) the existing tests
+// use — do not invent a new override pattern here.
+
+void main() {
+  testWidgets('TrendoviScreen dark golden', (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          // Mirror the overrides used in trendovi_screen_test.dart so the
+          // chart renders with seed data instead of its loading state.
+        ],
+        child: MaterialApp(
+          theme: buildAppTheme(Brightness.dark),
+          home: const Scaffold(body: TrendoviScreen()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(TrendoviScreen),
+      matchesGoldenFile('goldens/trendovi_dark.png'),
+    );
+  });
+}
+```
+
+If `trendovi_screen_test.dart` doesn't already seed data thick enough to drive the chart (a single snapshot is typically not enough for a line chart — Trendovi needs at least two data points), extend the seed locally in the golden test rather than mutating the existing screen test.
+
+- [ ] **Step 9: Generate the third golden and run**
+
+Run:
+
+```bash
+flutter test --update-goldens test/golden/trendovi_dark_test.dart
+flutter test test/golden/trendovi_dark_test.dart
+```
+
+Expected: `test/golden/goldens/trendovi_dark.png` is created, then the test passes without `--update-goldens`. If the chart renders an empty state instead of a line, revisit the seed data — the screen needs at least two snapshots with overlapping municipalities to draw a line.
+
+- [ ] **Step 10: Manual visual smoke (light + dark)**
 
 Build and install:
 
@@ -1919,7 +1995,7 @@ In each brightness (toggle via Sistem → Svetla and Sistem → Tamna), step thr
 
 Note: OSM tiles render in light style in both modes. Acceptable for now per the spec.
 
-- [ ] **Step 9: Run analyzer and full test suite**
+- [ ] **Step 11: Run analyzer and full test suite**
 
 Run:
 
@@ -1930,11 +2006,11 @@ flutter test
 
 Expected: zero issues, all tests pass.
 
-- [ ] **Step 10: Commit**
+- [ ] **Step 12: Commit**
 
 ```bash
 git add lib/screens/ test/golden/
-git commit -m "feat: dark palette audit + golden tests for two key screens"
+git commit -m "feat: dark palette audit + golden tests for three key screens"
 ```
 
 ---
@@ -2929,7 +3005,7 @@ git tag v1.0.4+7 HEAD
 Confirm with Milan before pushing.
 
 ```bash
-git push origin feature/phase-2
+git push -u origin feature/dark-mode-onboarding
 git push origin v1.0.4+7
 ```
 
@@ -2939,4 +3015,4 @@ Out-of-repo. Upload the AAB to Play Console internal track.
 
 - [ ] **Step 8: Open PR for the feature branch**
 
-After both releases ship and bake on internal track for at least 24 hours, open a PR from `feature/phase-2` into `main` summarizing both releases.
+After 1.0.4 has baked on internal track for at least 24 hours, open a PR from `feature/dark-mode-onboarding` into `main` summarizing the dark-mode + onboarding work.
