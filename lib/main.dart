@@ -11,10 +11,5 @@ Future<void> main() async {
   final container = ProviderContainer();
   final prefs = await container.read(preferencesProvider.future);
   await prefs.setAppOpenCount(prefs.appOpenCount + 1);
-  runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const App(),
-    ),
-  );
+  runApp(UncontrolledProviderScope(container: container, child: const App()));
 }

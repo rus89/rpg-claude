@@ -4,11 +4,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../layout/breakpoints.dart';
 import '../../layout/screen_scaffold.dart';
+import '../../providers/package_info_provider.dart';
 import '../../theme.dart';
 
 const _playStoreUrl =
@@ -20,32 +22,14 @@ const _feedbackErrorMessage =
     'Nije moguće otvoriti mail klijent. Pošaljite poruku na $_feedbackEmail';
 const _privacyPolicyUrl = 'https://sites.google.com/view/serbiaopendata/home';
 
-class OAplikacijiScreen extends StatefulWidget {
+class OAplikacijiScreen extends ConsumerStatefulWidget {
   const OAplikacijiScreen({super.key});
 
   @override
-  State<OAplikacijiScreen> createState() => _OAplikacijiScreenState();
+  ConsumerState<OAplikacijiScreen> createState() => _OAplikacijiScreenState();
 }
 
-class _OAplikacijiScreenState extends State<OAplikacijiScreen> {
-  PackageInfo? _packageInfo;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPackageInfo();
-  }
-
-  Future<void> _loadPackageInfo() async {
-    try {
-      final info = await PackageInfo.fromPlatform();
-      if (mounted) setState(() => _packageInfo = info);
-    } catch (_) {
-      // PackageInfo unavailable (e.g., test without mock). Feedback tile
-      // stays disabled rather than firing a half-formed mailto.
-    }
-  }
-
+class _OAplikacijiScreenState extends ConsumerState<OAplikacijiScreen> {
   Future<void> _openRate() async {
     try {
       final opened = await launchUrl(
@@ -58,9 +42,7 @@ class _OAplikacijiScreenState extends State<OAplikacijiScreen> {
     }
   }
 
-  Future<void> _openFeedback() async {
-    final info = _packageInfo;
-    if (info == null) return;
+  Future<void> _openFeedback(PackageInfo info) async {
     try {
       final opened = await launchUrl(
         buildFeedbackUri(info),
@@ -108,7 +90,8 @@ class _OAplikacijiScreenState extends State<OAplikacijiScreen> {
   Widget build(BuildContext context) {
     final desktop = isDesktop(context);
     final showRate = shouldShowRateTile();
-    final feedbackReady = _packageInfo != null;
+    final packageInfo = ref.watch(packageInfoProvider).valueOrNull;
+    final feedbackReady = packageInfo != null;
 
     const infoCards = [
       _InfoCard(
@@ -178,13 +161,13 @@ class _OAplikacijiScreenState extends State<OAplikacijiScreen> {
               title: 'Prijavite grešku ili predlog',
               subtitle: 'Pošaljite poruku autoru',
               semanticsLabel: 'Prijavite grešku ili predlog autoru aplikacije',
-              onTap: feedbackReady ? _openFeedback : null,
+              onTap: feedbackReady ? () => _openFeedback(packageInfo) : null,
             ),
             const SizedBox(height: 12),
             _ActionCard(
               icon: Icons.privacy_tip_outlined,
               title: 'Politika privatnosti',
-              subtitle: 'Pogledaj kako koristimo podatke',
+              subtitle: 'Otvori u pregledaču',
               semanticsLabel: 'Otvori politiku privatnosti u pregledaču',
               onTap: _openPrivacyPolicy,
             ),

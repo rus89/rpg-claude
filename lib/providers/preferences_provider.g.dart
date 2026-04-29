@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// TODO(codegen-unblocked): regenerate via build_runner. Hand-written placeholder hashes will diverge from generated values; the Riverpod runtime check is suppressed in release mode (dart.vm.product) and warns in dev only.
+
 part of 'preferences_provider.dart';
 
 // **************************************************************************

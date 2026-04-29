@@ -1,7 +1,6 @@
 // ABOUTME: Typed wrapper around SharedPreferences keyed by domain concepts.
 // ABOUTME: Hides string keys and provides typed get/set per preference.
 
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Preferences {
@@ -15,13 +14,9 @@ class Preferences {
 
   final SharedPreferences _prefs;
 
-  ThemeMode get themeMode => switch (_prefs.getString(_kThemeMode)) {
-    'light' => ThemeMode.light,
-    'dark' => ThemeMode.dark,
-    _ => ThemeMode.system,
-  };
-  Future<void> setThemeMode(ThemeMode mode) =>
-      _prefs.setString(_kThemeMode, mode.name);
+  String? get themeModeName => _prefs.getString(_kThemeMode);
+  Future<void> setThemeModeName(String name) =>
+      _prefs.setString(_kThemeMode, name);
 
   bool get onboardingSeen => _prefs.getBool(_kOnboardingSeen) ?? false;
   Future<void> setOnboardingSeen(bool value) =>
@@ -35,6 +30,7 @@ class Preferences {
     final iso = _prefs.getString(_kLastReviewPromptDate);
     return iso == null ? null : DateTime.tryParse(iso);
   }
+
   Future<void> setLastReviewPromptDate(DateTime date) =>
       _prefs.setString(_kLastReviewPromptDate, date.toIso8601String());
 

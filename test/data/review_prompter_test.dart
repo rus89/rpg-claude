@@ -67,23 +67,25 @@ void main() {
       expect(prompter.isEligible, isFalse);
     });
 
-    test('true when count >= 3, no prior build prompt, no recent date', () async {
-      final prefs = await _prefsWith({'appOpenCount': 3});
-      final prompter = ReviewPrompter(
-        prefs: prefs,
-        currentBuildNumber: '6',
-        review: _FakeReview(),
-        now: () => DateTime.utc(2026, 4, 29),
-      );
-      expect(prompter.isEligible, isTrue);
-    });
+    test(
+      'true when count >= 3, no prior build prompt, no recent date',
+      () async {
+        final prefs = await _prefsWith({'appOpenCount': 3});
+        final prompter = ReviewPrompter(
+          prefs: prefs,
+          currentBuildNumber: '6',
+          review: _FakeReview(),
+          now: () => DateTime.utc(2026, 4, 29),
+        );
+        expect(prompter.isEligible, isTrue);
+      },
+    );
 
     test('true when last prompt was 30 days ago and build differs', () async {
       final prefs = await _prefsWith({
         'appOpenCount': 5,
         'reviewPromptedForBuild': '5',
-        'lastReviewPromptDate':
-            DateTime.utc(2026, 3, 30).toIso8601String(),
+        'lastReviewPromptDate': DateTime.utc(2026, 3, 30).toIso8601String(),
       });
       final prompter = ReviewPrompter(
         prefs: prefs,
@@ -135,20 +137,23 @@ void main() {
       expect(review.requestCalls, 0);
     });
 
-    test('calls requestReview and persists date + build when eligible', () async {
-      final prefs = await _prefsWith({'appOpenCount': 5});
-      final review = _FakeReview();
-      final prompter = ReviewPrompter(
-        prefs: prefs,
-        currentBuildNumber: '6',
-        review: review,
-        now: () => DateTime.utc(2026, 4, 29),
-      );
-      await prompter.maybePrompt();
-      expect(review.requestCalls, 1);
-      expect(prefs.reviewPromptedForBuild, '6');
-      expect(prefs.lastReviewPromptDate, DateTime.utc(2026, 4, 29));
-    });
+    test(
+      'calls requestReview and persists date + build when eligible',
+      () async {
+        final prefs = await _prefsWith({'appOpenCount': 5});
+        final review = _FakeReview();
+        final prompter = ReviewPrompter(
+          prefs: prefs,
+          currentBuildNumber: '6',
+          review: review,
+          now: () => DateTime.utc(2026, 4, 29),
+        );
+        await prompter.maybePrompt();
+        expect(review.requestCalls, 1);
+        expect(prefs.reviewPromptedForBuild, '6');
+        expect(prefs.lastReviewPromptDate, DateTime.utc(2026, 4, 29));
+      },
+    );
 
     test('swallows platform exceptions and never throws', () async {
       final prefs = await _prefsWith({'appOpenCount': 5});

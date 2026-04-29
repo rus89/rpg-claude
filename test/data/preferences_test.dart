@@ -1,7 +1,6 @@
 // ABOUTME: Tests for the typed Preferences wrapper around shared_preferences.
-// ABOUTME: Verifies defaults, roundtrip get/set, and ThemeMode encoding.
+// ABOUTME: Verifies defaults, roundtrip get/set, and themeMode raw-string encoding.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rpg_claude/data/preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,21 +10,21 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  test('themeMode defaults to system when unset', () async {
+  test('themeModeName defaults to null when unset', () async {
     final prefs = Preferences(await SharedPreferences.getInstance());
-    expect(prefs.themeMode, ThemeMode.system);
+    expect(prefs.themeModeName, isNull);
   });
 
-  test('themeMode roundtrips light', () async {
+  test('themeModeName roundtrips light', () async {
     final prefs = Preferences(await SharedPreferences.getInstance());
-    await prefs.setThemeMode(ThemeMode.light);
-    expect(prefs.themeMode, ThemeMode.light);
+    await prefs.setThemeModeName('light');
+    expect(prefs.themeModeName, 'light');
   });
 
-  test('themeMode roundtrips dark', () async {
+  test('themeModeName roundtrips dark', () async {
     final prefs = Preferences(await SharedPreferences.getInstance());
-    await prefs.setThemeMode(ThemeMode.dark);
-    expect(prefs.themeMode, ThemeMode.dark);
+    await prefs.setThemeModeName('dark');
+    expect(prefs.themeModeName, 'dark');
   });
 
   test('onboardingSeen defaults to false', () async {

@@ -63,21 +63,21 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  test('themeMode defaults to system when unset', () async {
+  test('themeModeName defaults to null when unset', () async {
     final prefs = Preferences(await SharedPreferences.getInstance());
-    expect(prefs.themeMode, ThemeMode.system);
+    expect(prefs.themeModeName, isNull);
   });
 
-  test('themeMode roundtrips light', () async {
+  test('themeModeName roundtrips light', () async {
     final prefs = Preferences(await SharedPreferences.getInstance());
-    await prefs.setThemeMode(ThemeMode.light);
-    expect(prefs.themeMode, ThemeMode.light);
+    await prefs.setThemeModeName('light');
+    expect(prefs.themeModeName, 'light');
   });
 
-  test('themeMode roundtrips dark', () async {
+  test('themeModeName roundtrips dark', () async {
     final prefs = Preferences(await SharedPreferences.getInstance());
-    await prefs.setThemeMode(ThemeMode.dark);
-    expect(prefs.themeMode, ThemeMode.dark);
+    await prefs.setThemeModeName('dark');
+    expect(prefs.themeModeName, 'dark');
   });
 
   test('onboardingSeen defaults to false', () async {
@@ -133,7 +133,6 @@ Create `lib/data/preferences.dart`:
 // ABOUTME: Typed wrapper around SharedPreferences keyed by domain concepts.
 // ABOUTME: Hides string keys and provides typed get/set per preference.
 
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Preferences {
@@ -147,13 +146,9 @@ class Preferences {
 
   final SharedPreferences _prefs;
 
-  ThemeMode get themeMode => switch (_prefs.getString(_kThemeMode)) {
-    'light' => ThemeMode.light,
-    'dark' => ThemeMode.dark,
-    _ => ThemeMode.system,
-  };
-  Future<void> setThemeMode(ThemeMode mode) =>
-      _prefs.setString(_kThemeMode, mode.name);
+  String? get themeModeName => _prefs.getString(_kThemeMode);
+  Future<void> setThemeModeName(String name) =>
+      _prefs.setString(_kThemeMode, name);
 
   bool get onboardingSeen => _prefs.getBool(_kOnboardingSeen) ?? false;
   Future<void> setOnboardingSeen(bool value) =>
@@ -1364,7 +1359,7 @@ void main() {
         .setMode(ThemeMode.dark);
 
     expect(container.read(themeModeNotifierProvider), ThemeMode.dark);
-    expect(prefs.themeMode, ThemeMode.dark);
+    expect(prefs.themeModeName, 'dark');
   });
 }
 ```
@@ -1399,16 +1394,22 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
   @override
   ThemeMode build() {
     final prefs = ref.watch(preferencesProvider).valueOrNull;
-    return prefs?.themeMode ?? ThemeMode.system;
+    return _toThemeMode(prefs?.themeModeName);
   }
 
   Future<void> setMode(ThemeMode mode) async {
     final prefs = ref.read(preferencesProvider).valueOrNull;
     if (prefs == null) return;
-    await prefs.setThemeMode(mode);
+    await prefs.setThemeModeName(mode.name);
     state = mode;
   }
 }
+
+ThemeMode _toThemeMode(String? name) => switch (name) {
+  'light' => ThemeMode.light,
+  'dark' => ThemeMode.dark,
+  _ => ThemeMode.system,
+};
 ```
 
 > **UX note (one-frame flash):** While `preferencesProvider` is still loading on cold start, `valueOrNull` is null and the notifier returns `ThemeMode.system`. A user who selected dark will see a single frame of light theme before the notifier rebuilds with the persisted value. The `LoadingScreen` route is shown immediately after, so the flash is bounded to the very first frame. Acceptable for v1 — if a fix becomes desirable, gate `MaterialApp.router` on `ref.watch(preferencesProvider)` resolving and show a brightness-neutral splash until then.

@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -13,31 +14,41 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 
 void main() {
   testWidgets('shows disclaimer text', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: OAplikacijiScreen()));
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: OAplikacijiScreen())),
+    );
     expect(find.textContaining('nezavisan'), findsWidgets);
   });
 
   testWidgets('shows data source credit', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: OAplikacijiScreen()));
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: OAplikacijiScreen())),
+    );
     expect(find.textContaining('data.gov.rs'), findsWidgets);
   });
 
   testWidgets('info sections show leading icons', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: OAplikacijiScreen()));
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: OAplikacijiScreen())),
+    );
     expect(find.byIcon(Icons.info_outline), findsOneWidget);
     expect(find.byIcon(Icons.gavel), findsOneWidget);
     expect(find.byIcon(Icons.open_in_new), findsOneWidget);
   });
 
   testWidgets('shows tappable data source link', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: OAplikacijiScreen()));
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: OAplikacijiScreen())),
+    );
     // The link text should be present and tappable
     expect(find.textContaining('data.gov.rs'), findsWidgets);
     expect(find.byType(InkWell), findsWidgets);
   });
 
   testWidgets('shows guide for all 4 main tabs', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: OAplikacijiScreen()));
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: OAplikacijiScreen())),
+    );
     await tester.scrollUntilVisible(find.text('Pregled'), 100);
     expect(find.text('Pregled'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Opštine'), 100);
@@ -52,7 +63,9 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: OAplikacijiScreen())),
+        const ProviderScope(
+          child: MaterialApp(home: Scaffold(body: OAplikacijiScreen())),
+        ),
       );
       expect(find.textContaining('nezavisan'), findsWidgets);
       expect(find.byIcon(Icons.info_outline), findsOneWidget);
@@ -66,7 +79,12 @@ void main() {
       (tester) async {
         final handle = tester.ensureSemantics();
         await tester.pumpWidget(
-          MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+          ProviderScope(
+            child: MaterialApp(
+              theme: appTheme,
+              home: const OAplikacijiScreen(),
+            ),
+          ),
         );
         // Do NOT pumpAndSettle — we want the state before _loadPackageInfo resolves.
         await tester.pump();
@@ -123,7 +141,9 @@ void main() {
 
       final handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        ProviderScope(
+          child: MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -149,7 +169,12 @@ void main() {
         );
         final handle = tester.ensureSemantics();
         await tester.pumpWidget(
-          MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+          ProviderScope(
+            child: MaterialApp(
+              theme: appTheme,
+              home: const OAplikacijiScreen(),
+            ),
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -183,7 +208,9 @@ void main() {
 
     testWidgets('renders both action tiles on non-web', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        ProviderScope(
+          child: MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        ),
       );
       await tester.pumpAndSettle();
       expect(find.text('Oceni aplikaciju'), findsOneWidget);
@@ -200,7 +227,9 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       await tester.pumpWidget(
-        MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        ProviderScope(
+          child: MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -210,10 +239,7 @@ void main() {
       final data = tester
           .getSemantics(find.byIcon(Icons.privacy_tip_outlined))
           .getSemanticsData();
-      expect(
-        data.label,
-        contains('Otvori politiku privatnosti u pregledaču'),
-      );
+      expect(data.label, contains('Otvori politiku privatnosti u pregledaču'));
       // ignore: deprecated_member_use
       expect(data.hasFlag(SemanticsFlag.isButton), isTrue);
       handle.dispose();
@@ -229,7 +255,9 @@ void main() {
 
       final handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        ProviderScope(
+          child: MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -328,7 +356,9 @@ void main() {
         addTearDown(tester.view.resetDevicePixelRatio);
       }
       await tester.pumpWidget(
-        MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        ProviderScope(
+          child: MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+        ),
       );
       await tester.pumpAndSettle();
     }
