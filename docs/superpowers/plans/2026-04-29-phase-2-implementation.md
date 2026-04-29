@@ -2602,6 +2602,43 @@ void main() {
       '/onboarding',
     );
   });
+
+  testWidgets('data loaded but prefs pending: stays on /ucitavanje', (
+    tester,
+  ) async {
+    // Race-condition guard: if dataRepository resolves before
+    // preferencesProvider, the redirect must hold at /ucitavanje rather than
+    // dispatching past onboarding for a first-time user.
+    final prefsCompleter = Completer<Preferences>();
+    final container = ProviderContainer(
+      overrides: [
+        preferencesProvider.overrideWith((_) => prefsCompleter.future),
+        dataRepositoryProvider.overrideWith(() => _LoadedDataRepository()),
+      ],
+    );
+    addTearDown(container.dispose);
+    await container.read(dataRepositoryProvider.future);
+
+    final router = container.read(routerProvider);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpAndSettle();
+
+    expect(
+      router.routerDelegate.currentConfiguration.uri.toString(),
+      '/ucitavanje',
+    );
+
+    // Resolve prefs with onboardingSeen=false; redirect should now fire.
+    SharedPreferences.setMockInitialValues({});
+    final prefs = Preferences(await SharedPreferences.getInstance());
+    prefsCompleter.complete(prefs);
+    await tester.pumpAndSettle();
+
+    expect(
+      router.routerDelegate.currentConfiguration.uri.toString(),
+      '/onboarding',
+    );
+  });
 }
 ```
 
@@ -2613,7 +2650,7 @@ Run:
 flutter test test/navigation/onboarding_redirect_test.dart
 ```
 
-Expected: all 4 tests fail (the second and third with the `/pregled` outcome that the current router produces, instead of `/onboarding`; the fourth because the route doesn't exist).
+Expected: all 5 tests fail (the second and third with the `/pregled` outcome that the current router produces, instead of `/onboarding`; the fourth because the route doesn't exist; the fifth because there is no race-aware gate yet).
 
 - [ ] **Step 3: Update the router**
 
@@ -2653,15 +2690,17 @@ GoRouter router(Ref ref) {
     redirect: (context, state) {
       final hasData = ref.read(dataRepositoryProvider).hasValue;
       final prefs = ref.read(preferencesProvider).valueOrNull;
-      // Default to true until prefs load so returning users never flash the
-      // onboarding flow on the first frame.
-      final onboardingSeen = prefs?.onboardingSeen ?? true;
-
       final loc = state.matchedLocation;
-      if (!hasData && loc != '/ucitavanje') return '/ucitavanje';
-      if (hasData && loc == '/ucitavanje') {
-        return onboardingSeen ? '/pregled' : '/onboarding';
+
+      // /ucitavanje is the gate: hold until BOTH data and prefs are ready, then
+      // dispatch to /onboarding or /pregled based on onboardingSeen. This
+      // prevents a race where data loads before prefs and a first-time user
+      // gets routed past onboarding.
+      if (loc == '/ucitavanje') {
+        if (!hasData || prefs == null) return null;
+        return prefs.onboardingSeen ? '/pregled' : '/onboarding';
       }
+      if (!hasData) return '/ucitavanje';
       return null;
     },
     routes: [
@@ -2751,7 +2790,7 @@ Run:
 flutter test test/navigation/onboarding_redirect_test.dart
 ```
 
-Expected: all 4 tests pass.
+Expected: all 5 tests pass.
 
 - [ ] **Step 6: Run full test suite**
 
@@ -3013,6 +3052,6 @@ git push origin v1.0.4+7
 
 Out-of-repo. Upload the AAB to Play Console internal track.
 
-- [ ] **Step 8: Open PR for the feature branch**
+- [ ] **Step 8: Open PR and merge to `main`**
 
-After 1.0.4 has baked on internal track for at least 24 hours, open a PR from `feature/dark-mode-onboarding` into `main` summarizing the dark-mode + onboarding work.
+The commit at the `v1.0.4+7` tag is what was uploaded to Play Console — `main` should reflect what was built. Open a PR from `feature/dark-mode-onboarding` into `main` summarizing the dark-mode + onboarding work and merge it once green. Internal track is the safety net for finding regressions; keeping the feature branch open across the bake period only invites drift.
