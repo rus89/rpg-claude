@@ -18,6 +18,7 @@ const _feedbackSubject = 'GeoAgro Srbija — povratna informacija';
 const _linkErrorMessage = 'Nije moguće otvoriti link.';
 const _feedbackErrorMessage =
     'Nije moguće otvoriti mail klijent. Pošaljite poruku na $_feedbackEmail';
+const _privacyPolicyUrl = 'https://sites.google.com/view/serbiaopendata/home';
 
 class OAplikacijiScreen extends StatefulWidget {
   const OAplikacijiScreen({super.key});
@@ -68,6 +69,18 @@ class _OAplikacijiScreenState extends State<OAplikacijiScreen> {
       if (!opened && mounted) _showFeedbackFallback();
     } on PlatformException catch (_) {
       if (mounted) _showFeedbackFallback();
+    }
+  }
+
+  Future<void> _openPrivacyPolicy() async {
+    try {
+      final opened = await launchUrl(
+        Uri.parse(_privacyPolicyUrl),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened && mounted) _showSnack(_linkErrorMessage);
+    } on PlatformException catch (_) {
+      if (mounted) _showSnack(_linkErrorMessage);
     }
   }
 
@@ -166,6 +179,14 @@ class _OAplikacijiScreenState extends State<OAplikacijiScreen> {
               subtitle: 'Pošaljite poruku autoru',
               semanticsLabel: 'Prijavite grešku ili predlog autoru aplikacije',
               onTap: feedbackReady ? _openFeedback : null,
+            ),
+            const SizedBox(height: 12),
+            _ActionCard(
+              icon: Icons.privacy_tip_outlined,
+              title: 'Politika privatnosti',
+              subtitle: 'Pogledaj kako koristimo podatke',
+              semanticsLabel: 'Otvori politiku privatnosti u pregledaču',
+              onTap: _openPrivacyPolicy,
             ),
             const SizedBox(height: 24),
             Text(

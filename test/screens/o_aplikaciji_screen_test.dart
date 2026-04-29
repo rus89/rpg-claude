@@ -190,6 +190,35 @@ void main() {
       expect(find.text('Prijavite grešku ili predlog'), findsOneWidget);
     });
 
+    testWidgets('renders Privacy Policy tile with button semantics', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MaterialApp(theme: appTheme, home: const OAplikacijiScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Politika privatnosti'), findsOneWidget);
+      expect(find.byIcon(Icons.privacy_tip_outlined), findsOneWidget);
+
+      final data = tester
+          .getSemantics(find.byIcon(Icons.privacy_tip_outlined))
+          .getSemanticsData();
+      expect(
+        data.label,
+        contains('Otvori politiku privatnosti u pregledaču'),
+      );
+      // ignore: deprecated_member_use
+      expect(data.hasFlag(SemanticsFlag.isButton), isTrue);
+      handle.dispose();
+    });
+
     testWidgets('rate tile exposes button semantics with accessibility label', (
       tester,
     ) async {
