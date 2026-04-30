@@ -27,7 +27,7 @@ void main() {
     // Check for municipality names that differ only by diacritics/whitespace
     final element = tester.element(find.byType(Scaffold).first);
     final container = ProviderScope.containerOf(element);
-    final snapshots = container.read(dataRepositoryProvider).valueOrNull;
+    final snapshots = container.read(dataRepositoryProvider).value;
     expect(snapshots, isNotNull, reason: 'Data should have loaded');
 
     final allNames = snapshots!
