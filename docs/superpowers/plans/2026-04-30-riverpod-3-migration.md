@@ -102,8 +102,8 @@ After:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod: ^3.3.0
-  riverpod_annotation: ^3.0.3
+  flutter_riverpod: ^3.1.0
+  riverpod_annotation: ^4.0.0
 ```
 
 And in `dev_dependencies`. Before:
@@ -112,17 +112,21 @@ And in `dev_dependencies`. Before:
   riverpod_generator: ^2.6.1
   build_runner: ^2.4.13
   riverpod_lint: ^2.6.1
+  custom_lint: ^0.7.3
 ```
 
 After:
 
 ```yaml
-  riverpod_generator: ^3.0.3
+  riverpod_generator: ^4.0.0
   build_runner: ^2.4.13
   riverpod_lint: ^3.1.0
+  custom_lint: ^0.8.1
 ```
 
-> Do NOT touch `build_runner`, `custom_lint`, `flutter_lints`, or any non-riverpod dep. The pub solver upgrades `analyzer` and `_fe_analyzer_shared` transitively because the new riverpod stack requires it.
+> Do NOT touch `build_runner`, `flutter_lints`, or any non-riverpod dep. **`custom_lint` must be bumped** from `^0.7.3` to `^0.8.1` — `custom_lint 0.7.x` pins `analyzer ^7.0.0`, which blocks the analyzer upgrade. This was discovered during execution: the plan's original "don't touch custom_lint" instruction was over-prescribed. The pub solver upgrades `analyzer` and `_fe_analyzer_shared` transitively once both `riverpod_lint` and `custom_lint` are loosened.
+
+> **Resolved versions reference (Apr 30, 2026)**: After this bump pub picks `flutter_riverpod 3.1.0`, `riverpod_annotation 4.0.0`, `riverpod_generator 4.0.0+1`, `riverpod_lint 3.1.0`, `custom_lint 0.8.1`, `analyzer 8.4.0`, `_fe_analyzer_shared 91.0.0`. The hybrid (`flutter_riverpod 3.x` + `riverpod_annotation 4.x`) is what the pub solver picks; runtime APIs are identical between 3.x and 4.x for our usage.
 
 - [ ] **Step 2: Run pub get**
 
@@ -202,16 +206,19 @@ Generated files will likely diff vs. the hand-written placeholder versions in gi
 - [ ] **Step 1: Run analyzer**
 
 ```bash
-flutter analyze 2>&1 | tail -20
+flutter analyze 2>&1 | tail -25
 ```
 
-Expected: errors about `valueOrNull` being undefined on `AsyncValue<T>`. This is the breaking API change from riverpod 3.x and the only category of error you should see. Count these errors and confirm the count matches the **13 sites** listed in the File Structure table (12 in `lib/` across 7 source files + 1 in `integration_test/app_test.dart`). `flutter analyze` covers `test/` and `integration_test/` by default, so the integration test site will appear in the same output.
+**Actual baseline observed Apr 30, 2026 (18 issues):**
+- **13 errors** — `valueOrNull` undefined on `AsyncValue<T>` (the 13 sites enumerated in Tasks 4–10b). Fixed by Tasks 4 through 10b.
+- **4 info** — `unnecessary_import` of `flutter_riverpod` in 4 provider files (`data_provider.dart`, `package_info_provider.dart`, `preferences_provider.dart`, `review_prompter_provider.dart`). Fixed by Task 11a.
+- **1 error** — `Override isn't a type` at `test/screens/mapa_screen_test.dart:307`. Fixed by Task 11b.
 
-If you see other errors (missing methods, unknown types), riverpod 3.x has a wider API surface change than this plan accounts for — STOP, capture the full output, and ask Milan before continuing.
+If `flutter analyze` shows MORE than these 18 issues, or any in different files, the migration surface is wider than scoped — STOP and ask Milan.
 
 - [ ] **Step 2: Note the failing analyzer count**
 
-Record the count from Step 1 in your scratchpad. After Task 10b it must be 0.
+Expected count at this point: **18 issues** (14 errors + 4 info). After Task 11b, this must drop to 0. Task 11 (final analyzer pass) confirms.
 
 ---
 
@@ -526,6 +533,103 @@ Expected: `No issues found!`
 ```bash
 git add integration_test/app_test.dart
 git commit -m "refactor: replace valueOrNull with .value in integration test"
+```
+
+---
+
+## Task 11a: Remove redundant `flutter_riverpod` imports from provider files
+
+**Files:**
+- Modify: `lib/providers/data_provider.dart:7`
+- Modify: `lib/providers/package_info_provider.dart:4`
+- Modify: `lib/providers/preferences_provider.dart:4`
+- Modify: `lib/providers/review_prompter_provider.dart:4`
+
+> Discovered after Task 2 by `flutter analyze`: in riverpod 4.x, `riverpod_annotation` re-exports the runtime types (`Ref`, `AsyncValue`, etc.) so the `flutter_riverpod` import in these provider files is redundant. The analyzer flags 4 `unnecessary_import` info warnings, one per file. Removing them is mechanical and required for a clean baseline.
+
+- [ ] **Step 1: Remove the redundant import from each of the four files**
+
+In each of the four files, delete the line:
+
+```dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+```
+
+Keep the existing `import 'package:riverpod_annotation/riverpod_annotation.dart';` line — that is the one that supplies all the symbols. Do not delete other imports.
+
+> The screen files under `lib/screens/` ALSO import `flutter_riverpod`, but they need it for `ConsumerWidget`/`ConsumerStatefulWidget` which are NOT re-exported by `riverpod_annotation`. Do not remove those — only the four files listed above.
+
+- [ ] **Step 2: Run analyzer on the four files**
+
+```bash
+flutter analyze lib/providers/data_provider.dart lib/providers/package_info_provider.dart lib/providers/preferences_provider.dart lib/providers/review_prompter_provider.dart 2>&1 | tail -10
+```
+
+Expected: 1 remaining error in `data_provider.dart:44` (`valueOrNull` undefined — fixed by Task 4) for `data_provider.dart`. The other three files should be `No issues found!`. The 4 `unnecessary_import` info warnings must be gone.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add lib/providers/data_provider.dart lib/providers/package_info_provider.dart lib/providers/preferences_provider.dart lib/providers/review_prompter_provider.dart
+git commit -m "refactor: drop redundant flutter_riverpod imports in provider files
+
+riverpod_annotation 4.x re-exports the runtime types (Ref, AsyncValue),
+so the explicit flutter_riverpod import is redundant in files that only
+use those symbols + @Riverpod annotations."
+```
+
+---
+
+## Task 11b: Fix `Override` type reference in `mapa_screen_test.dart`
+
+**Files:**
+- Modify: `test/screens/mapa_screen_test.dart:307`
+
+> Discovered after Task 2 by `flutter analyze`: in riverpod 3.1.0 the `Override` class is no longer publicly exported (it lives in `package:riverpod/src/core/override.dart`). One test file still declares `List<Override>` as a return type, which now fails analysis. Fix is to drop the explicit return type — Dart infers it correctly from the list literal.
+
+- [ ] **Step 1: Drop the explicit return type**
+
+In `test/screens/mapa_screen_test.dart`, line 307. Before:
+
+```dart
+    List<Override> metricOverrides() => [
+      dataRepositoryProvider.overrideWith(() => _Fixture()),
+      nameResolverProvider.overrideWith((ref) async => _resolver),
+      farmSizeRepositoryProvider.overrideWith(
+        () => _FixtureFarmSizeRepository(),
+      ),
+      ageRepositoryProvider.overrideWith(() => _FixtureAgeRepository()),
+    ];
+```
+
+After:
+
+```dart
+    metricOverrides() => [
+      dataRepositoryProvider.overrideWith(() => _Fixture()),
+      nameResolverProvider.overrideWith((ref) async => _resolver),
+      farmSizeRepositoryProvider.overrideWith(
+        () => _FixtureFarmSizeRepository(),
+      ),
+      ageRepositoryProvider.overrideWith(() => _FixtureAgeRepository()),
+    ];
+```
+
+> The function still returns the same list of override objects — just untyped at the function signature, so Dart infers the list type. `ProviderScope.overrides` accepts the inferred type. Five callsites in this file (`overrides: metricOverrides()` at lines 321, 337, 356, 378, 417) continue to work unchanged.
+
+- [ ] **Step 2: Run analyzer on this file**
+
+```bash
+flutter analyze test/screens/mapa_screen_test.dart 2>&1 | tail -5
+```
+
+Expected: `No issues found!`
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add test/screens/mapa_screen_test.dart
+git commit -m "fix(test): drop List<Override> annotation; type is private in riverpod 3.x"
 ```
 
 ---
