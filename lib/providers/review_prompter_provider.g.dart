@@ -1,29 +1,49 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// TODO(codegen-unblocked): regenerate via build_runner. Hand-written placeholder hashes will diverge from generated values; the Riverpod runtime check is suppressed in release mode (dart.vm.product) and warns in dev only.
-
 part of 'review_prompter_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$reviewPrompterHash() => r'b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [reviewPrompter].
 @ProviderFor(reviewPrompter)
-final reviewPrompterProvider = FutureProvider<ReviewPrompter>.internal(
-  reviewPrompter,
-  name: r'reviewPrompterProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$reviewPrompterHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final reviewPrompterProvider = ReviewPrompterProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ReviewPrompterRef = FutureProviderRef<ReviewPrompter>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class ReviewPrompterProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<ReviewPrompter>,
+          ReviewPrompter,
+          FutureOr<ReviewPrompter>
+        >
+    with $FutureModifier<ReviewPrompter>, $FutureProvider<ReviewPrompter> {
+  ReviewPrompterProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'reviewPrompterProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$reviewPrompterHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<ReviewPrompter> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<ReviewPrompter> create(Ref ref) {
+    return reviewPrompter(ref);
+  }
+}
+
+String _$reviewPrompterHash() => r'e90a67f6fb17577d67821b86cd7cc91f492e1917';
