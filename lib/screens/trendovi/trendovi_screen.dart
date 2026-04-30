@@ -93,7 +93,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
             });
       });
     }
-    final resolver = ref.watch(nameResolverProvider).valueOrNull;
+    final resolver = ref.watch(nameResolverProvider).value;
     final allCsvNames = ref.watch(municipalityNamesProvider);
     final displayNames = resolver != null
         ? resolver.allDisplayNames
