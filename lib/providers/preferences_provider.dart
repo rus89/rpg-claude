@@ -1,7 +1,6 @@
 // ABOUTME: Riverpod provider for the Preferences wrapper.
 // ABOUTME: Resolves SharedPreferences once per app process via keepAlive.
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/preferences.dart';
