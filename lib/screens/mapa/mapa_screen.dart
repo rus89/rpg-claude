@@ -130,10 +130,10 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
             .read(reviewPrompterProvider.future)
             .then((p) => p.maybePrompt())
             .catchError((Object _) {
-          // ReviewPrompter swallows its own platform errors; this catch is a
-          // last-resort guard for tests where preferencesProvider /
-          // reviewPrompterProvider build fails without explicit overrides.
-        });
+              // ReviewPrompter swallows its own platform errors; this catch is a
+              // last-resort guard for tests where preferencesProvider /
+              // reviewPrompterProvider build fails without explicit overrides.
+            });
       });
     }
 

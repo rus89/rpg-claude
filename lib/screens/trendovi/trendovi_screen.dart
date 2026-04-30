@@ -89,8 +89,8 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
             .read(reviewPrompterProvider.future)
             .then((p) => p.maybePrompt())
             .catchError((Object _) {
-          // See MapaScreen note above.
-        });
+              // See MapaScreen note above.
+            });
       });
     }
     final resolver = ref.watch(nameResolverProvider).valueOrNull;
