@@ -12,6 +12,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rpg_claude/data/models/age_bracket.dart';
 import 'package:rpg_claude/data/models/age_record.dart';
 import 'package:rpg_claude/data/models/age_snapshot.dart';
@@ -30,6 +32,17 @@ import 'package:rpg_claude/theme.dart';
 final _resolver = NameResolver(['Barajevo', 'NoviBeograd', 'Inđija']);
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    PackageInfo.setMockInitialValues(
+      appName: 'GeoAgro Srbija',
+      packageName: 'com.serbiaOpenData.rpg_claude',
+      version: '1.0.3',
+      buildNumber: '7',
+      buildSignature: '',
+    );
+  });
+
   testWidgets('renders FlutterMap widget', (tester) async {
     await tester.pumpWidget(
       ProviderScope(

@@ -17,6 +17,7 @@ import '../../layout/screen_scaffold.dart';
 import '../../providers/age_provider.dart';
 import '../../providers/data_provider.dart';
 import '../../providers/farm_size_provider.dart';
+import '../../providers/review_prompter_provider.dart';
 import '../../utils/chart_helpers.dart';
 import '../../widgets/data_error_message.dart';
 
@@ -35,6 +36,7 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
   _Dataset _selectedDataset = _Dataset.gazdinstva;
   final Set<int> _selectedSizeBrackets = {0, 1, 2, 3};
   final Set<AgeBracket> _selectedAgeBrackets = AgeBracket.values.toSet();
+  bool _reviewPromptAttempted = false;
 
   String? get _selectedNorm => _selectedMunicipality != null
       ? normaliseSerbianName(_selectedMunicipality!)
@@ -77,6 +79,20 @@ class _TrendoviScreenState extends ConsumerState<TrendoviScreen> {
   @override
   Widget build(BuildContext context) {
     final dataAsync = ref.watch(dataRepositoryProvider);
+    if (!_reviewPromptAttempted &&
+        dataAsync.hasValue &&
+        dataAsync.value!.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_reviewPromptAttempted || !mounted) return;
+        _reviewPromptAttempted = true;
+        ref
+            .read(reviewPrompterProvider.future)
+            .then((p) => p.maybePrompt())
+            .catchError((Object _) {
+          // See MapaScreen note above.
+        });
+      });
+    }
     final resolver = ref.watch(nameResolverProvider).valueOrNull;
     final allCsvNames = ref.watch(municipalityNamesProvider);
     final displayNames = resolver != null

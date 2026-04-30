@@ -20,6 +20,7 @@ import '../../layout/screen_scaffold.dart';
 import '../../providers/age_provider.dart';
 import '../../providers/data_provider.dart';
 import '../../providers/farm_size_provider.dart';
+import '../../providers/review_prompter_provider.dart';
 
 enum MapMetric { gazdinstva, velicina, starost, mladji }
 
@@ -48,6 +49,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
   late final MapController _mapController;
   final GlobalKey _overlayKey = GlobalKey();
   double _overlayHeight = 0;
+  bool _reviewPromptAttempted = false;
 
   @override
   void initState() {
@@ -117,6 +119,23 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
   Widget build(BuildContext context) {
     final dataAsync = ref.watch(dataRepositoryProvider);
     final resolver = ref.watch(nameResolverProvider).valueOrNull;
+
+    if (!_reviewPromptAttempted &&
+        dataAsync.hasValue &&
+        dataAsync.value!.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_reviewPromptAttempted || !mounted) return;
+        _reviewPromptAttempted = true;
+        ref
+            .read(reviewPrompterProvider.future)
+            .then((p) => p.maybePrompt())
+            .catchError((Object _) {
+          // ReviewPrompter swallows its own platform errors; this catch is a
+          // last-resort guard for tests where preferencesProvider /
+          // reviewPrompterProvider build fails without explicit overrides.
+        });
+      });
+    }
 
     if (_tappedMunicipality != null) {
       // Seed with the overlay's maxHeight constraint so chrome starts above
