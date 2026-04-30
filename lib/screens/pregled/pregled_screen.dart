@@ -27,7 +27,7 @@ class PregledScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dataAsync = ref.watch(dataRepositoryProvider);
-    final resolver = ref.watch(nameResolverProvider).valueOrNull;
+    final resolver = ref.watch(nameResolverProvider).value;
 
     return dataAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
