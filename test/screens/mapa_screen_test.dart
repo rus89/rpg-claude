@@ -304,7 +304,7 @@ void main() {
   });
 
   group('metric selector', () {
-    List<Override> metricOverrides() => [
+    metricOverrides() => [
       dataRepositoryProvider.overrideWith(() => _Fixture()),
       nameResolverProvider.overrideWith((ref) async => _resolver),
       farmSizeRepositoryProvider.overrideWith(
