@@ -1,7 +1,6 @@
 // ABOUTME: Riverpod provider for ReviewPrompter; depends on Preferences and PackageInfo.
 // ABOUTME: Constructs the prompter once per app process via keepAlive.
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../data/review_prompter.dart';
 import 'package_info_provider.dart';

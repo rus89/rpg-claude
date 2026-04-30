@@ -31,7 +31,7 @@ class OpstinaDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dataAsync = ref.watch(dataRepositoryProvider);
-    final resolver = ref.watch(nameResolverProvider).valueOrNull;
+    final resolver = ref.watch(nameResolverProvider).value;
 
     return dataAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -240,7 +240,7 @@ class _FarmSizeDetail extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncValue = ref.watch(farmSizeRepositoryProvider);
-    final resolver = ref.watch(nameResolverProvider).valueOrNull;
+    final resolver = ref.watch(nameResolverProvider).value;
     return asyncValue.when(
       loading: () => const Padding(
         padding: EdgeInsets.symmetric(vertical: 16),
@@ -393,7 +393,7 @@ class _AgeDetail extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncValue = ref.watch(ageRepositoryProvider);
-    final resolver = ref.watch(nameResolverProvider).valueOrNull;
+    final resolver = ref.watch(nameResolverProvider).value;
     return asyncValue.when(
       loading: () => const Padding(
         padding: EdgeInsets.symmetric(vertical: 16),

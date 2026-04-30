@@ -34,7 +34,7 @@ void main() {
         child: const MaterialApp(home: LoadingScreen()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text(FetchError.unknown.message), findsOneWidget);
     expect(find.text('Pokušaj ponovo'), findsOneWidget);
   });
@@ -52,7 +52,7 @@ void main() {
         child: const MaterialApp(home: LoadingScreen()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text(FetchError.noInternet.message), findsOneWidget);
   });
 
@@ -69,7 +69,7 @@ void main() {
         child: const MaterialApp(home: LoadingScreen()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text(FetchError.timeout.message), findsOneWidget);
   });
 
@@ -84,7 +84,7 @@ void main() {
         child: const MaterialApp(home: LoadingScreen()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text(FetchError.serverError.message), findsOneWidget);
   });
 
@@ -99,7 +99,7 @@ void main() {
         child: const MaterialApp(home: LoadingScreen()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text(FetchError.unknown.message), findsOneWidget);
   });
 }

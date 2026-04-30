@@ -1,29 +1,49 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// TODO(codegen-unblocked): regenerate via build_runner. Hand-written placeholder hashes will diverge from generated values; the Riverpod runtime check is suppressed in release mode (dart.vm.product) and warns in dev only.
-
 part of 'package_info_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$packageInfoHash() => r'c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [packageInfo].
 @ProviderFor(packageInfo)
-final packageInfoProvider = FutureProvider<PackageInfo>.internal(
-  packageInfo,
-  name: r'packageInfoProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$packageInfoHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final packageInfoProvider = PackageInfoProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef PackageInfoRef = FutureProviderRef<PackageInfo>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class PackageInfoProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<PackageInfo>,
+          PackageInfo,
+          FutureOr<PackageInfo>
+        >
+    with $FutureModifier<PackageInfo>, $FutureProvider<PackageInfo> {
+  PackageInfoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'packageInfoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$packageInfoHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<PackageInfo> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<PackageInfo> create(Ref ref) {
+    return packageInfo(ref);
+  }
+}
+
+String _$packageInfoHash() => r'854bbb0e381edfdddbd736229351d6cc918a2ad1';

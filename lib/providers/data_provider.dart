@@ -4,7 +4,6 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../data/data_loader.dart';
 import '../data/models/snapshot.dart';
@@ -41,7 +40,7 @@ Future<NameResolver> nameResolver(Ref ref) async {
 // Returns all unique municipality names sorted alphabetically.
 @riverpod
 List<String> municipalityNames(Ref ref) {
-  final snapshots = ref.watch(dataRepositoryProvider).valueOrNull ?? [];
+  final snapshots = ref.watch(dataRepositoryProvider).value ?? [];
   final names =
       snapshots
           .expand((s) => s.records)

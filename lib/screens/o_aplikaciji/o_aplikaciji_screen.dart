@@ -90,7 +90,7 @@ class _OAplikacijiScreenState extends ConsumerState<OAplikacijiScreen> {
   Widget build(BuildContext context) {
     final desktop = isDesktop(context);
     final showRate = shouldShowRateTile();
-    final packageInfo = ref.watch(packageInfoProvider).valueOrNull;
+    final packageInfo = ref.watch(packageInfoProvider).value;
     final feedbackReady = packageInfo != null;
 
     const infoCards = [

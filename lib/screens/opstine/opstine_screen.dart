@@ -29,7 +29,7 @@ class _OpstineScreenState extends ConsumerState<OpstineScreen> {
     final resolverAsync = ref.watch(nameResolverProvider);
     final allCsvNames = ref.watch(municipalityNamesProvider);
 
-    final resolver = resolverAsync.valueOrNull;
+    final resolver = resolverAsync.value;
     final displayNames = resolver != null
         ? resolver.allDisplayNames
         : allCsvNames;

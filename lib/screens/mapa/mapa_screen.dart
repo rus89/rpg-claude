@@ -118,7 +118,7 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
   @override
   Widget build(BuildContext context) {
     final dataAsync = ref.watch(dataRepositoryProvider);
-    final resolver = ref.watch(nameResolverProvider).valueOrNull;
+    final resolver = ref.watch(nameResolverProvider).value;
 
     if (!_reviewPromptAttempted &&
         dataAsync.hasValue &&
@@ -189,21 +189,21 @@ class _MapaScreenState extends ConsumerState<MapaScreen> {
           maxValue = metricValues.values.fold(0.0, (a, b) => a > b ? a : b);
         } else if (_selectedMetric == MapMetric.velicina) {
           secondaryLoading = farmSizeAsync?.isLoading ?? true;
-          final farmSizeData = farmSizeAsync?.valueOrNull;
+          final farmSizeData = farmSizeAsync?.value;
           if (farmSizeData != null && farmSizeData.isNotEmpty) {
             _computeFarmSizeMetric(farmSizeData.last, resolver, metricValues);
             maxValue = metricValues.values.fold(0.0, (a, b) => a > b ? a : b);
           }
         } else if (_selectedMetric == MapMetric.starost) {
           secondaryLoading = ageAsync?.isLoading ?? true;
-          final ageData = ageAsync?.valueOrNull;
+          final ageData = ageAsync?.value;
           if (ageData != null && ageData.isNotEmpty) {
             _computeAgeMetric(ageData.last, resolver, metricValues);
             maxValue = metricValues.values.fold(0.0, (a, b) => a > b ? a : b);
           }
         } else if (_selectedMetric == MapMetric.mladji) {
           secondaryLoading = ageAsync?.isLoading ?? true;
-          final ageData = ageAsync?.valueOrNull;
+          final ageData = ageAsync?.value;
           if (ageData != null && ageData.isNotEmpty) {
             _computeYoungPercentMetric(ageData.last, resolver, metricValues);
             maxValue = metricValues.values.fold(0.0, (a, b) => a > b ? a : b);
