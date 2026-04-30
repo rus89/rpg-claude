@@ -41,7 +41,7 @@ Future<NameResolver> nameResolver(Ref ref) async {
 // Returns all unique municipality names sorted alphabetically.
 @riverpod
 List<String> municipalityNames(Ref ref) {
-  final snapshots = ref.watch(dataRepositoryProvider).valueOrNull ?? [];
+  final snapshots = ref.watch(dataRepositoryProvider).value ?? [];
   final names =
       snapshots
           .expand((s) => s.records)
