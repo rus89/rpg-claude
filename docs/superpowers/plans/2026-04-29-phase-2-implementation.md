@@ -15,11 +15,11 @@
 | Release | Branch | Tag | Features |
 | --- | --- | --- | --- |
 | 1.0.3+6 | `main` | `v1.0.3+6` | Foundation + Privacy Policy tile + `in_app_review` |
-| 1.0.4+8 | `feature/dark-mode-onboarding` | `v1.0.4+8` | Dark mode + onboarding + version label + chart x-axis fix |
+| 1.0.4+9 | `feature/dark-mode-onboarding` | `v1.0.4+9` | Dark mode + onboarding + version label + chart x-axis fix |
 
 Release 1 ships directly on `main` (small surface, low risk). Release 2 is a feature branch that PRs into `main` after the 1.0.3 build bakes on internal track.
 
-> **Build number note:** `+7` was consumed by the `chore: bump version to 1.0.3+7` commit (riverpod 3.x migration patch on `main`, tagged `v1.0.3+7`), so Release 2 advances to `+8` to keep Play Console build numbers strictly monotonic.
+> **Build number note:** `+7` was consumed by the `chore: bump version to 1.0.3+7` commit (riverpod 3.x migration patch on `main`, tagged `v1.0.3+7`) and `+8` by the targetSdk 36 patch (`1.0.3+8`, tagged `v1.0.3+8`), so Release 2 advances to `+9` to keep Play Console build numbers strictly monotonic.
 
 ---
 
@@ -1509,7 +1509,7 @@ Append a new group at the end of `test/screens/o_aplikaciji_screen_test.dart` (b
         appName: 'GeoAgro Srbija',
         packageName: 'com.serbiaOpenData.rpg_claude',
         version: '1.0.4',
-        buildNumber: '8',
+        buildNumber: '9',
         buildSignature: '',
       );
     });
@@ -1794,7 +1794,7 @@ void main() {
       appName: 'GeoAgro Srbija',
       packageName: 'com.serbiaOpenData.rpg_claude',
       version: '1.0.4',
-      buildNumber: '8',
+      buildNumber: '9',
       buildSignature: '',
     );
     tester.view.physicalSize = const Size(800, 2400);
@@ -2844,7 +2844,7 @@ Append a new group at the end of `test/screens/o_aplikaciji_screen_test.dart` (b
         appName: 'GeoAgro Srbija',
         packageName: 'com.serbiaOpenData.rpg_claude',
         version: '1.0.4',
-        buildNumber: '8',
+        buildNumber: '9',
         buildSignature: '',
       );
     });
@@ -2988,10 +2988,10 @@ git commit -m "feat: replace inline TabGuide with onboarding replay tile"
 
 Add a `testWidgets` case to `test/screens/o_aplikaciji_screen_test.dart` that:
 
-1. Sets `PackageInfo.setMockInitialValues(version: '1.0.4', buildNumber: '8', ...)` in `setUp` (or per-test).
+1. Sets `PackageInfo.setMockInitialValues(version: '1.0.4', buildNumber: '9', ...)` in `setUp` (or per-test).
 2. Pumps `OAplikacijiScreen` inside a `ProviderScope` + `MaterialApp`.
 3. `await tester.pumpAndSettle();`
-4. Asserts `find.text('Verzija: v1.0.4+8'), findsOneWidget`.
+4. Asserts `find.text('Verzija: v1.0.4+9'), findsOneWidget`.
 
 Run `flutter test test/screens/o_aplikaciji_screen_test.dart` and confirm the new test fails (no version label rendered yet).
 
@@ -3120,7 +3120,7 @@ Expected: zero analyzer issues, all tests pass, format check exits 0. Manual ver
 
 ---
 
-## Task 14: Release boundary 1.0.4+8
+## Task 14: Release boundary 1.0.4+9
 
 **Files:**
 - Modify: `pubspec.yaml`
@@ -3136,7 +3136,7 @@ version: 1.0.3+7
 to:
 
 ```yaml
-version: 1.0.4+8
+version: 1.0.4+9
 ```
 
 - [ ] **Step 2: Run analyzer, full tests, and format check**
@@ -3166,7 +3166,7 @@ On the device, verify:
 - O aplikaciji → tap "Pogledaj uvodni vodič" → onboarding re-shows.
 - Theme toggle: switch to Tamna → entire app re-renders dark; force-stop and restart → still dark. Switch to Sistem → follows OS appearance.
 - Visual check on every screen in both brightnesses: Pregled, Opštine, Opština detail, Trendovi (incl. chart), Mapa (incl. overlay), O aplikaciji.
-- O aplikaciji shows `Verzija: v1.0.4+8` below the tab guide (Task 13.5).
+- O aplikaciji shows `Verzija: v1.0.4+9` below the tab guide (Task 13.5).
 - Trendovi and Opština-detail line charts show ≥3 date labels along the x-axis, not just the first and last (Task 13.6).
 
 - [ ] **Step 4: Manual smoke (web)**
@@ -3186,8 +3186,8 @@ Verify:
 
 ```bash
 git add pubspec.yaml
-git commit -m "chore: bump version to 1.0.4+8"
-git tag v1.0.4+8 HEAD
+git commit -m "chore: bump version to 1.0.4+9"
+git tag v1.0.4+9 HEAD
 ```
 
 - [ ] **Step 6: Push branch and tag**
@@ -3196,7 +3196,7 @@ Confirm with Milan before pushing.
 
 ```bash
 git push -u origin feature/dark-mode-onboarding
-git push origin v1.0.4+8
+git push origin v1.0.4+9
 ```
 
 - [ ] **Step 7: Submit Play Console internal track**
@@ -3205,4 +3205,4 @@ Out-of-repo. Upload the AAB to Play Console internal track.
 
 - [ ] **Step 8: Open PR and merge to `main`**
 
-The commit at the `v1.0.4+8` tag is what was uploaded to Play Console — `main` should reflect what was built. Open a PR from `feature/dark-mode-onboarding` into `main` summarizing the dark-mode + onboarding work plus the two `O aplikaciji` / chart bug fixes (Tasks 13.5 and 13.6) and merge it once green. Internal track is the safety net for finding regressions; keeping the feature branch open across the bake period only invites drift.
+The commit at the `v1.0.4+9` tag is what was uploaded to Play Console — `main` should reflect what was built. Open a PR from `feature/dark-mode-onboarding` into `main` summarizing the dark-mode + onboarding work plus the two `O aplikaciji` / chart bug fixes (Tasks 13.5 and 13.6) and merge it once green. Internal track is the safety net for finding regressions; keeping the feature branch open across the bake period only invites drift.
