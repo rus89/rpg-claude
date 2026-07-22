@@ -168,3 +168,14 @@ First overlay approach built a `displayNameByNormalised` map from CSV names and 
 - Internet permission missing from main AndroidManifest.xml — only in debug manifest. Will fail in release builds.
 - Tile layer `ClientException` logs in tests are noisy but harmless. Could be suppressed if needed.
 - Milan needs to re-test the map on device to verify all municipalities now render with colour.
+
+## 2026-07-22: Kimi Code agent settings replicated from Claude setup
+
+Kimi Code now follows the same project conventions as Claude Code:
+
+- `AGENTS.md` at project root mirrors `CLAUDE.md` (keep the two in sync when editing rules).
+- `.kimi-code/skills/` ports the `release` and `review` skills (with `whenToUse` triggers).
+- `.kimi-code/hooks/` ports the `.claude` hooks. JS hooks are thin wrappers that `require()` the rule engines in `.claude/hooks/` — edit patterns there, not in the wrappers. All hooks self-guard on `cwd` because they register globally in `~/.kimi-code/config.toml`.
+- The `.claude` `UserPromptSubmit` hook command (`flutter analyze --fatal-lints --fatal-performance --fatal-hints --fatal-build`) is broken on the installed Flutter — those flags no longer exist, so it silently never ran the tests. The Kimi port uses `--fatal-infos --fatal-warnings`. The `.claude` original still has the broken flags.
+- `check-memory-freshness.sh` was ported as `check-journal-freshness.sh` against `JOURNAL.md`; first run found stale branch/file refs in entries from Feb–Mar 2026.
+- `.kimi-code/` is gitignored like `.claude/` (personal agent overrides).
