@@ -179,3 +179,9 @@ Kimi Code now follows the same project conventions as Claude Code:
 - The `.claude` `UserPromptSubmit` hook command (`flutter analyze --fatal-lints --fatal-performance --fatal-hints --fatal-build`) is broken on the installed Flutter — those flags no longer exist, so it silently never ran the tests. The Kimi port uses `--fatal-infos --fatal-warnings`. The `.claude` original still has the broken flags.
 - `check-memory-freshness.sh` was ported as `check-journal-freshness.sh` against `JOURNAL.md`; first run found stale branch/file refs in entries from Feb–Mar 2026.
 - `.kimi-code/` is gitignored like `.claude/` (personal agent overrides).
+
+## 2026-07-22: Fixed broken UserPromptSubmit hook in .claude
+
+- `.claude/hooks/session_start.sh` failed on every prompt with exit 64: `flutter analyze` no longer accepts `--fatal-lints --fatal-performance --fatal-hints --fatal-build` (only `--fatal-infos --fatal-warnings` exist). Replaced the flag set to match the Kimi port; hook now exits 0.
+- Timed the corrected gate at ~16s wall clock (analyze + 290 tests), safely inside Claude Code's 60s default hook timeout — but it adds that latency to every single prompt. If it gets annoying, options are moving it to a `Stop` hook or dropping `flutter test` from it.
+- The script is named `session_start.sh` but wired to `UserPromptSubmit` (SessionStart runs `check-memory-freshness.sh`). Left the name alone — renaming would touch `settings.json` too and wasn't part of the fix.
